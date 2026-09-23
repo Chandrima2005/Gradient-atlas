@@ -334,7 +334,7 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
 </head>
 <body>
 <header class="bar"><div class="bar-in">
-  <a class="brand" href="#map" aria-label="Gradient Atlas, ML Materials — knowledge map"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <a class="brand" href="#home" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
   <form class="repl" id="repl" autocomplete="off">
     <div class="repl-in"><span class="ps">&gt;&gt;&gt;</span><input id="cmd" type="text" spellcheck="false" aria-label="Command prompt" placeholder="open(11) · search('lasso') · path_to('boosting') · help()"><button class="run" type="submit">Run ↵</button></div>
     <div class="suggest" id="suggest" hidden></div>
@@ -344,8 +344,9 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
 </div></header>
 
 <nav class="rail" aria-label="Views">
+  <a href="#home" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
   <a href="#map" data-v="map"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.6"/><circle cx="19" cy="15" r="1.6"/><circle cx="6" cy="17" r="1.6"/><path d="M12 5.1 18 14M7.4 16.2 17.4 15"/></svg>Map</a>
-  <a href="#metro" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Metro</a>
+  <a href="#route" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
   <a href="#console" data-v="console"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/></svg>Console</a>
   <a href="#recall" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
   <span class="sep"></span>
@@ -353,7 +354,70 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
 </nav>
 
 <main class="stage">
-  <section class="view" id="v-map" aria-label="Knowledge map">
+  <section class="view" id="v-home" aria-label="Home">
+    <canvas id="heroBg" aria-hidden="true"></canvas>
+    <div class="home">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="kicker"><span class="kdot"></span>ML Materials · classical machine learning</div>
+          <h1 class="h-display">Learn machine learning by <em>building it</em>, not memorising it.</h1>
+          <p class="lead">24 chapters that take every classic algorithm apart. You see the maths, write it yourself in plain Python, then check your version gives the same answer as scikit-learn.</p>
+          <div class="hero-cta">
+            <button class="btn primary big" type="button" id="ctaRoute">Plan my study route →</button>
+            <a class="btn big" href="#ch1">Start from Chapter 1</a>
+          </div>
+          <p class="resume" id="homeResume" hidden></p>
+        </div>
+        <figure class="hero-art fv" aria-label="The five study tools of Gradient Atlas">
+          <div class="fv-stage"><canvas id="featViz"></canvas><div class="fv-tip" id="fvTip" hidden></div></div>
+          <div class="fv-legend" id="fvLegend"></div>
+          <figcaption>Five tools, one set of notes. <b>Hover a bold node</b> to see what it is, click to open it.</figcaption>
+        </figure>
+      </div>
+
+      <div class="strip" id="homeStats">
+        <div><b>24</b><span>chapters</span></div><div><b>439</b><span>short sections</span></div><div><b>862</b><span>runnable code cells</span></div><div><b>512</b><span>flashcards</span></div><div><b>~16 h</b><span>of reading</span></div>
+      </div>
+
+      <section class="hsec" id="features">
+        <div class="hsec-head">
+          <h2 class="h-display">Five ways to study, one set of notes</h2>
+          <p>Everything below works on the same 24 chapters, so use whichever suits you today.</p>
+        </div>
+        <div class="feats" id="featGrid"></div>
+      </section>
+
+      <section class="hsec" id="goals">
+        <div class="hsec-head">
+          <h2 class="h-display">Only need one thing?</h2>
+          <p>You don't have to read all 24 chapters. These are the things people look for most. Pick one and you get the shortest route there, skipping the rest.</p>
+        </div>
+        <div class="goals" id="goalGrid"></div>
+        <div class="goal-any"><label for="goalSel">Or pick any chapter as your destination</label><select id="goalSel"></select></div>
+      </section>
+
+      <section class="hsec" id="how">
+        <div class="hsec-head">
+          <h2 class="h-display">What you get in every chapter</h2>
+          <p>Each algorithm chapter follows the same four steps, so you always know where you are.</p>
+        </div>
+        <ol class="how">
+          <li><b>See the idea</b><span>The goal of the algorithm, written out as maths with every symbol explained.</span></li>
+          <li><b>Build it yourself</b><span>A short, readable version in plain NumPy, so you can see how it works inside.</span></li>
+          <li><b>Use the real tool</b><span>The same problem solved with scikit-learn, and the settings that matter.</span></li>
+          <li><b>Prove they match</b><span>A check that both give the same answer, then a real-world case and the mistakes to avoid.</span></li>
+        </ol>
+      </section>
+
+      <div class="tour-cta"><span>New here? Take a 30-second look around.</span><button class="btn" type="button" id="homeTour">Take the tour</button></div>
+      <footer class="sitefoot">
+        <span>© 2026 Gradient Atlas · ML Materials. All rights reserved.</span>
+        <span class="sf-credits">✍️ Content created by <b>Shayan Saha</b> <i>·</i> 💻 Website designed and developed by <b>Chandrima Das</b></span>
+      </footer>
+    </div>
+  </section>
+
+  <section class="view" id="v-map" aria-label="Knowledge map" hidden>
     <canvas id="mapCv" aria-label="Map of all sections and their cross-references. Use the list in the intro panel or the command prompt to navigate by keyboard."></canvas>
     <div class="map-intro" id="mapIntro">
       <div class="eyebrow">Knowledge map</div>
@@ -369,10 +433,10 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
     <aside class="inspector" id="insp" hidden aria-live="polite"></aside>
   </section>
 
-  <section class="view" id="v-metro" hidden aria-label="Metro map of chapters">
+  <section class="view" id="v-metro" hidden aria-label="Route planner">
     <div class="pagewrap">
       <div class="metro-head">
-        <div><div class="eyebrow">Metro · route planner</div><h1 class="h-display">Pick a destination. Get the shortest reading route.</h1></div>
+        <div><div class="eyebrow">Route planner</div><h1 class="h-display">Pick a destination. Get the shortest reading route.</h1></div>
         <div>
           <p>Each Part is a line and each chapter is a station. Big ringed stations are interchanges: the chapters other Parts rely on most. Routes come from the text's own cross-references, plus the author's advice to read Chapters 8 and 9 before any algorithm.</p>
           <div class="planner"><label for="dest">Destination</label><select id="dest"></select><button class="btn small" type="button" id="clearRoute">Clear route</button></div>
@@ -380,7 +444,7 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
         </div>
       </div>
       <div class="metro-grid">
-        <div class="metro-map"><svg id="metroSvg" viewBox="0 0 1290 580" role="img" aria-label="Metro map: chapters as stations on six lines"></svg></div>
+        <div class="metro-map"><svg id="metroSvg" viewBox="0 0 1290 580" role="img" aria-label="Route map: chapters as stations on six lines"></svg></div>
         <aside class="itin" id="itin"></aside>
       </div>
     </div>
@@ -459,6 +523,129 @@ body.touring .maptip{display:none!important}
 .tour-dock.top{bottom:auto;top:calc(var(--bar) + 10px + env(safe-area-inset-top,0px))}
 @media (max-width:760px){.tour-dock{bottom:calc(72px + env(safe-area-inset-bottom,0px));gap:8px;padding:8px}.tour-dock .seg .nm,.t-count{display:none}.tour-card.welcome{padding:20px}.tour-card.welcome h3{font-size:23px}.t-art{width:64px;height:64px}}
 </style>
+<style>
+/* ---------- HOME ---------- */
+.home{max-width:1240px;margin:0 auto;padding:34px clamp(16px,4vw,48px) 70px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;padding-bottom:30px}
+.kicker{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:6px 14px}
+.kdot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:kp 2s infinite}
+@keyframes kp{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.hero h1{font-size:clamp(30px,3.3vw,46px);font-weight:700;letter-spacing:-.01em;margin:18px 0 18px;line-height:1.12}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{font-size:clamp(17px,1.5vw,19.5px);line-height:1.6;color:var(--ink-2);max-width:50ch;margin:0 0 26px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn.big{height:50px;padding:0 22px;font-size:14.5px;border-radius:12px}
+.resume{margin:18px 0 0;font-size:15px;color:var(--ink-2)}
+.resume a{font-weight:600}
+.hero-art{margin:0;background:radial-gradient(120% 90% at 70% 20%,color-mix(in srgb,var(--accent) 10%,var(--panel)),var(--panel));border:1px solid var(--line);border-radius:22px;padding:18px 18px 14px;box-shadow:0 30px 80px -40px rgba(0,0,0,.6)}
+#heroSvg{display:block;width:100%;height:auto}
+#heroSvg text{font-family:var(--f-display);font-weight:700;font-size:18px;fill:var(--ink)}
+#heroSvg text.sub{font-family:var(--f-mono);font-weight:500;font-size:12.5px;fill:var(--muted)}
+.hero-run{stroke-dasharray:100;stroke-dashoffset:100;animation:hrun 5.2s linear infinite}
+@keyframes hrun{0%{stroke-dashoffset:100}90%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+.hs circle{fill:var(--panel);stroke:var(--line-2);stroke-width:4;animation:hs 5.2s infinite;animation-delay:var(--d)}
+.hs.goal circle{stroke:var(--accent);stroke-width:5}
+@keyframes hs{0%{fill:var(--panel);stroke:var(--line-2)}4%,85%{fill:var(--accent);stroke:var(--accent)}100%{fill:var(--panel);stroke:var(--line-2)}}
+.hero-train{fill:var(--ink);filter:drop-shadow(0 0 6px var(--accent))}
+.hero-art figcaption{font-size:14.5px;color:var(--ink-2);padding:4px 6px 2px;line-height:1.5}
+.hero-art figcaption b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.hero-run{stroke-dashoffset:0}.hs circle{fill:var(--accent);stroke:var(--accent)}.hero-train{display:none}}
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden;margin:6px 0 10px}
+.strip div{padding:16px 18px;border-right:1px solid var(--line)}
+.strip div:last-child{border-right:0}
+.strip b{display:block;font-family:var(--f-mono);font-weight:600;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.strip span{font-size:14px;color:var(--ink-2)}
+.hsec{padding-top:64px;scroll-margin-top:calc(var(--bar) + 16px)}
+.hsec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 40px;margin-bottom:24px}
+.hsec-head h2{font-size:clamp(26px,2.8vw,36px);font-weight:700;letter-spacing:-.01em;max-width:24ch;line-height:1.12}
+.hsec-head p{margin:0;font-size:17px;color:var(--ink-2);max-width:46ch}
+.goals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.goal{display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;position:relative;overflow:hidden}
+.goal::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--pc)}
+.goal:hover,.goal:focus-visible{transform:translateY(-3px);border-color:var(--pc);box-shadow:0 18px 40px -24px var(--pc)}
+.goal .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--pc) 18%,transparent);color:var(--pc);font-size:20px}
+.goal h3{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.2;margin:0}
+.goal .eg{font-size:14.5px;color:var(--ink-2);margin:0;line-height:1.45}
+.goal .dest{font-size:14px;color:var(--ink);margin:0}
+.goal .dest span{color:var(--muted)}
+.minir{display:flex;align-items:center;gap:0;margin-top:auto;padding-top:6px}
+.minir i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.minir i.t{width:14px;height:14px;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.minir b{flex:1;height:2px;background:var(--line-2);min-width:4px}
+.goal .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.goal .foot em{font-style:normal;color:var(--accent);font-weight:600}
+.goal-any{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;font-size:15px;color:var(--ink-2)}
+.goal-any select{height:42px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-family:var(--f-mono);font-size:13.5px;padding:0 10px;max-width:100%}
+.feats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.feat{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:var(--ink);transition:border-color .18s,transform .18s}
+.feat:hover{border-color:var(--accent);transform:translateY(-2px)}
+.feat svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.feat .tag2{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.feat h3{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0;line-height:1.2}
+.feat p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.feat .go{margin-top:auto;font-family:var(--f-mono);font-size:12.5px;color:var(--accent);font-weight:600}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:hw}
+.how li{counter-increment:hw;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.how li::before{content:counter(hw);width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-mono);font-weight:700;font-size:14px;margin-bottom:6px}
+.how b{font-family:var(--f-display);font-size:18px}
+.how span{font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.hfoot{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;font-size:14.5px;color:var(--ink-2)}
+@media (max-width:1100px){.goals{grid-template-columns:repeat(2,minmax(0,1fr))}.feats{grid-template-columns:repeat(3,minmax(0,1fr))}.how{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}.strip{grid-template-columns:repeat(3,minmax(0,1fr))}.strip div:nth-child(3){border-right:0}.strip div:nth-child(-n+3){border-bottom:1px solid var(--line)}}
+@media (max-width:600px){.goals,.feats,.how{grid-template-columns:minmax(0,1fr)}.strip{grid-template-columns:repeat(2,minmax(0,1fr))}.strip div{border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)}.strip div:nth-child(2n){border-right:0!important}.btn.big{width:100%;justify-content:center}}
+</style>
+<style>
+#v-home{position:relative;overflow:hidden}
+#heroBg{position:absolute;left:0;top:0;width:100%;height:900px;z-index:0;pointer-events:none;opacity:.7;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+#v-home .home{position:relative;z-index:1}
+.s2m{padding:18px 18px 14px;background:radial-gradient(90% 70% at 50% 45%,color-mix(in srgb,var(--accent) 12%,var(--panel)) 0%,color-mix(in srgb,var(--panel) 70%,transparent) 75%);backdrop-filter:blur(3px)}
+.s2m-head{display:flex;align-items:center;gap:10px;justify-content:center;font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:2px 0 12px}
+.s2m-head i{flex:0 0 90px;height:2px;background:linear-gradient(90deg,var(--muted),var(--accent));position:relative}
+.s2m-head i::after{content:"";position:absolute;right:-2px;top:-4px;border:5px solid transparent;border-left-color:var(--accent)}
+.s2m-head span:last-child{color:var(--accent)}
+.s2m-stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px 60px;padding:6px 4px}
+.s2m-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.s2m-links .lk{fill:none;stroke:var(--line-2);stroke-width:2;vector-effect:non-scaling-stroke}
+.s2m-links .lk{stroke:var(--accent);stroke-dasharray:4 7;opacity:.35;animation:lkflow 1.2s linear infinite}
+@keyframes lkflow{to{stroke-dashoffset:-22}}
+.s2m-card{position:relative;z-index:1;background:color-mix(in srgb,var(--raised) 92%,transparent);border:1px solid var(--line-2);border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;gap:6px;min-width:0;animation:s2mlit 6s infinite}
+.s2m-card.c2{animation-delay:1.2s}.s2m-card.c3{animation-delay:2.4s}.s2m-card.c4{animation-delay:3.6s}
+@keyframes s2mlit{0%,100%{border-color:var(--line-2);box-shadow:none}6%,22%{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 12px 30px -14px var(--accent)}30%{border-color:var(--line-2);box-shadow:none}}
+.s2m-card .st{font-family:var(--f-mono);font-size:11.5px;color:var(--accent);letter-spacing:.03em}
+.s2m-card .math{font-family:var(--f-body);font-style:italic;font-size:24px;color:var(--ink)}
+.s2m-card code{font-family:var(--f-mono);font-size:12px;color:var(--ink);line-height:1.5;white-space:pre;overflow-x:auto;scrollbar-width:none}
+.s2m-card small{font-size:12.5px;color:var(--muted)}
+.s2m-card .ok{font-family:var(--f-mono);font-size:14px;color:var(--good)}
+.s2m-core{position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);z-index:2;display:grid;place-items:center}
+.s2m-core .orb{position:relative;z-index:1;width:78px;height:78px;border-radius:50%;display:grid;place-items:center;text-align:center;font-family:var(--f-display);font-weight:700;font-size:14px;line-height:1.1;color:var(--accent-ink);background:radial-gradient(circle at 35% 30%,#fff3 0,transparent 40%),var(--accent);box-shadow:0 0 40px -4px var(--accent)}
+.s2m-core .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:orbr 3s ease-out infinite}
+.s2m-core .r2{animation-delay:1.5s}
+@keyframes orbr{0%{transform:scale(.8);opacity:.7}100%{transform:scale(1.9);opacity:0}}
+@media (max-width:600px){.s2m-stage{grid-template-columns:minmax(0,1fr);gap:10px}.s2m-links{display:none}.s2m-core{position:relative;left:auto;top:auto;transform:none;margin:10px auto 4px}.s2m-card code{font-size:12px}}
+.metro-head h1,.recall-head h1{font-weight:700;letter-spacing:-.01em;line-height:1.1}
+@media (prefers-reduced-motion:reduce){.s2m-card,.s2m-links .lk,.s2m-core .ring{animation:none}}
+</style>
+<style>
+.fv{padding:14px 14px 12px;background:radial-gradient(80% 70% at 50% 45%,color-mix(in srgb,var(--accent) 7%,var(--panel)) 0%,color-mix(in srgb,var(--panel) 75%,transparent) 75%);backdrop-filter:blur(3px)}
+.fv-stage{position:relative;width:100%;aspect-ratio:1/1;max-height:520px}
+#featViz{display:block;width:100%;height:100%;cursor:default;touch-action:manipulation}
+.fv-tip{position:absolute;pointer-events:none;z-index:3;background:var(--ink);color:var(--ground);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.4;max-width:240px;transform:translate(-50%,calc(-100% - 18px));box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}
+.fv-tip b{display:block;font-family:var(--f-display);font-size:15px}
+.fv-tip span{opacity:.75}
+.fv-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 8px;margin:6px 0 8px}
+.fv-legend a{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:12px;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:color-mix(in srgb,var(--panel) 80%,transparent)}
+.fv-legend a:hover,.fv-legend a.on{border-color:var(--pc);color:var(--ink)}
+.fv-legend i{width:9px;height:9px;border-radius:50%;background:var(--pc)}
+</style>
+<style>.hfoot .credits{display:flex;flex-direction:column;gap:4px}.hfoot .credits b{color:var(--ink)}</style>
+<style>
+.tour-cta{margin-top:64px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);font-size:15px;color:var(--ink-2)}
+.sitefoot{margin:40px calc(-1 * clamp(16px,4vw,48px)) -70px;padding:18px clamp(16px,4vw,48px) 22px;border-top:1px solid var(--line);background:var(--foot);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;font-size:12px;color:var(--muted);font-family:var(--f-mono)}
+.sitefoot b{color:var(--ink-2);font-weight:500}
+.sitefoot i{font-style:normal;margin:0 6px;opacity:.6}
+@media (max-width:760px){.sitefoot{margin-bottom:-70px;flex-direction:column;align-items:flex-start}}
+</style>
+<style>:root{--foot:#070A12}@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--foot:#E9EBF1}}:root[data-theme="light"]{--foot:#E9EBF1}</style>
 <script>
 window.MathJax = {
   tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true },
@@ -512,7 +699,7 @@ document.addEventListener('click', e => {
 });
 
 /* ======================= router ======================= */
-const VIEWS = ['map', 'metro', 'console', 'recall', 'read'];
+const VIEWS = ['home', 'map', 'metro', 'console', 'recall', 'read'];
 let curView = null;
 function show(v) {
   curView = v;
@@ -523,11 +710,12 @@ function show(v) {
 }
 function route() {
   if (!M) return;
-  const h = decodeURIComponent(location.hash.slice(1)) || 'map';
+  const h = decodeURIComponent(location.hash.slice(1)) || 'home';
+  if (h === 'home') { show('home'); Home.render(); return; }
   let m;
   if (h === 'map') { show('map'); return; }
   if ((m = h.match(/^node-(.+)$/))) { show('map'); Map_.select(m[1], true); return; }
-  if (h === 'metro') { show('metro'); Metro.build(); return; }
+  if (h === 'metro' || h === 'route') { show('metro'); Metro.build(); return; }
   if ((m = h.match(/^route-(\d+)$/))) { show('metro'); Metro.build(); Metro.setRoute(+m[1]); return; }
   if (h === 'console') { show('console'); Con.boot(); return; }
   if (h === 'recall') { show('recall'); Recall.dash(); return; }
@@ -535,7 +723,7 @@ function route() {
   if (h === 'review') { show('recall'); Recall.review(); return; }
   if ((m = h.match(/^ch(\d+)$/))) { show('read'); Reader.open(+m[1]); return; }
   if ((m = h.match(/^s(\d+)(?:-\d+)+$/))) { show('read'); Reader.open(+m[1], h); return; }
-  show('map');
+  show('home'); Home.render();
 }
 addEventListener('hashchange', route);
 const go = h => { if (h !== 'console') document.getElementById('cmd').blur(); if (location.hash.slice(1) === h) route(); else location.hash = h; };
@@ -731,7 +919,7 @@ const Metro = {
     const sel = $('#dest');
     sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => c.n >= 1 && c.n <= 24).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
     sel.onchange = () => sel.value ? go('route-' + sel.value) : this.setRoute(null);
-    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', '#metro'); };
+    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', '#route'); };
     const Q = [[19, 'Gradient boosting'], [16, 'SVMs'], [20, 'Clustering'], [23, 'Hyperparameter tuning'], [24, 'SHAP & deployment'], [13, 'Logistic regression']];
     $('#quick').innerHTML = Q.map(([n, l]) => `<a class="chip" href="#route-${n}"><b>→</b>${l}</a>`).join('');
     // interchange strength: incoming refs from other parts
@@ -840,7 +1028,7 @@ const Reader = {
         <div class="racts"><a class="btn small" href="#node-c${n}">Show on map</a>${n >= 1 && n <= 24 ? `<a class="btn small" href="#route-${n}">Plan a route here</a><a class="btn small" href="#quiz-${n}">Quiz me</a>` : ''}</div></header>
         <div class="body" id="body">${d.html}</div>
         <div class="rend">
-          ${n >= 1 && n <= 24 ? `<div class="box"><p>Finished? Marking it complete fills in its station on the metro map and its dots on the knowledge map.</p><div class="acts"><button class="btn" type="button" id="doneBtn"></button><a class="btn" href="#quiz-${n}">Take the quiz</a></div></div>` : ''}
+          ${n >= 1 && n <= 24 ? `<div class="box"><p>Finished? Marking it complete fills in its station on the route map and its dots on the knowledge map.</p><div class="acts"><button class="btn" type="button" id="doneBtn"></button><a class="btn" href="#quiz-${n}">Take the quiz</a></div></div>` : ''}
           <nav class="pn">${prev ? `<a href="#ch${prev.n}"><small>← ${chLabel(prev.n)}</small><span>${esc(prev.title)}</span></a>` : ''}${next ? `<a class="next" href="#ch${next.n}"><small>${chLabel(next.n)} →</small><span>${esc(next.title)}</span></a>` : ''}</nav>
         </div>`;
       const body = $('#body');
@@ -1037,13 +1225,13 @@ const CMDS = [
   ['open(11)', 'Open a chapter, or a section with open("11.3")'],
   ['search("lasso")', 'Search all section titles and text'],
   ['refs("9.2")', 'What a section builds on, and what uses it'],
-  ['path_to("boosting")', 'Plan a reading route on the metro map'],
+  ['path_to("boosting")', 'Plan a reading route to any chapter'],
   ['chapters(part="IV")', 'List chapters, optionally for one Part'],
   ['quiz(13)', 'Take a quiz built from a chapter\'s tables'],
   ['review()', 'Start a spaced-repetition review session'],
   ['progress()', 'What you\'ve read, completed and memorised'],
   ['map("11.2")', 'Show the knowledge map, optionally focused on a section'],
-  ['metro()', 'Open the metro map'],
+  ['route()', 'Open the route planner'],
   ['random()', 'Jump to a random section you haven\'t read'],
   ['theme("light")', 'Switch theme: "light" or "dark"'],
   ['tour()', 'Take the guided tour again'],
@@ -1094,7 +1282,7 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
           if (!t) { if (args[0]) return this.run(`path_to("${args[0]}")`.replace('path_to', 'search')); return out(`TypeError: open() needs a chapter number or section like "11.3"`, true); }
           return nav(t.sec || 'ch' + t.ch); }
         case 'map': { const t = this.resolveTarget(args[0]); if (t) return nav('node-' + (t.sec || 'c' + t.ch)); return nav('map'); }
-        case 'metro': return nav('metro');
+        case 'metro': return nav('route');
         case 'tour': case 'onboarding': Tour.start(0); return;
         case 'review': return nav('review');
         case 'quiz': { const n = +(args[0] ?? kw.chapter); if (!byN[n] || n < 1 || n > 24) return out(`ValueError: quiz() needs a chapter from 1 to 24, e.g. quiz(13)`, true); return nav('quiz-' + n); }
@@ -1112,11 +1300,11 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
           const id = t.sec || 'c' + t.ch, n = NODE[id]; const li = arr => arr.length ? `<div class="olist">${arr.sort((a, b) => b[1] - a[1]).map(([o, w]) => { const x = NODE[o]; return x ? `<a href="#${x.hub ? 'ch' + x.c : o}"><span class="n">${x.hub ? chLabel(x.c) : x.num}</span><span>${esc(x.t)}</span><span class="m">${w > 1 ? '×' + w : ''}</span></a>` : ''; }).join('')}</div>` : '<p>(none)</p>';
           return out(`<p><b style="color:var(--ink)">${n.hub ? chLabel(n.c) : n.num} ${esc(n.t)}</b> · <a href="#node-${id}">show on map</a></p><p style="color:var(--accent)">builds on:</p>${li([...(OUTE[id] || [])])}<p style="margin-top:10px">used by:</p>${li([...(INE[id] || [])])}`);
         }
-        case 'path_to': case 'route': { let a = args[0] ?? kw.target; let t = this.resolveTarget(a); let n = t ? (t.ch || NODE[t.sec].c) : null;
+        case 'path_to': case 'route': { if (fn === 'route' && !args.length && !kw.target) return nav('route'); let a = args[0] ?? kw.target; let t = this.resolveTarget(a); let n = t ? (t.ch || NODE[t.sec].c) : null;
           if (!n && a) { await loadSearch(); const h = rank(String(a)).filter(s => s.c >= 1 && s.c <= 24); if (h.length) { const votes = {}; h.slice(0, 10).forEach((s, i) => votes[s.c] = (votes[s.c] || 0) + s.sc / (i + 1)); n = +Object.entries(votes).sort((x, y) => y[1] - x[1])[0][0]; } }
           if (!n || n < 1 || n > 24) return out(`LookupError: no chapter found for ${esc(JSON.stringify(a ?? ''))}. Try path_to(19) or path_to("clustering").`, true);
           Metro.build(); const rt = Metro.compute(n); const mins = rt.filter(r => !done.has(r.n)).reduce((s, r) => s + byN[r.n].minutes, 0);
-          return out(`<p>Route to <b style="color:var(--ink)">${chLabel(n)} ${esc(byN[n].title)}</b>: ${rt.length} stops, about ${Math.floor(mins / 60)}h ${pad2(mins % 60)}m unread</p><div class="olist">${rt.map((r, i) => `<a href="#ch${r.n}"><span class="n">${r.kind === 'target' ? '★' : i + 1}. ${pad2(r.n)}</span><span>${esc(byN[r.n].title)}${done.has(r.n) ? ' <span style="color:var(--good)">✓</span>' : ''}</span><span class="m">${r.kind} · ${esc(r.why)}</span></a>`).join('')}</div><div class="cmds"><a class="chip" href="#route-${n}"><b>→</b>view on metro map</a></div>`);
+          return out(`<p>Route to <b style="color:var(--ink)">${chLabel(n)} ${esc(byN[n].title)}</b>: ${rt.length} stops, about ${Math.floor(mins / 60)}h ${pad2(mins % 60)}m unread</p><div class="olist">${rt.map((r, i) => `<a href="#ch${r.n}"><span class="n">${r.kind === 'target' ? '★' : i + 1}. ${pad2(r.n)}</span><span>${esc(byN[r.n].title)}${done.has(r.n) ? ' <span style="color:var(--good)">✓</span>' : ''}</span><span class="m">${r.kind} · ${esc(r.why)}</span></a>`).join('')}</div><div class="cmds"><a class="chip" href="#route-${n}"><b>→</b>view on the route map</a></div>`);
         }
         case 'progress': { await loadCards().catch(() => {}); const nSec = G.nodes.filter(n => !n.hub).length; const rd = G.nodes.filter(n => !n.hub && isRead(n.id)).length;
           const bar = (k, t) => { const w = 28, f = Math.round(k / Math.max(1, t) * w); return `<span style="color:var(--accent)">${'█'.repeat(f)}</span><span style="color:var(--line-2)">${'░'.repeat(w - f)}</span>`; };
@@ -1157,9 +1345,177 @@ cmd.addEventListener('keydown', e => {
 $('#repl').addEventListener('submit', e => { e.preventDefault(); if (!sug.hidden && sugSel >= 0) { cmd.value = sugList[sugSel][0]; sug.hidden = true; return; } const v = cmd.value; cmd.value = ''; sug.hidden = true; Con.run(v).then(() => { if (curView !== 'console') cmd.blur(); }); });
 document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); cmd.focus(); } });
 
+
+/* ======================= HOME BACKGROUND NETWORK ======================= */
+const HeroBg = {
+  cv: null, t0: 0, raf: null, pal: null, palAt: 0, pts: null,
+  init() {
+    this.cv = $('#heroBg'); if (!this.cv || !G) return;
+    let h = 2166136261;
+    const rnd = s => { let x = 0; for (const c of s) x = Math.imul(x ^ c.charCodeAt(0), 16777619); return ((x >>> 0) % 1000) / 1000; };
+    this.pts = G.nodes.map(n => ({ x: n.x, y: n.y, z: (rnd(n.id) - .5) * (n.hub ? .3 : .9), r: n.hub ? 2.6 : 1.2 + Math.sqrt(n.in) * .35, c: n.c, id: n.id }));
+    this.idx = Object.fromEntries(this.pts.map((p, i) => [p.id, i]));
+    this.links = G.edges.map(([a, b]) => [this.idx[a], this.idx[b]]).filter(([a, b]) => a != null && b != null);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const loop = t => { this.draw(t); if (!reduce) this.raf = requestAnimationFrame(loop); };
+    this.raf = requestAnimationFrame(loop);
+  },
+  draw(t) {
+    const cv = this.cv; if (curView !== 'home' || document.hidden) return;
+    if (this._last && t - this._last < 33) return; this._last = t;
+    const r = cv.getBoundingClientRect(); if (!r.width) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    if (cv.width !== Math.round(r.width * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, r.width, r.height);
+    if (!this.pal || t - this.palAt > 1500) { this.palAt = t; this.pal = { edge: css('--edge'), part: Object.fromEntries(Object.keys(PV).map(k => [k, css(PV[k])])) }; }
+    const a = (t || 0) / 1000 * .06, ca = Math.cos(a), sa = Math.sin(a), tilt = .35, ct = Math.cos(tilt), st = Math.sin(tilt);
+    const wide = r.width > 900, S = (wide ? Math.min(r.width * .42, r.height * .62) : Math.min(r.width * .7, 380));
+    const cx = wide ? r.width * .56 : r.width * .5, cy = wide ? r.height * .4 : 360;
+    const P = this.pts.map(p => { const x = p.x * ca - p.z * sa, z = p.x * sa + p.z * ca; const y = p.y * ct - z * st, z2 = p.y * st + z * ct; const k = 1 / (1.6 - z2 * .5); return [cx + x * S * k, cy + y * S * k, k, z2]; });
+    c.lineWidth = .6; c.strokeStyle = `rgba(${this.pal.edge},.13)`; c.beginPath();
+    for (const [i, j] of this.links) { const A = P[i], B = P[j]; c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); }
+    c.stroke();
+    this.pts.forEach((p, i) => { const q = P[i]; c.globalAlpha = .28 + q[3] * .25; c.fillStyle = this.pal.part[partOf[p.c]]; c.beginPath(); c.arc(q[0], q[1], p.r * q[2] * 1.2, 0, 6.283); c.fill(); });
+    c.globalAlpha = 1;
+  }
+};
+
+/* ======================= HOME FEATURE VIRUS ======================= */
+const FeatViz = {
+  F: [
+    { h: '#route', t: 'Route planner', d: 'Pick a goal, get only the chapters you need, in order.', v: '--p1' },
+    { h: '#ch1', t: 'Chapter reader', d: 'The notes: maths, code and real output, chapter by chapter.', v: '--p2' },
+    { h: '#recall', t: 'Flashcards & quizzes', d: '512 cards and 665 questions built from the notes.', v: '--p3' },
+    { h: '#map', t: 'Map of ideas', d: 'See how all 439 sections link to each other.', v: '--p4' },
+    { h: '#console', t: 'Quick console', d: 'Type a topic or command and jump straight there.', v: '--p5' },
+  ],
+  init() {
+    const cv = $('#featViz'); if (!cv) return; this.cv = cv;
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const K = this.F.length; this.nodes = []; this.hubs = [];
+    this.F.forEach((f, k) => {
+      const a = -Math.PI / 2 + k * 2 * Math.PI / K;
+      this.hubs.push({ k, a, r: .8 });
+      const sw = 2 * Math.PI / K;
+      for (let i = 0; i < 95; i++) { const rr = .5 + Math.sqrt(rnd()) * .56, da = (rnd() - .5) * sw * .98; this.nodes.push({ k, a: a + da, r: rr, s: 1.8 + rnd() * rnd() * 7.5, ph: rnd() * 6.28 }); }
+    });
+    this.edges = [];
+    for (let i = 0; i < 320; i++) { const A = Math.floor(rnd() * this.nodes.length), B = Math.floor(rnd() * this.nodes.length); if (this.nodes[A].k !== this.nodes[B].k || rnd() < .15) this.edges.push([A, B]); }
+    this.hov = -1;
+    $('#fvLegend').innerHTML = this.F.map((f, k) => `<a href="${f.h}" data-k="${k}" style="--pc:var(${f.v})"><i></i>${f.t}</a>`).join('');
+    $('#fvLegend').addEventListener('mouseover', e => { const a = e.target.closest('[data-k]'); this.hov = a ? +a.dataset.k : -1; });
+    $('#fvLegend').addEventListener('mouseleave', () => this.hov = -1);
+    const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    cv.addEventListener('pointermove', e => { const [x, y] = pos(e); this.setHov(this.hit(x, y)); });
+    cv.addEventListener('pointerleave', () => this.setHov(-1));
+    cv.addEventListener('click', e => { const [x, y] = pos(e); const k = this.hit(x, y); if (k >= 0) go(this.F[k].h.slice(1)); });
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const loop = t => { this.draw(reduce ? 0 : t); if (!reduce) requestAnimationFrame(loop); else setTimeout(() => requestAnimationFrame(loop), 500); };
+    requestAnimationFrame(loop);
+  },
+  setHov(k) {
+    if (k === this.hov && this._tipK === k) return; this.hov = k; this._tipK = k;
+    this.cv.style.cursor = k >= 0 ? 'pointer' : 'default';
+    $$('#fvLegend a').forEach(a => a.classList.toggle('on', +a.dataset.k === k));
+  },
+  hit(x, y) { if (!this.H) return -1; for (let k = 0; k < this.H.length; k++) { const [hx, hy, hr] = this.H[k]; if ((x - hx) ** 2 + (y - hy) ** 2 < (hr + 10) ** 2) return k; } return -1; },
+  draw(t) {
+    if (curView !== 'home' || document.hidden) return;
+    if (this._l && t && t - this._l < 30) return; this._l = t;
+    const cv = this.cv, r = cv.getBoundingClientRect(); if (!r.width) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    if (cv.width !== Math.round(r.width * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, r.width, r.height);
+    if (!this.pal || (t - (this.palAt || 0)) > 1500) { this.palAt = t; this.pal = { edge: css('--edge'), ground: css('--ground'), ink: css('--ink'), col: this.F.map(f => css(f.v)), mono: css('--f-mono') }; }
+    const P = this.pal, W = r.width, Hh = r.height, cx = W / 2, cy = Hh / 2, R = Math.min(W, Hh) * .42, rot = (t || 0) / 1000 * .035;
+    const xy = (a, rr) => [cx + Math.cos(a + rot) * rr * R, cy + Math.sin(a + rot) * rr * R];
+    const pts = this.nodes.map(n => xy(n.a + Math.sin((t || 0) / 2400 + n.ph) * .012, n.r));
+    // ring
+    c.strokeStyle = `rgba(${P.edge},.10)`; c.lineWidth = 1; c.setLineDash([2, 6]); c.beginPath(); c.arc(cx, cy, R * 1.0, 0, 6.283); c.stroke(); c.setLineDash([]);
+    // edges
+    for (const [a, b] of this.edges) {
+      const A = pts[a], B = pts[b], ka = this.nodes[a].k, kb = this.nodes[b].k, on = this.hov >= 0 && (ka === this.hov || kb === this.hov);
+      c.strokeStyle = on ? P.col[this.hov] : `rgba(${P.edge},1)`; c.globalAlpha = this.hov >= 0 ? (on ? .45 : .04) : .1; c.lineWidth = on ? 1.1 : .7;
+      const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2;
+      c.beginPath(); c.moveTo(A[0], A[1]); c.quadraticCurveTo(cx + (mx - cx) * .3, cy + (my - cy) * .3, B[0], B[1]); c.stroke();
+    }
+    // small outline nodes
+    this.nodes.forEach((n, i) => {
+      const [x, y] = pts[i]; c.globalAlpha = this.hov >= 0 && n.k !== this.hov ? .25 : .95;
+      c.fillStyle = P.ground; c.strokeStyle = P.col[n.k]; c.lineWidth = 1.5;
+      c.beginPath(); c.arc(x, y, n.s, 0, 6.283); c.fill(); c.stroke();
+    });
+    // bold hubs
+    this.H = this.hubs.map(h => { const [x, y] = xy(h.a, h.r); return [x, y, Math.max(15, R * .085)]; });
+    this.H.forEach(([x, y, hr], k) => {
+      const hot = k === this.hov, pulse = (((t || 0) / 1000 + k * .4) % 2.4) / 2.4;
+      c.globalAlpha = this.hov >= 0 && !hot ? .45 : 1;
+      c.strokeStyle = P.col[k]; c.lineWidth = 2; c.globalAlpha *= (1 - pulse) * .8;
+      c.beginPath(); c.arc(x, y, hr + pulse * hr * 1.4, 0, 6.283); c.stroke();
+      c.globalAlpha = this.hov >= 0 && !hot ? .5 : 1;
+      c.fillStyle = P.col[k]; c.beginPath(); c.arc(x, y, hot ? hr * 1.18 : hr, 0, 6.283); c.fill();
+      c.fillStyle = P.ground; c.font = `700 ${Math.round(hr * .8)}px ${P.mono}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(k + 1, x, y + 1);
+    });
+    c.globalAlpha = 1;
+    const tip = $('#fvTip');
+    if (this.hov >= 0 && this._tipK === this.hov) {
+      const [x, y, hr] = this.H[this.hov], f = this.F[this.hov];
+      tip.innerHTML = `<b>${f.t}</b><span>${f.d}</span>`; tip.hidden = false;
+      tip.style.left = Math.max(125, Math.min(W - 125, x)) + 'px'; tip.style.top = (y - hr) + 'px';
+    } else tip.hidden = true;
+  }
+};
+/* ======================= HOME ======================= */
+const Home = {
+  built: false,
+  GOALS: [
+    { n: 11, ico: '↗', t: 'Predict a number', eg: 'House prices, next month\'s sales, delivery times.' },
+    { n: 13, ico: '✓', t: 'Answer yes or no', eg: 'Spam or not, will a customer leave, pass or fail.' },
+    { n: 17, ico: '⤷', t: 'Make rules you can explain', eg: 'If-this-then-that decisions anyone can read.' },
+    { n: 19, ico: '▲', t: 'Win on spreadsheet data', eg: 'The go-to method for tabular problems at work.' },
+    { n: 20, ico: '◎', t: 'Find natural groups', eg: 'Customer segments and similar items, no labels needed.' },
+    { n: 21, ico: '!', t: 'Spot the odd ones out', eg: 'Fraud, faulty sensors, and items bought together.' },
+    { n: 22, ico: '⚖', t: 'Handle messy, unbalanced data', eg: 'Rare classes, and the leaks that fake a good score.' },
+    { n: 24, ico: '⇪', t: 'Explain and ship a model', eg: 'Why it predicted that, and keeping it healthy live.' },
+  ],
+  FEATS: [
+    { h: '#route', tag: 'Plan', t: 'Route planner', p: 'Pick a destination and follow only the chapters you need, in order.', go: 'Plan a route', ic: '<path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/>' },
+    { h: '#ch1', tag: 'Read', t: 'Chapter reader', p: 'Clear notes with the maths, the code and its real output. Each heading shows what it builds on.', go: 'Read Chapter 1', ic: '<path d="M3 5.5C6 4 9 4 12 6c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13.5"/>' },
+    { h: '#recall', tag: 'Remember', t: 'Flashcards & quizzes', p: '512 cards and 665 questions made from the notes. Cards come back just before you would forget them.', go: 'Practise now', ic: '<rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/>' },
+    { h: '#map', tag: 'Explore', t: 'Map of ideas', p: 'See how all 439 sections link together, and which ideas everything else relies on.', go: 'Open the map', ic: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.6"/><circle cx="19" cy="15" r="1.6"/><circle cx="6" cy="17" r="1.6"/><path d="M12 5.1 18 14M7.4 16.2 17.4 15"/>' },
+    { h: '#console', tag: 'Jump', t: 'Quick console', p: 'Type “lasso” or open(11) in the box at the top of any page to go straight there.', go: 'Try the console', ic: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/>' },
+  ],
+  fmt(m) { return m >= 60 ? `${Math.floor(m / 60)}h ${pad2(m % 60)}m` : `${m} min`; },
+  render() {
+    if (!this.built) {
+      this.built = true;
+      $('#goalGrid').innerHTML = this.GOALS.map(g => {
+        const rt = Metro.compute(g.n), c = byN[g.n];
+        const mins = rt.reduce((a, r) => a + byN[r.n].minutes, 0);
+        const dots = rt.map((r, i) => (i ? '<b></b>' : '') + `<i class="${r.kind === 'target' ? 't' : ''}" style="--c:var(${PV[partOf[r.n]]})" title="Ch ${r.n} · ${esc(byN[r.n].title)}"></i>`).join('');
+        return `<a class="goal" href="#route-${g.n}" style="--pc:var(${PV[c.part]})"><span class="ico" aria-hidden="true">${g.ico}</span><h3>${g.t}</h3><p class="eg">${g.eg}</p><p class="dest"><span>Ends at</span> Ch ${g.n} · ${esc(c.title)}</p><div class="minir" aria-hidden="true">${dots}</div><div class="foot"><span>${rt.length} chapters · ${this.fmt(mins)}</span><em>Route →</em></div></a>`;
+      }).join('');
+      $('#featGrid').innerHTML = this.FEATS.map(f => `<a class="feat" href="${f.h}"><svg viewBox="0 0 24 24" aria-hidden="true">${f.ic}</svg><span class="tag2">${f.tag}</span><h3>${f.t}</h3><p>${f.p}</p><span class="go">${f.go} →</span></a>`).join('');
+      const sel = $('#goalSel');
+      sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => c.n >= 1 && c.n <= 24).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
+      sel.onchange = () => { if (sel.value) go('route-' + sel.value); };
+      $('#ctaRoute').onclick = () => go('route');
+      $('#homeTour').onclick = () => { if (!Tour.active) { scrollTo({ top: 0 }); Tour.start(0); } };
+      const st = $('#homeStats');
+      const nSec = G.nodes.filter(n => !n.hub).length, nCode = M.chapters.reduce((a, c) => a + c.code, 0), hrs = Math.round(M.chapters.filter(c => c.n >= 1 && c.n <= 24).reduce((a, c) => a + c.minutes, 0) / 60);
+      st.innerHTML = `<div><b>24</b><span>chapters</span></div><div><b>${nSec}</b><span>short sections</span></div><div><b>${nCode}</b><span>runnable code cells</span></div><div><b>512</b><span>flashcards</span></div><div><b>~${hrs} h</b><span>of reading</span></div>`;
+    }
+    const last = store.get('lastCh', null), r = $('#homeResume');
+    if (last != null && byN[last]) { r.innerHTML = `Welcome back. <a href="#ch${last}">Continue ${chLabel(last)}: ${esc(byN[last].title)} →</a>`; r.hidden = false; }
+    const rt = store.get('route', null);
+    if (rt && byN[rt]) { r.innerHTML += `${r.hidden ? '' : '<br>'}Your route: <a href="#route-${rt}">heading to ${chLabel(rt)} →</a>`; r.hidden = false; }
+  }
+};
+
 /* ======================= GUIDED TOUR ======================= */
 const Tour = (() => {
-  const SECS = ['Welcome', 'Map', 'Metro', 'Console', 'Recall', 'Done'];
+  const SECS = ['Welcome', 'Start here', 'Get around', 'Done'];
   let steps = [], i = 0, active = false, loop = null, poll = null, doneFlag = false, lastKey = '', entered = -1;
   let spot, blocks, pulse, card, dock;
   const W = () => innerWidth, H = () => innerHeight, mobile = () => innerWidth < 760;
@@ -1167,6 +1523,7 @@ const Tour = (() => {
   /* ---------- helpers that put the site into the state a step needs ---------- */
   const TOP = () => G.nodes.filter(n => !n.hub).sort((a, b) => b.in - a.in)[0].id;
   const view = v => { if (curView !== v) go(v === 'read' ? 'ch1' : v); };
+  const goGoals = () => go('route');
   const introOpen = () => { const el = $('#mapIntro'); if (el.classList.contains('mini')) { el.classList.remove('mini'); $('#introToggle').textContent = 'Hide'; } };
   const mapClean = () => { Map_.clear(); Map_.fitted = false; Map_.resize(); };
   const partsOn = () => { $$('#legend [data-p].off').forEach(b => b.click()); };
@@ -1179,137 +1536,33 @@ const Tour = (() => {
 
   steps = [
     { sec: 'Welcome', center: true, welcome: true,
-      title: 'Hey, welcome to Gradient Atlas',
-      body: `<p>This is a study companion for a set of notes on <b>classical machine learning</b>: linear regression, decision trees, clustering, and everything else that came before neural networks.</p>
-             <p>Every algorithm in the notes is worked out on paper, built from scratch in Python, and then checked against scikit-learn, the library you'd use at work.</p>
-             <p>Instead of one long list of chapters, you get four ways in. Give me about two minutes and I'll show you each one.</p>`,
-      before() { view('map'); introOpen(); mapClean(); } },
-
-    // ---------------- MAP ----------------
-    { sec: 'Map', target: el('#v-map'), inside: true,
-      title: 'This is the map',
-      body: `<p>Every small dot is one section of the notes. The big numbered dots are the chapters.</p><p>They sit around the ring in reading order, starting at the top and going clockwise.</p>`,
-      before() { view('map'); introOpen(); mapClean(); } },
-    { sec: 'Map', target: ringRect, round: true,
-      title: 'The lines are the interesting part',
-      body: `<p>Whenever the text says something like <i>“see 8.3”</i> or <i>“as in Chapter 9”</i>, that's a line here.</p><p>A dot with lots of lines running into it is an idea the rest of the notes keep leaning on.</p>`,
-      before() { view('map'); mapClean(); } },
-    { sec: 'Map', target: el('#top5'), skip: () => !$('#top5').getClientRects().length,
-      title: 'Not sure where to start?',
-      body: `<p>These five are the ideas the rest of the notes rely on most. They're a good first read.</p>`,
-      before() { view('map'); introOpen(); Map_.clear(); } },
-    { sec: 'Map', target: () => el('#top5 button')() || nodeRect(TOP())(), round: false, action: true,
-      title: 'Click this one',
-      body: `<p>Go on, click this one. It's the idea the rest of the notes lean on most.</p>`,
-      done: () => Map_.sel === TOP(), doIt: () => Map_.select(TOP(), true),
-      before() { view('map'); introOpen(); Map_.clear(); } },
-    { sec: 'Map', target: el('#insp'),
-      title: 'Now it tells you about it',
-      body: `<p>The map zooms in on that section and this panel opens. The top part is a short preview of what the section says.</p>`,
-      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
-    { sec: 'Map', target: union('#inspBuilds', '#inspUsed'),
-      title: 'What it needs, and what needs it',
-      body: `<p><b>Builds on</b> lists what you should know first. <b>Used by</b> lists where this idea comes back later.</p><p>On the map, the solid amber lines are “builds on” and the dashed ones are “used by”. Click any chip to hop over to it.</p>`,
-      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
-    { sec: 'Map', target: el('#inspActs'),
-      title: 'Jump off from here',
-      body: `<p>Read the section, plan a route to its chapter, or quiz yourself on it. You'll see where each of these goes in a minute.</p>`,
-      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
-    { sec: 'Map', target: nodeRect('c11'), round: true, action: true,
-      title: 'Your turn: click a dot on the map',
-      body: `<p>This big one is <b>Chapter 11, Linear Regression</b>. Click it.</p>`,
-      done: () => Map_.sel === 'c11', doIt: () => Map_.select('c11', true),
-      before() { view('map'); introOpen(); mapClean(); } },
-    { sec: 'Map', target: el('#legend'),
-      title: 'Filter by part of the book',
-      body: `<p>The notes are split into six Parts, and each has its own colour. These chips switch a Part on and off.</p>`,
-      before() { view('map'); Map_.clear(); partsOn(); } },
-    { sec: 'Map', target: el('#legend [data-p="IV"]'), action: true,
-      title: 'Try switching one off',
-      body: `<p>Click <b>IV · Supervised Learning</b> and watch those dots fade out.</p>`,
-      done: () => Map_.off.has('IV'), doIt: () => $('#legend [data-p="IV"]').click(),
-      before() { view('map'); Map_.clear(); partsOn(); } },
-    { sec: 'Map', target: el('.map-zoom'),
-      title: 'Moving around',
-      body: `<p>I've switched Part IV back on for you.</p><p>Scroll or pinch to zoom, and drag to move. These buttons do the same, and the bottom one resets the view.</p>`,
-      before() { view('map'); partsOn(); } },
-    { sec: 'Map', target: el('.rail a[data-v="metro"]'), action: true,
-      title: 'Next up: the metro',
-      body: `<p>That's the map. Click <b>Metro</b> to see the same notes a different way.</p>`,
-      done: () => curView === 'metro', doIt: () => go('metro'),
-      before() { view('map'); partsOn(); Map_.clear(); } },
-
-    // ---------------- METRO ----------------
-    { sec: 'Metro', target: el('.metro-map'),
-      title: 'The book as a metro map',
-      body: `<p>Each Part of the book is a coloured line, and each chapter is a station.</p><p>Follow the lines left to right, top to bottom, and you're reading the book in order.</p>`,
-      before() { view('metro'); Metro.build(); Metro.setRoute(null); history.replaceState(null, '', '#metro'); } },
-    { sec: 'Metro', target: el(() => { const n = [...Metro.inter].sort((a, b) => a - b)[0]; return $(`#metroSvg .st[data-n="${n}"]`); }), round: true,
-      title: 'Stations with a thick ring',
-      body: `<p>These are interchanges: chapters the rest of the book keeps coming back to. They're worth reading properly, not skimming.</p>`,
-      before() { view('metro'); Metro.build(); } },
-    { sec: 'Metro', target: el('#quick a[href="#route-19"]'), action: true,
-      title: 'Plan a trip',
-      body: `<p>Say you only want to learn <b>gradient boosting</b> and don't want to read all 24 chapters first. Click this.</p>`,
-      done: () => Metro.target === 19, doIt: () => go('route-19'),
-      before() { view('metro'); Metro.build(); if (Metro.target) { Metro.setRoute(null); history.replaceState(null, '', '#metro'); } } },
-    { sec: 'Metro', target: el('#itin'),
-      title: 'Here is your route',
-      body: `<p>These are only the chapters Chapter 19 actually leans on, in the order to read them, with a time for each.</p><p>The numbered badges on the map match this list, and the dotted amber line connects the stops.</p>`,
-      before() { if (Metro.target !== 19) go('route-19'); } },
-    { sec: 'Metro', target: el('.planner'),
-      title: 'Going somewhere else?',
-      body: `<p>Pick any chapter here to plan a different route. <b>Clear route</b> puts the map back to normal.</p>`,
-      before() { if (Metro.target !== 19) go('route-19'); } },
-    { sec: 'Metro', target: el('.rail a[data-v="console"]'), action: true,
-      title: 'Next: the console',
-      body: `<p>Click <b>Console</b>. It's the fastest way around once you know what you're looking for.</p>`,
-      done: () => curView === 'console', doIt: () => go('console'),
-      before() { if (curView !== 'metro') go('route-19'); } },
-
-    // ---------------- CONSOLE ----------------
-    { sec: 'Console', target: el('#repl .repl-in'),
-      title: 'The box at the top',
-      body: `<p>This works on every page. It's a tiny Python-style console: you type a short command and it takes you there.</p><p>Plain words work too. Type <code>decision trees</code> and it just searches.</p>`,
-      before() { view('console'); Con.boot(); } },
-    { sec: 'Console', target: el(() => mobile() ? $('#repl .repl-in') : $('#repl .run')), action: true,
-      title: 'Run your first command',
-      body: `<p>I've typed <code>search("lasso")</code> for you. Click <b>Run</b>, or press Enter.</p>`,
-      done: () => entries() > entryBase, doIt: () => { const v = $('#cmd').value || 'search("lasso")'; $('#cmd').value = ''; Con.run(v); },
-      before() { view('console'); Con.boot(); entryBase = entries(); const c = $('#cmd'); c.value = 'search("lasso")'; setTimeout(() => { c.focus(); $('#suggest').hidden = true; }, 60); } },
-    { sec: 'Console', target: el(() => $$('#log .entry').pop()),
-      title: 'Results land here',
-      body: `<p>Click any row to jump straight to that section.</p><p>Type <code>help()</code> whenever you want the full list. My favourite is <code>path_to("clustering")</code>, which plans a metro route from the keyboard.</p>`,
-      before() { view('console'); Con.boot(); if (!entries()) Con.run('search("lasso")'); } },
-    { sec: 'Console', target: el('.rail a[data-v="recall"]'), action: true,
-      title: 'Last stop: Recall',
-      body: `<p>Click <b>Recall</b>.</p>`,
-      done: () => curView === 'recall', doIt: () => go('recall'),
-      before() { view('console'); $('#cmd').blur(); } },
-
-    // ---------------- RECALL ----------------
-    { sec: 'Recall', target: el('.tiles'),
-      title: 'Reading it once isn\'t knowing it',
-      body: `<p>This page turns the notes into flashcards and quizzes, so the stuff actually sticks.</p>`,
-      before() { view('recall'); } },
-    { sec: 'Recall', target: el('.mastery .mcell'),
-      title: 'One tile per chapter',
-      body: `<p>Each chapter gets a quiz built from its own tables, and cards like “what does this code print?”.</p><p>The bar fills up as you get cards right over time.</p>`,
-      before() { view('recall'); } },
-    { sec: 'Recall', target: el('.recall-head .btn.primary'),
-      title: 'Cards come back when you need them',
-      body: `<p>Forget a card and it shows up again soon. Get it easily and you won't see it for days.</p><p>New cards appear here as you read, so exploring the notes fills this up by itself.</p>`,
-      before() { view('recall'); } },
-    { sec: 'Recall', target: el('#readLink'),
-      title: 'And when you just want to read',
-      body: `<p>This opens the chapter you were last on. Every heading in there shows what it builds on and what uses it, the same as the map.</p>`,
-      before() { view('recall'); } },
-
-    // ---------------- DONE ----------------
+      title: 'Welcome to Gradient Atlas',
+      body: `<p>Study notes for <b>classical machine learning</b>: 24 chapters where you build each algorithm yourself, then check it against scikit-learn, the library used at work.</p><p>This quick tour shows you the few things you need. It takes about 30 seconds.</p>`,
+      before() { view('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Start here', target: el('#ctaRoute'),
+      title: 'Start here',
+      body: `<p><b>Plan my study route</b> opens the route planner. Pick the chapter you want to reach and it shows only the chapters you need first, in order, with how long each takes.</p>`,
+      before() { view('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Start here', target: el('#featGrid'),
+      title: 'Five ways to study',
+      body: `<p>Plan a route, read the chapters, practise with flashcards, explore how ideas connect, or jump anywhere from the console. Use whichever suits you today.</p>`,
+      before() { view('home'); } },
+    { sec: 'Start here', target: el('#goalGrid'),
+      title: 'Only need one thing?',
+      body: `<p>These are the most popular goals. Click one and you skip straight to the shortest route for it.</p>`,
+      before() { view('home'); } },
+    { sec: 'Get around', target: el('.rail'),
+      title: 'Switch pages here',
+      body: `<p>Home, Map, Route, Console, Recall and Read are always one click away.</p>`,
+      before() { view('home'); } },
+    { sec: 'Get around', target: el('#repl .repl-in'),
+      title: 'Or just type',
+      body: `<p>Type a topic like <code>decision trees</code> and press Enter to find it. This box works on every page.</p>`,
+      before() { view('home'); } },
     { sec: 'Done', center: true, finale: true,
-      title: 'That\'s the tour',
-      body: `<p>Two good places to start:</p><ul><li><b>New to ML?</b> Start at Chapter 1 and go in order.</li><li><b>Know what you want?</b> Pick it in the metro and follow the route.</li></ul><p>You can take this tour again any time from the <b>?</b> button at the top.</p>`,
-      before() { view('map'); partsOn(); mapClean(); } },
+      title: 'You\'re all set',
+      body: `<p>The easiest way to begin is to plan a route and follow it. New to all of this? Chapter 1 starts from zero.</p><p>Replay this tour any time from the <b>?</b> button at the top.</p>`,
+      before() { view('home'); scrollTo({ top: 0 }); } },
   ];
 
   /* ---------- DOM ---------- */
@@ -1328,7 +1581,7 @@ const Tour = (() => {
       const b = e.target.closest('[data-t]'); if (!b) return;
       const a = b.dataset.t;
       if (a === 'next') next(); else if (a === 'skip') end();
-      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'map') { end(); go('map'); } else if (a === 'metro') { end(); go('metro'); }
+      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'goals') { end(); goGoals(); } else if (a === 'map') { end(); go('map'); } else if (a === 'metro') { end(); go('metro'); }
     });
   }
   function nudge() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); if (!pulse.hidden) { pulse.classList.remove('boost'); void pulse.offsetWidth; pulse.classList.add('boost'); } }
@@ -1352,8 +1605,8 @@ const Tour = (() => {
     const s = steps[i];
     const art = s.welcome ? `<svg class="t-art" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="44" fill="none" stroke="var(--line-2)" stroke-dasharray="2 5"/>${[...Array(12)].map((_, k) => { const a = k / 12 * Math.PI * 2 - Math.PI / 2; return `<circle cx="${60 + 44 * Math.cos(a)}" cy="${60 + 44 * Math.sin(a)}" r="${k % 3 === 0 ? 5 : 3}" fill="var(${['--p1', '--p2', '--p3', '--p4', '--p5', '--p6'][k % 6]})"/>`; }).join('')}<path class="chord c1" d="M60 16 Q60 60 98 82"/><path class="chord c2" d="M22 82 Q60 60 98 38"/><path class="chord c3" d="M38 22 Q60 60 60 104"/></svg>` : '';
     const hint = s.action ? (doneFlag ? `<div class="t-hint ok">✓ Nice, that's it.</div>` : `<div class="t-hint"><span class="dotp"></span>Your turn. Click the glowing spot.</div>`) : '';
-    const foot = s.welcome ? `<div class="t-acts"><button type="button" class="btn primary" data-t="next">Show me around →</button><button type="button" class="btn" data-t="skip">I'll explore on my own</button></div>`
-      : s.finale ? `<div class="t-acts"><button type="button" class="btn primary" data-t="ch1">Start Chapter 1 →</button><button type="button" class="btn" data-t="metro">Plan a route</button><button type="button" class="btn" data-t="map">Explore the map</button></div>` : '';
+    const foot = s.welcome ? `<div class="t-acts"><button type="button" class="btn primary" data-t="next">Show me (30 sec) →</button><button type="button" class="btn" data-t="skip">Skip, I'll explore</button></div>`
+      : s.finale ? `<div class="t-acts"><button type="button" class="btn primary" data-t="goals">Plan my study route →</button><button type="button" class="btn" data-t="ch1">Start Chapter 1</button></div>` : '';
     return `${art}<div class="t-sec">${s.sec === 'Welcome' || s.sec === 'Done' ? 'Gradient Atlas · ML Materials' : s.sec + ' · ' + (steps.filter(x => x.sec === s.sec).indexOf(s) + 1) + ' of ' + steps.filter(x => x.sec === s.sec).length}</div><h3>${s.title}</h3><div class="t-body">${s.body}</div>${hint}${foot}`;
   }
 
@@ -1437,7 +1690,7 @@ const Tour = (() => {
     try { s.before && s.before(); } catch (e) {}
     render();
     // scroll target into view once it exists
-    setTimeout(() => { const t = s.target && s.target(); if (t && t.scrollIntoView && !t.closest?.('.bar,.rail')) { const r = t.getBoundingClientRect(); if (r.top < 60 || r.bottom > H() - 100) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, 250);
+    setTimeout(() => { const t = s.target && s.target(); if (t && t.scrollIntoView && !t.closest?.('.bar,.rail')) { const r = t.getBoundingClientRect(); if (r.top < 60 || r.bottom > H() - 100) t.scrollIntoView({ block: r.height > H() * .6 ? 'start' : 'center', behavior: 'smooth' }); } }, 250);
     if (s.action) poll = setInterval(() => {
       if (!active || entered !== i || doneFlag) return;
       if (s.done()) { doneFlag = true; clearInterval(poll); card.innerHTML = cardHTML(); dock.innerHTML = dockHTML(); lastKey = ''; layout(); setTimeout(() => { if (active && entered === i) next(); }, 900); }
@@ -1468,7 +1721,7 @@ const Tour = (() => {
   function end() {
     active = false; clearInterval(loop); clearInterval(poll);
     removeEventListener('keydown', onKey, true); removeEventListener('resize', layout);
-    store.set('toured', true);
+    store.set('toured2', true);
     spot.classList.remove('on'); document.body.classList.remove('touring');
     [card, dock, pulse, ...blocks].forEach(e => e.hidden = true);
     setTimeout(() => { [spot, card, dock, pulse, ...blocks].forEach(e => e.remove()); spot = null; }, 450);
@@ -1485,9 +1738,9 @@ Promise.all([fetch('data/manifest.json').then(r => r.json()), fetch('data/graph.
   G.nodes.forEach(n => NODE[n.id] = n);
   for (const [a, b, w] of G.edges) { (OUTE[a] = OUTE[a] || []).push([b, w]); (INE[b] = INE[b] || []).push([a, w]); }
   const last = store.get('lastCh', null); if (last != null) $('#readLink').href = '#ch' + last;
-  Map_.init(); Map_.chrome(); badge();
+  Map_.init(); Map_.chrome(); badge(); HeroBg.init(); FeatViz.init();
   route();
-  if (!store.get('toured', false) && (!location.hash || location.hash === '#map')) setTimeout(() => Tour.start(0), 700);
+  if (!store.get('toured2', false) && (!location.hash || location.hash === '#home')) setTimeout(() => Tour.start(0), 900);
   loadCards().then(() => { if (Map_.sel) Map_.inspect(Map_.sel); }).catch(() => {});
 }).catch(() => { document.querySelector('.stage').insertAdjacentHTML('afterbegin', '<p class="loading" style="padding:40px">The course data didn\'t load. Reload the page to try again.</p>'); });
 })();
