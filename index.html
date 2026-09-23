@@ -4,6 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var view = location.hash.replace('#', '') || 'home';
+      if (view === last) return; last = view;
+      gtag('event', 'page_view', {
+        page_title: document.title + ' [' + view + ']',
+        page_location: location.origin + location.pathname + (location.hash || '#home'),
+        page_path: '/' + view
+      });
+    }, 50);
+  }
+  window.addEventListener('hashchange', track);
+  window.addEventListener('load', track);
+})();
+</script>
 <title>Gradient Atlas</title>
 <meta name="description" content="Classical machine learning as a map you can explore, a route you can plan, a console you can type into, and cards you can recall.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
