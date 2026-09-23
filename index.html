@@ -339,6 +339,7 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
     <div class="repl-in"><span class="ps">&gt;&gt;&gt;</span><input id="cmd" type="text" spellcheck="false" aria-label="Command prompt" placeholder="open(11) · search('lasso') · path_to('boosting') · help()"><button class="run" type="submit">Run ↵</button></div>
     <div class="suggest" id="suggest" hidden></div>
   </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
   <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
 </div></header>
 
@@ -404,6 +405,60 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
 <div class="toast" id="toast" hidden></div>
 <style>@media (max-width:760px){.map-intro .top5,.map-intro .eyebrow+.top5,.map-intro .eyebrow:nth-of-type(2){display:none}.map-intro p{font-size:13.5px}}</style>
 <style>@media (max-width:760px){.suggest button{grid-template-columns:1fr;gap:2px}.map-legend{flex-wrap:nowrap;overflow-x:auto;max-width:calc(100% - 64px);padding-bottom:2px}.map-legend button{flex:none}}</style>
+<style>
+:root{--shade:rgba(3,6,14,.74);--shade0:rgba(3,6,14,0)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--shade:rgba(17,22,38,.58);--shade0:rgba(17,22,38,0)}}
+:root[data-theme="light"]{--shade:rgba(17,22,38,.58);--shade0:rgba(17,22,38,0)}
+.tour-spot{position:fixed;z-index:80;pointer-events:none;border-radius:12px;box-shadow:0 0 0 200vmax var(--shade0);transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),border-radius .45s,box-shadow .6s ease}
+.tour-spot.on{box-shadow:0 0 0 200vmax var(--shade)}
+.tour-spot.on.ring{box-shadow:0 0 0 2px var(--accent),0 0 28px 6px var(--accent-soft),0 0 0 200vmax var(--shade)}
+.tour-block{position:fixed;z-index:81}
+.tour-pulse{position:fixed;z-index:82;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--accent);pointer-events:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 30%,transparent)}
+.tour-pulse::before,.tour-pulse::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);animation:tp 1.6s ease-out infinite}
+.tour-pulse::after{animation-delay:.8s}
+.tour-pulse.boost{animation:tb .5s}
+@keyframes tp{0%{transform:scale(1);opacity:.95}100%{transform:scale(3.8);opacity:0}}
+@keyframes tb{50%{transform:scale(1.9)}}
+.tour-card{position:fixed;z-index:83;width:min(360px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:18px 20px;box-shadow:0 30px 80px -24px rgba(0,0,0,.6);transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1)}
+.tour-card.welcome{width:min(520px,calc(100vw - 32px));padding:26px 28px 24px}
+.tour-card.enter{animation:tcin .38s ease both}
+.tour-card.shake{animation:tsh .35s}
+@keyframes tcin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes tsh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.t-sec{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.tour-card h3{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.2;letter-spacing:-.01em;margin:6px 0 10px;text-wrap:balance}
+.tour-card.welcome h3{font-size:28px;margin-top:8px}
+.t-body p{margin:0 0 9px;font-size:15px;color:var(--ink-2);line-height:1.55}
+.t-body p:last-child{margin-bottom:0}
+.t-body b{color:var(--ink);font-weight:600}
+.t-body ul{margin:0 0 10px;padding-left:1.1em;font-size:15px;color:var(--ink-2)}
+.t-body li{margin:4px 0}
+.t-body code{font-family:var(--f-mono);font-size:12.5px;background:var(--code-bg);border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
+.t-hint{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.t-hint .dotp{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:tblink 1.1s ease-in-out infinite}
+.t-hint.ok{color:var(--good)}
+@keyframes tblink{50%{opacity:.25}}
+.t-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.t-art{width:88px;height:88px;display:block;margin:0 0 6px}
+.t-art .chord{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-dasharray:130;stroke-dashoffset:130;animation:tdraw 2.6s ease-in-out infinite alternate}
+.t-art .c2{animation-delay:.5s}.t-art .c3{animation-delay:1s}
+@keyframes tdraw{to{stroke-dashoffset:0}}
+.tour-dock{position:fixed;z-index:84;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));width:min(840px,calc(100vw - 32px));display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+.tour-dock .segs{flex:1;display:flex;gap:6px;min-width:0}
+.tour-dock .seg{border:0;background:transparent;padding:4px 0;display:flex;flex-direction:column;gap:6px;min-width:0;text-align:left}
+.tour-dock .seg .tbar{display:block;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden}
+.tour-dock .seg .tbar i{display:block;height:100%;background:var(--accent);transition:width .4s ease}
+.tour-dock .seg .nm{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tour-dock .seg.cur .nm{color:var(--ink)}.tour-dock .seg.done .nm{color:var(--ink-2)}
+.t-count{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.t-btn{height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--raised);font-family:var(--f-mono);font-size:12.5px;white-space:nowrap;color:var(--ink)}
+.t-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.t-btn[disabled]{opacity:.4;cursor:default}
+.t-skip{border:0;background:transparent;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+body.touring .maptip{display:none!important}
+.tour-dock.top{bottom:auto;top:calc(var(--bar) + 10px + env(safe-area-inset-top,0px))}
+@media (max-width:760px){.tour-dock{bottom:calc(72px + env(safe-area-inset-bottom,0px));gap:8px;padding:8px}.tour-dock .seg .nm,.t-count{display:none}.tour-card.welcome{padding:20px}.tour-card.welcome h3{font-size:23px}.t-art{width:64px;height:64px}}
+</style>
 <script>
 window.MathJax = {
   tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true },
@@ -612,9 +667,9 @@ const Map_ = {
       <h2>${esc(n.hub ? n.t : n.t)}</h2><button class="x" type="button" aria-label="Close">×</button></div>
       <div class="insp-body">
         ${snip ? `<p class="snip">${snip}</p>` : ''}
-        <div class="insp-acts"><a class="btn primary small" href="#${n.hub ? 'ch' + n.c : id}">Read ${n.hub ? 'chapter' : 'section'} →</a>${n.c >= 1 && n.c <= 24 ? `<a class="btn small" href="#route-${n.c}">Route here</a><a class="btn small" href="#quiz-${n.c}">Quiz Ch ${n.c}</a>` : ''}</div>
-        <div><h3><i></i>Builds on · ${outs.length}</h3><div class="insp-list">${outs.map(chip).join('') || '<span class="chip" style="cursor:default">Nothing earlier. This is a starting point.</span>'}</div></div>
-        <div><h3><i class="dash"></i>Used by · ${ins.length}</h3><div class="insp-list">${ins.map(chip).join('') || '<span class="chip" style="cursor:default">No later section points here yet.</span>'}</div></div>
+        <div class="insp-acts" id="inspActs"><a class="btn primary small" href="#${n.hub ? 'ch' + n.c : id}">Read ${n.hub ? 'chapter' : 'section'} →</a>${n.c >= 1 && n.c <= 24 ? `<a class="btn small" href="#route-${n.c}">Route here</a><a class="btn small" href="#quiz-${n.c}">Quiz Ch ${n.c}</a>` : ''}</div>
+        <div id="inspBuilds"><h3><i></i>Builds on · ${outs.length}</h3><div class="insp-list">${outs.map(chip).join('') || '<span class="chip" style="cursor:default">Nothing earlier. This is a starting point.</span>'}</div></div>
+        <div id="inspUsed"><h3><i class="dash"></i>Used by · ${ins.length}</h3><div class="insp-list">${ins.map(chip).join('') || '<span class="chip" style="cursor:default">No later section points here yet.</span>'}</div></div>
         ${n.hub ? `<div><h3>Sections</h3><div class="insp-list">${ch.sections.filter(s => s.lvl === 3).map(s => chip([s.id, 1])).join('')}</div></div>` : ''}
       </div>`;
     el.hidden = false;
@@ -991,6 +1046,7 @@ const CMDS = [
   ['metro()', 'Open the metro map'],
   ['random()', 'Jump to a random section you haven\'t read'],
   ['theme("light")', 'Switch theme: "light" or "dark"'],
+  ['tour()', 'Take the guided tour again'],
   ['clear()', 'Clear the console'],
 ];
 const Con = {
@@ -1039,6 +1095,7 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
           return nav(t.sec || 'ch' + t.ch); }
         case 'map': { const t = this.resolveTarget(args[0]); if (t) return nav('node-' + (t.sec || 'c' + t.ch)); return nav('map'); }
         case 'metro': return nav('metro');
+        case 'tour': case 'onboarding': Tour.start(0); return;
         case 'review': return nav('review');
         case 'quiz': { const n = +(args[0] ?? kw.chapter); if (!byN[n] || n < 1 || n > 24) return out(`ValueError: quiz() needs a chapter from 1 to 24, e.g. quiz(13)`, true); return nav('quiz-' + n); }
         case 'theme': { const v = String(args[0] || '').toLowerCase(); if (v !== 'light' && v !== 'dark') return out(`ValueError: theme() takes "light" or "dark"`, true); document.documentElement.dataset.theme = v; store.set('theme', v); onTheme(); return out(`<p>theme set to "${v}"</p>`); }
@@ -1100,6 +1157,327 @@ cmd.addEventListener('keydown', e => {
 $('#repl').addEventListener('submit', e => { e.preventDefault(); if (!sug.hidden && sugSel >= 0) { cmd.value = sugList[sugSel][0]; sug.hidden = true; return; } const v = cmd.value; cmd.value = ''; sug.hidden = true; Con.run(v).then(() => { if (curView !== 'console') cmd.blur(); }); });
 document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); cmd.focus(); } });
 
+/* ======================= GUIDED TOUR ======================= */
+const Tour = (() => {
+  const SECS = ['Welcome', 'Map', 'Metro', 'Console', 'Recall', 'Done'];
+  let steps = [], i = 0, active = false, loop = null, poll = null, doneFlag = false, lastKey = '', entered = -1;
+  let spot, blocks, pulse, card, dock;
+  const W = () => innerWidth, H = () => innerHeight, mobile = () => innerWidth < 760;
+
+  /* ---------- helpers that put the site into the state a step needs ---------- */
+  const TOP = () => G.nodes.filter(n => !n.hub).sort((a, b) => b.in - a.in)[0].id;
+  const view = v => { if (curView !== v) go(v === 'read' ? 'ch1' : v); };
+  const introOpen = () => { const el = $('#mapIntro'); if (el.classList.contains('mini')) { el.classList.remove('mini'); $('#introToggle').textContent = 'Hide'; } };
+  const mapClean = () => { Map_.clear(); Map_.fitted = false; Map_.resize(); };
+  const partsOn = () => { $$('#legend [data-p].off').forEach(b => b.click()); };
+  const el = s => () => { const e = typeof s === 'function' ? s() : $(s); return e && e.getClientRects().length ? e : null; };
+  const nodeRect = id => () => { const n = NODE[id]; if (!n || !Map_.ctx) return null; const r = Map_.cv.getBoundingClientRect(); const x = r.left + Map_.X(n), y = r.top + Map_.Y(n); return { left: x - 20, top: y - 20, width: 40, height: 40 }; };
+  const ringRect = () => { if (!Map_.ctx) return null; const r = Map_.cv.getBoundingClientRect(); const s = Map_.s * 1.04; return { left: r.left + Map_.tx - s, top: r.top + Map_.ty - s, width: 2 * s, height: 2 * s }; };
+  const union = (...sels) => () => { const rs = sels.map(s => $(s)).filter(Boolean).map(e => e.getBoundingClientRect()); if (!rs.length) return null; const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom)); return { left: l, top: t, width: rr - l, height: b - t }; };
+  const entries = () => $$('#log .entry').length;
+  let entryBase = 0;
+
+  steps = [
+    { sec: 'Welcome', center: true, welcome: true,
+      title: 'Hey, welcome to Gradient Atlas',
+      body: `<p>This is a study companion for a set of notes on <b>classical machine learning</b>: linear regression, decision trees, clustering, and everything else that came before neural networks.</p>
+             <p>Every algorithm in the notes is worked out on paper, built from scratch in Python, and then checked against scikit-learn, the library you'd use at work.</p>
+             <p>Instead of one long list of chapters, you get four ways in. Give me about two minutes and I'll show you each one.</p>`,
+      before() { view('map'); introOpen(); mapClean(); } },
+
+    // ---------------- MAP ----------------
+    { sec: 'Map', target: el('#v-map'), inside: true,
+      title: 'This is the map',
+      body: `<p>Every small dot is one section of the notes. The big numbered dots are the chapters.</p><p>They sit around the ring in reading order, starting at the top and going clockwise.</p>`,
+      before() { view('map'); introOpen(); mapClean(); } },
+    { sec: 'Map', target: ringRect, round: true,
+      title: 'The lines are the interesting part',
+      body: `<p>Whenever the text says something like <i>“see 8.3”</i> or <i>“as in Chapter 9”</i>, that's a line here.</p><p>A dot with lots of lines running into it is an idea the rest of the notes keep leaning on.</p>`,
+      before() { view('map'); mapClean(); } },
+    { sec: 'Map', target: el('#top5'), skip: () => !$('#top5').getClientRects().length,
+      title: 'Not sure where to start?',
+      body: `<p>These five are the ideas the rest of the notes rely on most. They're a good first read.</p>`,
+      before() { view('map'); introOpen(); Map_.clear(); } },
+    { sec: 'Map', target: () => el('#top5 button')() || nodeRect(TOP())(), round: false, action: true,
+      title: 'Click this one',
+      body: `<p>Go on, click this one. It's the idea the rest of the notes lean on most.</p>`,
+      done: () => Map_.sel === TOP(), doIt: () => Map_.select(TOP(), true),
+      before() { view('map'); introOpen(); Map_.clear(); } },
+    { sec: 'Map', target: el('#insp'),
+      title: 'Now it tells you about it',
+      body: `<p>The map zooms in on that section and this panel opens. The top part is a short preview of what the section says.</p>`,
+      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
+    { sec: 'Map', target: union('#inspBuilds', '#inspUsed'),
+      title: 'What it needs, and what needs it',
+      body: `<p><b>Builds on</b> lists what you should know first. <b>Used by</b> lists where this idea comes back later.</p><p>On the map, the solid amber lines are “builds on” and the dashed ones are “used by”. Click any chip to hop over to it.</p>`,
+      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
+    { sec: 'Map', target: el('#inspActs'),
+      title: 'Jump off from here',
+      body: `<p>Read the section, plan a route to its chapter, or quiz yourself on it. You'll see where each of these goes in a minute.</p>`,
+      before() { view('map'); if (Map_.sel !== TOP()) Map_.select(TOP(), true); } },
+    { sec: 'Map', target: nodeRect('c11'), round: true, action: true,
+      title: 'Your turn: click a dot on the map',
+      body: `<p>This big one is <b>Chapter 11, Linear Regression</b>. Click it.</p>`,
+      done: () => Map_.sel === 'c11', doIt: () => Map_.select('c11', true),
+      before() { view('map'); introOpen(); mapClean(); } },
+    { sec: 'Map', target: el('#legend'),
+      title: 'Filter by part of the book',
+      body: `<p>The notes are split into six Parts, and each has its own colour. These chips switch a Part on and off.</p>`,
+      before() { view('map'); Map_.clear(); partsOn(); } },
+    { sec: 'Map', target: el('#legend [data-p="IV"]'), action: true,
+      title: 'Try switching one off',
+      body: `<p>Click <b>IV · Supervised Learning</b> and watch those dots fade out.</p>`,
+      done: () => Map_.off.has('IV'), doIt: () => $('#legend [data-p="IV"]').click(),
+      before() { view('map'); Map_.clear(); partsOn(); } },
+    { sec: 'Map', target: el('.map-zoom'),
+      title: 'Moving around',
+      body: `<p>I've switched Part IV back on for you.</p><p>Scroll or pinch to zoom, and drag to move. These buttons do the same, and the bottom one resets the view.</p>`,
+      before() { view('map'); partsOn(); } },
+    { sec: 'Map', target: el('.rail a[data-v="metro"]'), action: true,
+      title: 'Next up: the metro',
+      body: `<p>That's the map. Click <b>Metro</b> to see the same notes a different way.</p>`,
+      done: () => curView === 'metro', doIt: () => go('metro'),
+      before() { view('map'); partsOn(); Map_.clear(); } },
+
+    // ---------------- METRO ----------------
+    { sec: 'Metro', target: el('.metro-map'),
+      title: 'The book as a metro map',
+      body: `<p>Each Part of the book is a coloured line, and each chapter is a station.</p><p>Follow the lines left to right, top to bottom, and you're reading the book in order.</p>`,
+      before() { view('metro'); Metro.build(); Metro.setRoute(null); history.replaceState(null, '', '#metro'); } },
+    { sec: 'Metro', target: el(() => { const n = [...Metro.inter].sort((a, b) => a - b)[0]; return $(`#metroSvg .st[data-n="${n}"]`); }), round: true,
+      title: 'Stations with a thick ring',
+      body: `<p>These are interchanges: chapters the rest of the book keeps coming back to. They're worth reading properly, not skimming.</p>`,
+      before() { view('metro'); Metro.build(); } },
+    { sec: 'Metro', target: el('#quick a[href="#route-19"]'), action: true,
+      title: 'Plan a trip',
+      body: `<p>Say you only want to learn <b>gradient boosting</b> and don't want to read all 24 chapters first. Click this.</p>`,
+      done: () => Metro.target === 19, doIt: () => go('route-19'),
+      before() { view('metro'); Metro.build(); if (Metro.target) { Metro.setRoute(null); history.replaceState(null, '', '#metro'); } } },
+    { sec: 'Metro', target: el('#itin'),
+      title: 'Here is your route',
+      body: `<p>These are only the chapters Chapter 19 actually leans on, in the order to read them, with a time for each.</p><p>The numbered badges on the map match this list, and the dotted amber line connects the stops.</p>`,
+      before() { if (Metro.target !== 19) go('route-19'); } },
+    { sec: 'Metro', target: el('.planner'),
+      title: 'Going somewhere else?',
+      body: `<p>Pick any chapter here to plan a different route. <b>Clear route</b> puts the map back to normal.</p>`,
+      before() { if (Metro.target !== 19) go('route-19'); } },
+    { sec: 'Metro', target: el('.rail a[data-v="console"]'), action: true,
+      title: 'Next: the console',
+      body: `<p>Click <b>Console</b>. It's the fastest way around once you know what you're looking for.</p>`,
+      done: () => curView === 'console', doIt: () => go('console'),
+      before() { if (curView !== 'metro') go('route-19'); } },
+
+    // ---------------- CONSOLE ----------------
+    { sec: 'Console', target: el('#repl .repl-in'),
+      title: 'The box at the top',
+      body: `<p>This works on every page. It's a tiny Python-style console: you type a short command and it takes you there.</p><p>Plain words work too. Type <code>decision trees</code> and it just searches.</p>`,
+      before() { view('console'); Con.boot(); } },
+    { sec: 'Console', target: el(() => mobile() ? $('#repl .repl-in') : $('#repl .run')), action: true,
+      title: 'Run your first command',
+      body: `<p>I've typed <code>search("lasso")</code> for you. Click <b>Run</b>, or press Enter.</p>`,
+      done: () => entries() > entryBase, doIt: () => { const v = $('#cmd').value || 'search("lasso")'; $('#cmd').value = ''; Con.run(v); },
+      before() { view('console'); Con.boot(); entryBase = entries(); const c = $('#cmd'); c.value = 'search("lasso")'; setTimeout(() => { c.focus(); $('#suggest').hidden = true; }, 60); } },
+    { sec: 'Console', target: el(() => $$('#log .entry').pop()),
+      title: 'Results land here',
+      body: `<p>Click any row to jump straight to that section.</p><p>Type <code>help()</code> whenever you want the full list. My favourite is <code>path_to("clustering")</code>, which plans a metro route from the keyboard.</p>`,
+      before() { view('console'); Con.boot(); if (!entries()) Con.run('search("lasso")'); } },
+    { sec: 'Console', target: el('.rail a[data-v="recall"]'), action: true,
+      title: 'Last stop: Recall',
+      body: `<p>Click <b>Recall</b>.</p>`,
+      done: () => curView === 'recall', doIt: () => go('recall'),
+      before() { view('console'); $('#cmd').blur(); } },
+
+    // ---------------- RECALL ----------------
+    { sec: 'Recall', target: el('.tiles'),
+      title: 'Reading it once isn\'t knowing it',
+      body: `<p>This page turns the notes into flashcards and quizzes, so the stuff actually sticks.</p>`,
+      before() { view('recall'); } },
+    { sec: 'Recall', target: el('.mastery .mcell'),
+      title: 'One tile per chapter',
+      body: `<p>Each chapter gets a quiz built from its own tables, and cards like “what does this code print?”.</p><p>The bar fills up as you get cards right over time.</p>`,
+      before() { view('recall'); } },
+    { sec: 'Recall', target: el('.recall-head .btn.primary'),
+      title: 'Cards come back when you need them',
+      body: `<p>Forget a card and it shows up again soon. Get it easily and you won't see it for days.</p><p>New cards appear here as you read, so exploring the notes fills this up by itself.</p>`,
+      before() { view('recall'); } },
+    { sec: 'Recall', target: el('#readLink'),
+      title: 'And when you just want to read',
+      body: `<p>This opens the chapter you were last on. Every heading in there shows what it builds on and what uses it, the same as the map.</p>`,
+      before() { view('recall'); } },
+
+    // ---------------- DONE ----------------
+    { sec: 'Done', center: true, finale: true,
+      title: 'That\'s the tour',
+      body: `<p>Two good places to start:</p><ul><li><b>New to ML?</b> Start at Chapter 1 and go in order.</li><li><b>Know what you want?</b> Pick it in the metro and follow the route.</li></ul><p>You can take this tour again any time from the <b>?</b> button at the top.</p>`,
+      before() { view('map'); partsOn(); mapClean(); } },
+  ];
+
+  /* ---------- DOM ---------- */
+  function build() {
+    if (spot) return;
+    spot = document.createElement('div'); spot.className = 'tour-spot'; document.body.appendChild(spot);
+    blocks = [0, 1, 2, 3].map(() => { const b = document.createElement('div'); b.className = 'tour-block'; b.addEventListener('click', nudge); document.body.appendChild(b); return b; });
+    pulse = document.createElement('div'); pulse.className = 'tour-pulse'; pulse.hidden = true; document.body.appendChild(pulse);
+    card = document.createElement('div'); card.className = 'tour-card'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-live', 'polite'); document.body.appendChild(card);
+    dock = document.createElement('div'); dock.className = 'tour-dock'; document.body.appendChild(dock);
+    dock.addEventListener('click', e => {
+      const b = e.target.closest('[data-t]'); if (!b) return;
+      const a = b.dataset.t; if (a === 'next') next(); else if (a === 'prev') prev(); else if (a === 'skip') end(); else if (a === 'jump') jump(+b.dataset.i);
+    });
+    card.addEventListener('click', e => {
+      const b = e.target.closest('[data-t]'); if (!b) return;
+      const a = b.dataset.t;
+      if (a === 'next') next(); else if (a === 'skip') end();
+      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'map') { end(); go('map'); } else if (a === 'metro') { end(); go('metro'); }
+    });
+  }
+  function nudge() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); if (!pulse.hidden) { pulse.classList.remove('boost'); void pulse.offsetWidth; pulse.classList.add('boost'); } }
+
+  function dockHTML() {
+    const s = steps[i];
+    const segs = SECS.map(name => {
+      const idx = steps.map((st, k) => st.sec === name ? k : -1).filter(k => k >= 0);
+      const doneN = idx.filter(k => k < i).length + (s.sec === name ? 1 : 0);
+      const first = idx[0];
+      return `<button type="button" class="seg ${s.sec === name ? 'cur' : ''} ${idx.every(k => k < i) ? 'done' : ''}" data-t="jump" data-i="${first}" style="flex:${idx.length + 3}" aria-label="Jump to ${name}"><span class="tbar"><i style="width:${doneN / idx.length * 100}%"></i></span><span class="nm">${name}</span></button>`;
+    }).join('');
+    const isAction = s.action && !doneFlag;
+    return `<button type="button" class="t-skip" data-t="skip">Skip tour</button>
+      <div class="segs">${segs}</div>
+      <span class="t-count">${i + 1}/${steps.length}</span>
+      <button type="button" class="t-btn" data-t="prev" ${i === 0 ? 'disabled' : ''} aria-label="Previous step">← Back</button>
+      <button type="button" class="t-btn primary" data-t="next">${i === steps.length - 1 ? 'Finish' : isAction ? 'Do it for me →' : 'Next →'}</button>`;
+  }
+  function cardHTML() {
+    const s = steps[i];
+    const art = s.welcome ? `<svg class="t-art" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="44" fill="none" stroke="var(--line-2)" stroke-dasharray="2 5"/>${[...Array(12)].map((_, k) => { const a = k / 12 * Math.PI * 2 - Math.PI / 2; return `<circle cx="${60 + 44 * Math.cos(a)}" cy="${60 + 44 * Math.sin(a)}" r="${k % 3 === 0 ? 5 : 3}" fill="var(${['--p1', '--p2', '--p3', '--p4', '--p5', '--p6'][k % 6]})"/>`; }).join('')}<path class="chord c1" d="M60 16 Q60 60 98 82"/><path class="chord c2" d="M22 82 Q60 60 98 38"/><path class="chord c3" d="M38 22 Q60 60 60 104"/></svg>` : '';
+    const hint = s.action ? (doneFlag ? `<div class="t-hint ok">✓ Nice, that's it.</div>` : `<div class="t-hint"><span class="dotp"></span>Your turn. Click the glowing spot.</div>`) : '';
+    const foot = s.welcome ? `<div class="t-acts"><button type="button" class="btn primary" data-t="next">Show me around →</button><button type="button" class="btn" data-t="skip">I'll explore on my own</button></div>`
+      : s.finale ? `<div class="t-acts"><button type="button" class="btn primary" data-t="ch1">Start Chapter 1 →</button><button type="button" class="btn" data-t="metro">Plan a route</button><button type="button" class="btn" data-t="map">Explore the map</button></div>` : '';
+    return `${art}<div class="t-sec">${s.sec === 'Welcome' || s.sec === 'Done' ? 'Gradient Atlas · ML Materials' : s.sec + ' · ' + (steps.filter(x => x.sec === s.sec).indexOf(s) + 1) + ' of ' + steps.filter(x => x.sec === s.sec).length}</div><h3>${s.title}</h3><div class="t-body">${s.body}</div>${hint}${foot}`;
+  }
+
+  /* ---------- layout: spotlight hole, click blockers, pulse, card position ---------- */
+  function rectOf(s) {
+    if (s.center || !s.target) return null;
+    const t = s.target(); if (!t) return null;
+    const r = t.getBoundingClientRect ? t.getBoundingClientRect() : t;
+    return { left: r.left, top: r.top, width: r.width, height: r.height };
+  }
+  function layout() {
+    if (!active) return;
+    const s = steps[i];
+    let r = rectOf(s);
+    const pad = s.round ? 6 : 8;
+    let hole;
+    if (r) {
+      const vis = { l: Math.max(4, r.left - pad), t: Math.max(4, r.top - pad), r: Math.min(W() - 4, r.left + r.width + pad), b: Math.min(H() - 4, r.top + r.height + pad) };
+      hole = { x: vis.l, y: vis.t, w: Math.max(0, vis.r - vis.l), h: Math.max(0, vis.b - vis.t) };
+      if (s.round) { const d = Math.max(hole.w, hole.h); hole = { x: hole.x + hole.w / 2 - d / 2, y: hole.y + hole.h / 2 - d / 2, w: d, h: d }; }
+    } else hole = { x: W() / 2, y: H() / 2, w: 0, h: 0 };
+    const key = [i, Math.round(hole.x), Math.round(hole.y), Math.round(hole.w), Math.round(hole.h), W(), H(), doneFlag].join(',');
+    Object.assign(spot.style, { left: hole.x + 'px', top: hole.y + 'px', width: hole.w + 'px', height: hole.h + 'px', borderRadius: s.round ? '50%' : '12px' });
+    spot.classList.toggle('ring', !!r);
+    // blockers: let clicks through the hole only on action steps
+    const open = s.action && r && !doneFlag;
+    const hx = open ? hole.x : 0, hy = open ? hole.y : 0, hw = open ? hole.w : 0, hh = open ? hole.h : 0;
+    const set = (b, x, y, w, h) => Object.assign(b.style, { left: x + 'px', top: y + 'px', width: Math.max(0, w) + 'px', height: Math.max(0, h) + 'px' });
+    if (open) {
+      set(blocks[0], 0, 0, W(), hy); set(blocks[1], 0, hy + hh, W(), H() - hy - hh);
+      set(blocks[2], 0, hy, hx, hh); set(blocks[3], hx + hw, hy, W() - hx - hw, hh);
+    } else { set(blocks[0], 0, 0, W(), H()); set(blocks[1], 0, 0, 0, 0); set(blocks[2], 0, 0, 0, 0); set(blocks[3], 0, 0, 0, 0); }
+    // pulse
+    if (s.action && r && !doneFlag) { pulse.hidden = false; pulse.style.left = (r.left + r.width / 2) + 'px'; pulse.style.top = (r.top + r.height / 2) + 'px'; }
+    else pulse.hidden = true;
+    const dockTop = !!r && hole.y + hole.h > H() - (mobile() ? 150 : 96) && hole.y > 150;
+    dock.classList.toggle('top', dockTop);
+    if (key + dockTop === lastKey) return; lastKey = key + dockTop;
+    placeCard(r ? { left: hole.x, top: hole.y, right: hole.x + hole.w, bottom: hole.y + hole.h, width: hole.w, height: hole.h } : null, s);
+  }
+  function placeCard(r, s) {
+    const dt = dock.classList.contains('top');
+    const dockH = dt ? 16 : dock.offsetHeight + 28 + (mobile() ? 64 : 0);
+    const minY = dt ? 58 + dock.offsetHeight + 24 : 70;
+    const cw = card.offsetWidth, ch = card.offsetHeight, gap = 18, m = 16;
+    let x, y;
+    if (!r) { x = (W() - cw) / 2; y = Math.max(m + 56, (H() - dockH - ch) / 2); }
+    else if (mobile()) {
+      x = (W() - cw) / 2;
+      const cy = r.top + r.height / 2;
+      y = cy > H() * .45 ? minY : H() - dockH - ch - 8;
+    } else {
+      const fitsR = r.right + gap + cw < W() - m, fitsL = r.left - gap - cw > m + 84, fitsB = r.bottom + gap + ch < H() - dockH, fitsA = r.top - gap - ch > minY;
+      const clampY = v => Math.max(minY, Math.min(v, H() - dockH - ch));
+      const clampX = v => Math.max(m + 84, Math.min(v, W() - cw - m));
+      if (s.inside || (r.width > W() * .6 && r.height > H() * .5)) { x = r.right - cw - 28; y = r.top + 28; }
+      else if (fitsR) { x = r.right + gap; y = clampY(r.top + r.height / 2 - ch / 2); }
+      else if (fitsL) { x = r.left - gap - cw; y = clampY(r.top + r.height / 2 - ch / 2); }
+      else if (fitsB) { x = clampX(r.left + r.width / 2 - cw / 2); y = r.bottom + gap; }
+      else if (fitsA) { x = clampX(r.left + r.width / 2 - cw / 2); y = r.top - gap - ch; }
+      else { x = r.right - cw - 28; y = r.top + 28; }
+      x = Math.max(m, Math.min(x, W() - cw - m));
+    }
+    card.style.left = x + 'px'; card.style.top = Math.max(r ? minY : 8, y) + 'px';
+  }
+
+  /* ---------- flow ---------- */
+  function render() {
+    const s = steps[i];
+    card.className = 'tour-card' + (s.center ? ' center' : '') + (s.welcome ? ' welcome' : '');
+    card.innerHTML = cardHTML(); dock.innerHTML = dockHTML();
+    card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter');
+    lastKey = ''; layout();
+    typeset(card);
+  }
+  async function enter(k, dir = 1) {
+    i = Math.max(0, Math.min(steps.length - 1, k)); doneFlag = false; entered = i;
+    const s = steps[i];
+    if (s.skip && s.skip() && i > 0 && i < steps.length - 1) return enter(i + dir, dir);
+    clearInterval(poll);
+    try { s.before && s.before(); } catch (e) {}
+    render();
+    // scroll target into view once it exists
+    setTimeout(() => { const t = s.target && s.target(); if (t && t.scrollIntoView && !t.closest?.('.bar,.rail')) { const r = t.getBoundingClientRect(); if (r.top < 60 || r.bottom > H() - 100) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, 250);
+    if (s.action) poll = setInterval(() => {
+      if (!active || entered !== i || doneFlag) return;
+      if (s.done()) { doneFlag = true; clearInterval(poll); card.innerHTML = cardHTML(); dock.innerHTML = dockHTML(); lastKey = ''; layout(); setTimeout(() => { if (active && entered === i) next(); }, 900); }
+    }, 150);
+  }
+  function next() {
+    const s = steps[i];
+    if (s.action && !doneFlag) { try { s.doIt(); } catch (e) {} doneFlag = true; clearInterval(poll); setTimeout(() => active && enter(i + 1), 500); card.innerHTML = cardHTML(); dock.innerHTML = dockHTML(); lastKey = ''; layout(); return; }
+    if (i >= steps.length - 1) return end();
+    enter(i + 1);
+  }
+  function prev() { if (i > 0) enter(i - 1, -1); }
+  function jump(k) { enter(k); }
+  function onKey(e) {
+    if (!active) return;
+    if (e.key === 'Escape') { e.preventDefault(); end(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  }
+  function start(at = 0) {
+    build(); active = true; document.body.classList.add('touring');
+    requestAnimationFrame(() => spot.classList.add('on'));
+    addEventListener('keydown', onKey, true);
+    addEventListener('resize', layout);
+    loop = setInterval(layout, 120);
+    enter(at);
+  }
+  function end() {
+    active = false; clearInterval(loop); clearInterval(poll);
+    removeEventListener('keydown', onKey, true); removeEventListener('resize', layout);
+    store.set('toured', true);
+    spot.classList.remove('on'); document.body.classList.remove('touring');
+    [card, dock, pulse, ...blocks].forEach(e => e.hidden = true);
+    setTimeout(() => { [spot, card, dock, pulse, ...blocks].forEach(e => e.remove()); spot = null; }, 450);
+    partsOn();
+  }
+  return { start, end, get active() { return active; } };
+})();
+$('#tourBtn').addEventListener('click', () => { if (!Tour.active) Tour.start(0); });
+
 /* ======================= boot ======================= */
 Promise.all([fetch('data/manifest.json').then(r => r.json()), fetch('data/graph.json').then(r => r.json())]).then(([m, g]) => {
   M = m; G = g;
@@ -1109,6 +1487,7 @@ Promise.all([fetch('data/manifest.json').then(r => r.json()), fetch('data/graph.
   const last = store.get('lastCh', null); if (last != null) $('#readLink').href = '#ch' + last;
   Map_.init(); Map_.chrome(); badge();
   route();
+  if (!store.get('toured', false) && (!location.hash || location.hash === '#map')) setTimeout(() => Tour.start(0), 700);
   loadCards().then(() => { if (Map_.sel) Map_.inspect(Map_.sel); }).catch(() => {});
 }).catch(() => { document.querySelector('.stage').insertAdjacentHTML('afterbegin', '<p class="loading" style="padding:40px">The course data didn\'t load. Reload the page to try again.</p>'); });
 })();
