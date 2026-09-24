@@ -1,0 +1,3 @@
+/* phone-width overrides for the map and prompt */
+@media (max-width:760px){.map-intro .top5,.map-intro .eyebrow+.top5,.map-intro .eyebrow:nth-of-type(2){display:none}.map-intro p{font-size:13.5px}}
+@media (max-width:760px){.suggest button{grid-template-columns:1fr;gap:2px}.map-legend{flex-wrap:nowrap;overflow-x:auto;max-width:calc(100% - 64px);padding-bottom:2px}.map-legend button{flex:none}}

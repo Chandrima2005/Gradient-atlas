@@ -1,0 +1,16 @@
+  <section class="view" id="v-metro" hidden aria-label="Route planner">
+    <div class="pagewrap">
+      <div class="metro-head">
+        <div><div class="eyebrow">Route planner</div><h1 class="h-display">Pick a destination. Get the shortest reading route.</h1></div>
+        <div>
+          <p>Each Part is a line and each chapter is a station. Big ringed stations are interchanges: the chapters other Parts rely on most. Routes come from the text's own cross-references, plus the author's advice to read Chapters 8 and 9 before any algorithm.</p>
+          <div class="planner"><label for="dest">Destination</label><select id="dest"></select><button class="btn small" type="button" id="clearRoute">Clear route</button></div>
+          <div class="quick" id="quick"></div>
+        </div>
+      </div>
+      <div class="metro-grid">
+        <div class="metro-map"><svg id="metroSvg" viewBox="0 0 1290 580" role="img" aria-label="Route map: chapters as stations on six lines"></svg></div>
+        <aside class="itin" id="itin"></aside>
+      </div>
+    </div>
+  </section>

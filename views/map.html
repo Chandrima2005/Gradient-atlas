@@ -1,0 +1,15 @@
+  <section class="view" id="v-map" aria-label="Knowledge map" hidden>
+    <canvas id="mapCv" aria-label="Map of all sections and their cross-references. Use the list in the intro panel or the command prompt to navigate by keyboard."></canvas>
+    <div class="map-intro" id="mapIntro">
+      <div class="eyebrow">Knowledge map</div>
+      <button class="collapse" id="introToggle" type="button" aria-expanded="true">Hide</button>
+      <h1 class="h-display">Every “see&nbsp;8.3” in the text, <em>drawn</em>.</h1>
+      <p id="mapStat">The chapters sit clockwise around the ring in reading order. Each dot is a section, and each line is a cross-reference the author wrote. A filled dot means you've read that section. Click any dot to see what it builds on and what builds on it.</p>
+      <div class="eyebrow" style="margin-top:14px">Most referenced ideas</div>
+      <div class="top5" id="top5"></div>
+    </div>
+    <div class="map-legend" id="legend"></div>
+    <div class="map-zoom"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">−</button><button type="button" id="zfit" aria-label="Fit whole map">⤢</button></div>
+    <div class="maptip" id="maptip" hidden></div>
+    <aside class="inspector" id="insp" hidden aria-live="polite"></aside>
+  </section>

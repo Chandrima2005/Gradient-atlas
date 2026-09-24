@@ -1,0 +1,62 @@
+  <section class="view" id="v-home" aria-label="Home">
+    <canvas id="heroBg" aria-hidden="true"></canvas>
+    <div class="home">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="kicker"><span class="kdot"></span>ML Materials · classical machine learning</div>
+          <h1 class="h-display">Learn machine learning by <em>building it</em>, not memorising it.</h1>
+          <p class="lead">24 chapters that take every classic algorithm apart. You see the maths, write it yourself in plain Python, then check your version gives the same answer as scikit-learn.</p>
+          <div class="hero-cta">
+            <button class="btn primary big" type="button" id="ctaRoute">Plan my study route →</button>
+            <a class="btn big" href="#ch1">Start from Chapter 1</a>
+          </div>
+          <p class="resume" id="homeResume" hidden></p>
+        </div>
+        <figure class="hero-art fv" aria-label="The five study tools of Gradient Atlas">
+          <div class="fv-stage"><canvas id="featViz"></canvas><div class="fv-tip" id="fvTip" hidden></div></div>
+          <div class="fv-legend" id="fvLegend"></div>
+          <figcaption>Five tools, one set of notes. <b>Hover a bold node</b> to see what it is, click to open it.</figcaption>
+        </figure>
+      </div>
+
+      <div class="strip" id="homeStats">
+        <div><b>24</b><span>chapters</span></div><div><b>439</b><span>short sections</span></div><div><b>862</b><span>runnable code cells</span></div><div><b>512</b><span>flashcards</span></div><div><b>~16 h</b><span>of reading</span></div>
+      </div>
+
+      <section class="hsec" id="features">
+        <div class="hsec-head">
+          <h2 class="h-display">Five ways to study, one set of notes</h2>
+          <p>Everything below works on the same 24 chapters, so use whichever suits you today.</p>
+        </div>
+        <div class="feats" id="featGrid"></div>
+      </section>
+
+      <section class="hsec" id="goals">
+        <div class="hsec-head">
+          <h2 class="h-display">Only need one thing?</h2>
+          <p>You don't have to read all 24 chapters. These are the things people look for most. Pick one and you get the shortest route there, skipping the rest.</p>
+        </div>
+        <div class="goals" id="goalGrid"></div>
+        <div class="goal-any"><label for="goalSel">Or pick any chapter as your destination</label><select id="goalSel"></select></div>
+      </section>
+
+      <section class="hsec" id="how">
+        <div class="hsec-head">
+          <h2 class="h-display">What you get in every chapter</h2>
+          <p>Each algorithm chapter follows the same four steps, so you always know where you are.</p>
+        </div>
+        <ol class="how">
+          <li><b>See the idea</b><span>The goal of the algorithm, written out as maths with every symbol explained.</span></li>
+          <li><b>Build it yourself</b><span>A short, readable version in plain NumPy, so you can see how it works inside.</span></li>
+          <li><b>Use the real tool</b><span>The same problem solved with scikit-learn, and the settings that matter.</span></li>
+          <li><b>Prove they match</b><span>A check that both give the same answer, then a real-world case and the mistakes to avoid.</span></li>
+        </ol>
+      </section>
+
+      <div class="tour-cta"><span>New here? Take a 30-second look around.</span><button class="btn" type="button" id="homeTour">Take the tour</button></div>
+      <footer class="sitefoot">
+        <span>© 2026 Gradient Atlas · ML Materials. All rights reserved.</span>
+        <span class="sf-credits">✍️ Content created by <b>Shayan Saha</b> <i>·</i> 💻 Website designed and developed by <b>Chandrima Das</b></span>
+      </footer>
+    </div>
+  </section>
