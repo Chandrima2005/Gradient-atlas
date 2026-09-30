@@ -38,7 +38,7 @@ const Tour = (() => {
       before() { page('home'); } },
     { sec: 'Pathway', target: el('#v-path .metro-map'),
       title: 'The whole pathway',
-      body: `<p>Each coloured line is a stage and each station is a chapter. Dashed stations are coming soon.</p>`,
+      body: `<p>Each station is one stage. Filled stations are live, dashed ones are coming soon. Click one to open it.</p>`,
       before() { page('route'); } },
     { sec: 'Pathway', target: el('#pitin'),
       title: 'Every stage at a glance',
