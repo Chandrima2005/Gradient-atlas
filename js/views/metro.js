@@ -86,14 +86,14 @@ const Metro = {
     const el = $('#itin');
     if (!rt) {
       const hubs = [...this.inter].sort((a, b) => a - b);
-      el.innerHTML = `<div class="eyebrow">No route yet</div><h2>Where are you heading?</h2><p class="sum">Choose a destination above, or start from an interchange:</p>
+      el.innerHTML = `<h2>Where are you heading?</h2><p class="sum">Choose a destination above, or start from an interchange:</p>
         <ol class="stops">${hubs.map(n => `<li style="--pc:var(${PV[partOf[n]]})"><span class="dot">${n}</span><div><a href="${L('ch' + n)}">${esc(byN[n].title)}</a><small>${this.xin[n]} references from other Parts · ${byN[n].minutes} min</small></div></li>`).join('')}</ol>`;
       return;
     }
     const left = rt.filter(r => !done.has(r.n));
     const mins = left.reduce((a, r) => a + byN[r.n].minutes, 0);
     const next = left[0];
-    el.innerHTML = `<div class="eyebrow">${C.name} · route to Chapter ${this.target}</div><h2>${esc(byN[this.target].title)}</h2>
+    el.innerHTML = `<h2>${esc(byN[this.target].title)}</h2>
       <p class="sum">${rt.length} stops · ${left.length} left · about ${Math.floor(mins / 60)}h ${pad2(mins % 60)}m of reading</p>
       <ol class="stops">${rt.map((r, i) => `<li class="${done.has(r.n) ? 'done' : ''} ${r.kind === 'target' ? 'target' : ''}" style="--pc:var(${PV[partOf[r.n]]})"><span class="dot">${r.kind === 'target' ? '★' : i + 1}</span><div><a href="${L('ch' + r.n)}">${pad2(r.n)} · ${esc(byN[r.n].title)}</a><small><span class="kind">${r.kind}</span>${esc(r.why)} · ${byN[r.n].minutes} min${done.has(r.n) ? ' · ✓ done' : ''}</small></div></li>`).join('')}</ol>
       ${next ? `<a class="btn primary" href="${L('ch' + next.n)}">Start at ${chLabel(next.n)} →</a>` : `<p class="sum" style="color:var(--good)">Every stop is marked complete.</p>`}`;

@@ -117,15 +117,15 @@ const Reader = {
       const d = x.closest('details.sec'); let t = x.textContent.replace(/^\s*Common mistake[s]?\s*[—:-]*\s*/i, '');
       return { id: d ? d.dataset.id : null, t: firstSentence(t, 150) };
     }).filter(x => x.t).slice(0, 6);
-    $('#cheat').innerHTML = `<div class="ch-top"><div class="eyebrow">Cheat sheet</div><p>The chapter in ${secs.length} ideas. Click one to open its full notes below.</p></div>
+    $('#cheat').innerHTML = `<div class="ch-top"><p>The chapter in ${secs.length} ideas. Click one to open its full notes below.</p></div>
       <ol class="ideas">${secs.map(s => `<li><a href="${L(s.id)}"><span class="n">${esc(s.num)}</span><span class="t">${esc(s.title)}</span>${s.line ? `<span class="l">${esc(s.line)}</span>` : ''}</a></li>`).join('')}</ol>
-      ${traps.length ? `<div class="traps"><div class="eyebrow">Watch out for</div><ul>${traps.map(t => `<li>${t.id ? `<a href="${L(t.id)}">${esc(t.t)}</a>` : esc(t.t)}</li>`).join('')}</ul></div>` : ''}`;
+      ${traps.length ? `<div class="traps"><h3>Watch out for</h3><ul>${traps.map(t => `<li>${t.id ? `<a href="${L(t.id)}">${esc(t.t)}</a>` : esc(t.t)}</li>`).join('')}</ul></div>` : ''}`;
   },
   toc(c) {
     const el = $('#rtoc');
     el.style.setProperty('--pc', `var(${PV[c.part]})`);
     const tabs = `<div class="ctabs" role="tablist" aria-label="Course">${Object.values(COURSES).sort((a, b) => a.stage - b.stage).map(x => `<a role="tab" href="${LC(x.id, 'ch' + store.get(x.id === 'ml' ? 'lastCh' : x.id + '.lastCh', x.first))}" class="${x.id === C.id ? 'on' : ''}" aria-selected="${x.id === C.id}">${x.id === 'ml' ? 'ML' : x.name}</a>`).join('')}</div>`;
-    el.innerHTML = `${tabs}<label class="eyebrow" for="chsel" style="display:block;margin-bottom:6px">${C.name} chapter</label><select id="chsel">${M.chapters.map(x => `<option value="${x.n}" ${x.n === c.n ? 'selected' : ''}>${C.id === 'ml' && x.n === 25 ? 'A' : pad2(x.n)} · ${esc(x.title)}${done.has(x.n) ? ' ✓' : ''}</option>`).join('')}</select>
+    el.innerHTML = `${tabs}<select id="chsel" aria-label="${C.name} chapter">${M.chapters.map(x => `<option value="${x.n}" ${x.n === c.n ? 'selected' : ''}>${C.id === 'ml' && x.n === 25 ? 'A' : pad2(x.n)} · ${esc(x.title)}${done.has(x.n) ? ' ✓' : ''}</option>`).join('')}</select>
       <div class="links">${c.sections.map(s => `<a href="${L(s.id)}" class="l${s.lvl} ${isRead(s.id) ? 'seen' : ''}" data-id="${s.id}"><span class="d"></span><span>${s.num} ${esc(s.title)}</span></a>`).join('')}</div>`;
     $('#chsel').onchange = e => goC('ch' + e.target.value);
   },

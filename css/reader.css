@@ -113,3 +113,5 @@ pre.out-text{margin:0;padding:24px 14px 12px;font-family:var(--f-mono);font-size
 .body .md mjx-container:not([display="true"]){display:inline-block;max-width:100%;overflow-x:auto;overflow-y:hidden;vertical-align:middle}
 .body .md mjx-container[display="true"]{max-width:100%;overflow-x:auto;overflow-y:hidden}
 .body .md,.body .sec-in{min-width:0;overflow-wrap:break-word}
+.traps h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--ink)}
+.cheat .ch-top p{font-size:13px}

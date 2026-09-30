@@ -97,7 +97,7 @@ const Path = {
     if (!t || t.status === 'live') { box.hidden = true; return; }
     const next = TRACKS.find(x => x.status === 'live');
     box.style.setProperty('--pc', `var(${t.v})`);
-    box.innerHTML = `<div class="eyebrow">Stage ${t.n} · route preview · coming soon</div><h2>${esc(t.title)}</h2>
+    box.innerHTML = `<h2>${esc(t.title)}</h2>
       <p class="note">${esc(t.sub)} The material for this stage is on its way. This is the planned route, and it may change once the chapters are published.</p>
       <ol class="pline">${t.mods.map((m, i) => `<li><span class="d">${i + 1}</span><span class="t">${esc(m)}</span></li>`).join('')}</ol>
       <div class="acts"><a class="btn" href="#route">← All stages</a>${next ? `<a class="btn primary" href="${next.href}">Meanwhile, start ${esc(next.title)} →</a>` : ''}</div>`;

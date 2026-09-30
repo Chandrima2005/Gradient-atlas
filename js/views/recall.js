@@ -39,11 +39,11 @@ const Recall = {
     const due = SRS.due().length, total = CARDS.flash.length, learning = Object.values(SRS.db).filter(v => v.i < 21).length, mastered = Object.values(SRS.db).filter(v => v.i >= 21).length;
     const newPool = this.newPool().length;
     const tabs = `<div class="ctabs" role="tablist" aria-label="Course">${Object.values(COURSES).sort((a, b) => a.stage - b.stage).map(x => `<a role="tab" href="${LC(x.id, 'recall')}" class="${x.id === C.id ? 'on' : ''}" aria-selected="${x.id === C.id}">${x.name}</a>`).join('')}</div>`;
-    r.innerHTML = `${tabs}<div class="recall-head"><div><div class="eyebrow">Recall · ${C.name} · spaced repetition</div><h1 class="h-display">Reading it once isn't knowing it.</h1>
+    r.innerHTML = `${tabs}<div class="recall-head"><div><h1 class="h-display">Reading it once isn't knowing it.</h1>
       <p>${total} flashcards and ${CARDS.quiz.length} quiz questions, all generated from the chapters' own tables, code outputs and section openings. New cards come from what you've already read. Review intervals grow each time you remember a card, and shrink when you don't.</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="${L('review')}">Review ${due ? due + ' due' : ''}${due && newPool ? ' + ' : ''}${newPool ? Math.min(newPool, 12) + ' new' : ''}${!due && !newPool ? 'cards' : ''} →</a></div></div>
       <div class="tiles"><div class="tile hot"><b>${due}</b><span>due now</span></div><div class="tile"><b>${newPool}</b><span>new from your reading</span></div><div class="tile"><b>${learning}</b><span>learning</span></div><div class="tile"><b>${mastered}</b><span>mastered (21d+)</span></div></div>
-      <div class="eyebrow" style="margin-bottom:10px">By chapter · card mastery and best quiz score</div>
+      
       <div class="mastery">${M.chapters.filter(c => inCourse(c.n)).map(c => {
         const cards = CARDS.flash.filter(f => f.c === c.n), m = cards.filter(f => SRS.db[f.id] && SRS.db[f.id].i >= 7).length, nq = CARDS.quiz.filter(q => q.c === c.n).length;
         const pct = cards.length ? Math.round(m / cards.length * 100) : 0;
@@ -72,7 +72,7 @@ const Recall = {
     const render = () => {
       if (i >= q.length) {
         this.setKeys(null);
-        r.innerHTML = `<div class="session"><div class="card done-card"><div class="eyebrow">Session complete</div><b>${q.length ? q.length + ' cards' : 'Nothing due'}</b><p style="margin:0;color:var(--ink-2)">${q.length ? `Again ${tally[0]} · Hard ${tally[1]} · Good ${tally[2]} · Easy ${tally[3]}` : 'Read a few sections and new cards will appear here.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><a class="btn" href="${L('recall')}">Back to Recall</a><a class="btn primary" href="#route">Plan a route</a></div></div></div>`;
+        r.innerHTML = `<div class="session"><div class="card done-card"><b>${q.length ? q.length + ' cards' : 'Nothing due'}</b><p style="margin:0;color:var(--ink-2)">${q.length ? `Again ${tally[0]} · Hard ${tally[1]} · Good ${tally[2]} · Easy ${tally[3]}` : 'Read a few sections and new cards will appear here.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><a class="btn" href="${L('recall')}">Back to Recall</a><a class="btn primary" href="#route">Plan a route</a></div></div></div>`;
         return;
       }
       const f = q[i], n = NODE[f.sec], pv = SRS.preview(f.id);
@@ -101,7 +101,7 @@ const Recall = {
       if (i >= qs.length) {
         this.setKeys(null);
         const pct = Math.round(score / qs.length * 100), best = store.get(K('qbest'), {}); if (best[ch] == null || pct > best[ch]) { best[ch] = pct; store.set(K('qbest'), best); }
-        r.innerHTML = `<div class="session"><div class="card done-card"><div class="eyebrow">${chLabel(ch)} quiz</div><b>${score} / ${qs.length}</b><p style="margin:0;color:var(--ink-2)">${pct >= 75 ? 'Solid. Flashcards will keep it that way.' : 'Worth another pass through the sections you missed.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn" type="button" id="again">Try again</button><a class="btn" href="${L('ch' + ch)}">Reread ${chLabel(ch)}</a><a class="btn primary" href="${L('recall')}">Back to Recall</a></div></div></div>`;
+        r.innerHTML = `<div class="session"><div class="card done-card"><b>${score} / ${qs.length}</b><p style="margin:0;color:var(--ink-2)">${pct >= 75 ? 'Solid. Flashcards will keep it that way.' : 'Worth another pass through the sections you missed.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn" type="button" id="again">Try again</button><a class="btn" href="${L('ch' + ch)}">Reread ${chLabel(ch)}</a><a class="btn primary" href="${L('recall')}">Back to Recall</a></div></div></div>`;
         $('#again').onclick = () => this.quiz(ch); return;
       }
       const q = qs[i], n = NODE[q.sec];

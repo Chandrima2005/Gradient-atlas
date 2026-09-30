@@ -166,9 +166,6 @@ const Home = {
       sel.onchange = () => { if (sel.value) { const [id, n] = sel.value.split(':'); location.hash = LC(id, 'route-' + n); } };
       $('#ctaRoute').onclick = () => go('route');
       $('#homeTour').onclick = () => { if (!Tour.active) { scrollTo({ top: 0 }); Tour.start(0); } };
-      const stats = await Promise.all(order.map(x => courseStats(x.id)));
-      const tot = k => stats.reduce((a, s) => a + s[k], 0);
-      $('#homeStats').innerHTML = `<div><b>${stats.length}</b><span>courses live</span></div><div><b>${tot('chapters')}</b><span>chapters</span></div><div><b>${tot('sections')}</b><span>short sections</span></div><div><b>${tot('code').toLocaleString('en')}</b><span>runnable examples</span></div><div><b>~${Math.round(tot('minutes') / 60)} h</b><span>of reading</span></div>`;
     }
     const r = $('#homeResume'), last = store.get('lastRead', null);
     const m = last && last.match(/^(py\/)?ch(\d+)$/);
