@@ -6,50 +6,94 @@ import { Recall } from './views/recall.js';
 
 /* ======================= GUIDED TOUR ======================= */
 const Tour = (() => {
-  const SECS = ['Welcome', 'Start here', 'Get around', 'Done'];
-  let steps = [], i = 0, active = false, loop = null, poll = null, doneFlag = false, lastKey = '', entered = -1;
+  const SECS = ['Start', 'Home', 'Pathway', 'Routes', 'Read', 'Practise', 'Tools', 'Done'];
+  let steps = [], i = 0, active = false, loop = null, poll = null, doneFlag = false, lastKey = '', entered = -1, zoomed = null, saved = null;
   let spot, blocks, pulse, card, dock;
   const W = () => innerWidth, H = () => innerHeight, mobile = () => innerWidth < 760;
 
   /* ---------- helpers that put the site into the state a step needs ---------- */
-  const TOP = () => G.nodes.filter(n => !n.hub).sort((a, b) => b.in - a.in)[0].id;
-  const view = v => { if (curView !== v) go(v === 'read' ? 'py/ch1' : v); };
+  const page = h => { if (location.hash !== '#' + h) go(h); };
   const goGoals = () => go('route');
   const el = s => () => { const e = typeof s === 'function' ? s() : $(s); return e && e.getClientRects().length ? e : null; };
-  const union = (...sels) => () => { const rs = sels.map(s => $(s)).filter(Boolean).map(e => e.getBoundingClientRect()); if (!rs.length) return null; const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom)); return { left: l, top: t, width: rr - l, height: b - t }; };
-  const entries = () => $$('#log .entry').length;
-  let entryBase = 0;
+  // the tour visits real pages; remember what it may overwrite and put it back afterwards
+  const KEEP = ['lastRead', 'lastCh', 'py.lastCh', 'route', 'py.route'];
 
+  // one short idea per step; each step zooms into one part of the site
   steps = [
-    { sec: 'Welcome', center: true, welcome: true,
+    { sec: 'Start', center: true, welcome: true,
       title: 'Welcome to Gradient Atlas',
-      body: `<p>One data science pathway: <b>Python</b>, then <b>machine learning</b>, with deep learning and generative AI on the way. Learn it all in order, or just the topic you need.</p><p>This quick tour shows you the few things you need. It takes about 30 seconds.</p>`,
-      before() { view('home'); scrollTo({ top: 0 }); } },
-    { sec: 'Start here', target: el('#ctaRoute'),
-      title: 'Start here',
-      body: `<p><b>Plan my study route</b> opens the full data science pathway: Python, libraries, machine learning, deep learning and generative AI. Pick a stage to open its route map, which shows only the chapters you need, in order.</p>`,
-      before() { view('home'); scrollTo({ top: 0 }); } },
-    { sec: 'Start here', target: el('#featGrid'),
+      body: `<p>A data science pathway: <b>Python</b> first, then <b>machine learning</b>, with more stages on the way.</p><p>This tour walks you through each part of the site, one at a time.</p>`,
+      before() { page('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Home', target: el('#ctaRoute'),
+      title: 'Not sure where to start?',
+      body: `<p><b>Plan my study route</b> shows the whole pathway and where each course fits.</p>`,
+      before() { page('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Home', target: el('.hero-art'),
       title: 'Four ways to study',
-      body: `<p>Plan a route, read the chapters, practise with flashcards, or jump anywhere from the console. Use whichever suits you today.</p>`,
-      before() { view('home'); } },
-    { sec: 'Start here', target: el('#goalGrid'),
+      body: `<p>Plan a route, read, practise, or search. Hover a bold dot to see what it does.</p>`,
+      before() { page('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Home', target: el('#goalGrid'),
       title: 'Only need one thing?',
-      body: `<p>These are the most popular goals. Click one and you skip straight to the shortest route for it.</p>`,
-      before() { view('home'); } },
-    { sec: 'Get around', target: el('.rail'),
-      title: 'Switch pages here',
-      body: `<p>Home, Route, Console, Recall and Read are always one click away.</p>`,
-      before() { view('home'); } },
-    { sec: 'Get around', target: el('#repl .repl-in'),
-      title: 'Or just type',
-      body: `<p>Type a topic like <code>decision trees</code> and press Enter to find it. This box works on every page.</p>`,
-      before() { view('home'); } },
+      body: `<p>Pick a goal and you get the shortest route to it, skipping everything else.</p>`,
+      before() { page('home'); } },
+    { sec: 'Pathway', target: el('#v-path .metro-map'),
+      title: 'The whole pathway',
+      body: `<p>Each coloured line is a stage and each station is a chapter. Dashed stations are coming soon.</p>`,
+      before() { page('route'); } },
+    { sec: 'Pathway', target: el('#pitin'),
+      title: 'Every stage at a glance',
+      body: `<p>Live stages open their own route map. The others show what's planned.</p>`,
+      before() { page('route'); } },
+    { sec: 'Routes', target: el('#v-metro .planner'),
+      title: 'Pick a destination',
+      body: `<p>Choose the chapter you want to reach. Here it's <b>Regular Expressions</b>.</p>`,
+      before() { page('py/route-15'); } },
+    { sec: 'Routes', target: el('#itin'),
+      title: 'Only the chapters you need',
+      body: `<p>Your route, stop by stop, with reading time. Click any stop to start reading.</p>`,
+      before() { page('py/route-15'); } },
+    { sec: 'Read', target: el('#cheat'),
+      title: 'A cheat sheet first',
+      body: `<p>Every chapter opens with each idea in one line, plus the mistakes to watch for.</p>`,
+      before() { page('py/ch6'); } },
+    { sec: 'Read', target: el(() => $('#body details.sec')),
+      title: 'Then the full notes',
+      body: `<p>Open one section at a time: an explanation, then examples with their real output.</p>`,
+      before() { page('py/ch6'); } },
+    { sec: 'Read', target: el('#rtoc .ctabs'),
+      title: 'Switch courses',
+      body: `<p>Jump between Python and Machine learning here.</p>`,
+      before() { page('py/ch6'); scrollTo({ top: 0 }); } },
+    { sec: 'Practise', target: el('#recallRoot .tiles'),
+      title: 'Flashcards that come back',
+      body: `<p>Cards return just before you'd forget them. A few minutes a day is enough.</p>`,
+      before() { page('py/recall'); } },
+    { sec: 'Practise', target: el('#recallRoot .mastery'),
+      title: 'Quiz any chapter',
+      body: `<p>See how well you know each chapter, and test yourself when you're ready.</p>`,
+      before() { page('py/recall'); } },
+    { sec: 'Tools', target: el('#repl .repl-in'),
+      title: 'Search everything',
+      body: `<p>Type a topic like <code>decorators</code> and press Enter. It searches both courses.</p>`,
+      before() { page('home'); scrollTo({ top: 0 }); } },
+    { sec: 'Tools', target: el('.rail'),
+      title: 'Every page, one click away',
+      body: `<p>Home, Route, Console, Recall and Read live here. The <b>?</b> button replays this tour.</p>`,
+      before() { page('home'); } },
     { sec: 'Done', center: true, finale: true,
       title: 'You\'re all set',
-      body: `<p>The easiest way to begin is to plan a route and follow it. New to all of this? Python Chapter 1 starts from zero.</p><p>Replay this tour any time from the <b>?</b> button at the top.</p>`,
-      before() { view('home'); scrollTo({ top: 0 }); } },
+      body: `<p>Plan a route and follow it, or start from Python Chapter 1 if you're new.</p>`,
+      before() { page('home'); scrollTo({ top: 0 }); } },
   ];
+
+  // gently enlarge the part being explained; big panels grow less than small buttons
+  function zoom(t) {
+    if (zoomed && zoomed !== t) { zoomed.classList.remove('tour-zoom'); zoomed.style.removeProperty('--tz'); zoomed = null; }
+    if (!t || !t.classList || t.closest('.bar,.rail')) return;
+    const r = t.getBoundingClientRect(), share = (r.width * r.height) / (W() * H());
+    t.style.setProperty('--tz', r.height > H() * .6 ? 1 : share < .03 ? 1.1 : share < .15 ? 1.04 : 1.012);
+    t.classList.add('tour-zoom'); zoomed = t;
+  }
 
   /* ---------- DOM ---------- */
   function build() {
@@ -91,9 +135,9 @@ const Tour = (() => {
     const s = steps[i];
     const art = s.welcome ? `<svg class="t-art" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="44" fill="none" stroke="var(--line-2)" stroke-dasharray="2 5"/>${[...Array(12)].map((_, k) => { const a = k / 12 * Math.PI * 2 - Math.PI / 2; return `<circle cx="${60 + 44 * Math.cos(a)}" cy="${60 + 44 * Math.sin(a)}" r="${k % 3 === 0 ? 5 : 3}" fill="var(${['--p1', '--p2', '--p3', '--p4', '--p5', '--p6'][k % 6]})"/>`; }).join('')}<path class="chord c1" d="M60 16 Q60 60 98 82"/><path class="chord c2" d="M22 82 Q60 60 98 38"/><path class="chord c3" d="M38 22 Q60 60 60 104"/></svg>` : '';
     const hint = s.action ? (doneFlag ? `<div class="t-hint ok">✓ Nice, that's it.</div>` : `<div class="t-hint"><span class="dotp"></span>Your turn. Click the glowing spot.</div>`) : '';
-    const foot = s.welcome ? `<div class="t-acts"><button type="button" class="btn primary" data-t="next">Show me (30 sec) →</button><button type="button" class="btn" data-t="skip">Skip, I'll explore</button></div>`
-      : s.finale ? `<div class="t-acts"><button type="button" class="btn primary" data-t="goals">Plan my study route →</button><button type="button" class="btn" data-t="ch1">Start Chapter 1</button></div>` : '';
-    return `${art}<div class="t-sec">${s.sec === 'Welcome' || s.sec === 'Done' ? 'Gradient Atlas · ML Materials' : s.sec + ' · ' + (steps.filter(x => x.sec === s.sec).indexOf(s) + 1) + ' of ' + steps.filter(x => x.sec === s.sec).length}</div><h3>${s.title}</h3><div class="t-body">${s.body}</div>${hint}${foot}`;
+    const foot = s.welcome ? `<div class="t-acts"><button type="button" class="btn primary" data-t="next">Show me around →</button><button type="button" class="btn" data-t="skip">Skip, I'll explore</button></div>`
+      : s.finale ? `<div class="t-acts"><button type="button" class="btn primary" data-t="goals">Plan my study route →</button><button type="button" class="btn" data-t="ch1">Start Python</button></div>` : '';
+    return `${art}<div class="t-sec">${s.sec === 'Start' || s.sec === 'Done' ? 'Gradient Atlas' : s.sec + ' · ' + (steps.filter(x => x.sec === s.sec).indexOf(s) + 1) + ' of ' + steps.filter(x => x.sec === s.sec).length}</div><h3>${s.title}</h3><div class="t-body">${s.body}</div>${hint}${foot}`;
   }
 
   /* ---------- layout: spotlight hole, click blockers, pulse, card position ---------- */
@@ -103,10 +147,12 @@ const Tour = (() => {
     const r = t.getBoundingClientRect ? t.getBoundingClientRect() : t;
     return { left: r.left, top: r.top, width: r.width, height: r.height };
   }
+  let zoomFrom = false;
   function layout() {
     if (!active) return;
     const s = steps[i];
     let r = rectOf(s);
+    if (r && zoomFrom) { zoomFrom = false; const g = 90; Object.assign(spot.style, { left: r.left - g + 'px', top: r.top - g + 'px', width: r.width + 2 * g + 'px', height: r.height + 2 * g + 'px' }); requestAnimationFrame(() => requestAnimationFrame(layout)); return; }
     const pad = s.round ? 6 : 8;
     let hole;
     if (r) {
@@ -165,7 +211,7 @@ const Tour = (() => {
     card.className = 'tour-card' + (s.center ? ' center' : '') + (s.welcome ? ' welcome' : '');
     card.innerHTML = cardHTML(); dock.innerHTML = dockHTML();
     card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter');
-    lastKey = ''; layout();
+    lastKey = ''; zoomFrom = true; layout();
     typeset(card);
   }
   async function enter(k, dir = 1) {
@@ -176,7 +222,9 @@ const Tour = (() => {
     try { s.before && s.before(); } catch (e) {}
     render();
     // scroll target into view once it exists
-    setTimeout(() => { const t = s.target && s.target(); if (t && t.scrollIntoView && !t.closest?.('.bar,.rail')) { const r = t.getBoundingClientRect(); if (r.top < 60 || r.bottom > H() - 100) t.scrollIntoView({ block: r.height > H() * .6 ? 'start' : 'center', behavior: 'smooth' }); } }, 250);
+    zoom(null);
+    const settle = (tries = 0) => { if (!active || entered !== i) return; const t = s.target && s.target(); if (!t) { if (tries < 30) setTimeout(() => settle(tries + 1), 120); return; } if (t.scrollIntoView && !t.closest?.('.bar,.rail')) { const r = t.getBoundingClientRect(); if (r.top < 60 || r.bottom > H() - 100) t.scrollIntoView({ block: r.height > H() * .6 ? 'start' : 'center', behavior: 'smooth' }); } zoomFrom = true; lastKey = ''; setTimeout(() => { if (active && entered === i) zoom(t); }, 380); };
+    setTimeout(settle, 250);
     if (s.action) poll = setInterval(() => {
       if (!active || entered !== i || doneFlag) return;
       if (s.done()) { doneFlag = true; clearInterval(poll); card.innerHTML = cardHTML(); dock.innerHTML = dockHTML(); lastKey = ''; layout(); setTimeout(() => { if (active && entered === i) next(); }, 900); }
@@ -197,6 +245,7 @@ const Tour = (() => {
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
   }
   function start(at = 0) {
+    saved = saved || Object.fromEntries(KEEP.map(k => [k, store.get(k, null)]));
     build(); active = true; document.body.classList.add('touring');
     requestAnimationFrame(() => spot.classList.add('on'));
     addEventListener('keydown', onKey, true);
@@ -208,6 +257,8 @@ const Tour = (() => {
     active = false; clearInterval(loop); clearInterval(poll);
     removeEventListener('keydown', onKey, true); removeEventListener('resize', layout);
     store.set('toured2', true);
+    zoom(null);
+    if (saved) { KEEP.forEach(k => { if (saved[k] == null) { try { localStorage.removeItem('s2s2.' + k); } catch {} } else store.set(k, saved[k]); }); $('#readLink').href = '#' + (saved.lastRead || 'py/ch1'); saved = null; }
     spot.classList.remove('on'); document.body.classList.remove('touring');
     [card, dock, pulse, ...blocks].forEach(e => e.hidden = true);
     setTimeout(() => { [spot, card, dock, pulse, ...blocks].forEach(e => e.remove()); spot = null; }, 450);

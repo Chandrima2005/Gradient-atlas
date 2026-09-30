@@ -1,49 +1,20 @@
-/* ---------- DATA SCIENCE PATHWAY ---------- */
-.path-head{max-width:820px;margin:6px 0 34px}
-.path-head h1{font-size:clamp(30px,3.3vw,46px);font-weight:700;letter-spacing:-.01em;margin:18px 0 18px;line-height:1.12}
-.path-head h1 em{font-style:normal;color:var(--accent)}
-.path-head p{font-size:clamp(17px,1.5vw,19.5px);line-height:1.6;margin:0;color:var(--ink-2);max-width:58ch}
-
-.pway{position:relative;margin:0 -8px}
-.pway svg{display:block;width:100%;max-width:1180px;height:auto;overflow:visible}
-.pway svg.pl-v{max-width:420px;margin:0 auto}
-.pl-st{cursor:pointer;text-decoration:none}
-.pl-st:focus{outline:none}
-.pl-st:focus-visible .pl-t{text-decoration:underline}
-.pl-k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;fill:var(--muted)}
-.pl-t{font-family:var(--f-display);font-weight:700;font-size:20px;fill:var(--ink);transition:fill .2s}
-.pl-s{font-family:var(--f-body);font-size:13.5px;fill:var(--ink-2)}
-.pl-m{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
-.pl-go{font-family:var(--f-mono);font-size:12px;font-weight:600;fill:var(--pc)}
-.pl-n{font-family:var(--f-mono);font-weight:700;font-size:14px}
-.pl-lead{stroke-width:2.5;stroke-dasharray:3 4;opacity:.8}
-.pl-live{fill:var(--good);font-weight:700}
-.pl-stop{fill:var(--ground);stroke:var(--ground);stroke-width:0}
-.pl-st.live .pl-stop{fill:#fff}
-.pl-st:hover .pl-t,.pl-st.sel .pl-t{fill:var(--pc)}
-.pl-st circle:not(.pl-stop):not(.pl-pulse){transition:r .2s}
-.pl-st:hover circle:not(.pl-stop):not(.pl-pulse),.pl-st.sel circle:not(.pl-stop):not(.pl-pulse){r:22}
-.pl-pulse{transform-box:fill-box;transform-origin:center;animation:plp 2.2s ease-out infinite}
-@keyframes plp{from{transform:scale(1);opacity:.7}to{transform:scale(1.9);opacity:0}}
-.badge{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:3px 9px;border:1px solid var(--line-2);color:var(--muted)}
-
-/* preview of a stage that is not live yet */
-.pdetail{margin-top:8px;border-top:1px solid var(--line);padding:26px 0 0}
-.pdetail h2{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,2.4vw,30px);margin:6px 0 4px}
-.pdetail .note{margin:0 0 18px;color:var(--ink-2);max-width:70ch}
-.pline{list-style:none;margin:0;padding:6px 0 4px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);overflow-x:auto;position:relative}
-.pline li{position:relative;text-align:center;padding:0 6px}
-.pline li::before{content:"";position:absolute;top:13px;left:0;right:0;border-top:4px dashed color-mix(in srgb,var(--pc) 70%,transparent)}
-.pline li:first-child::before{left:50%}
-.pline li:last-child::before{right:50%}
-.pline .d{position:relative;z-index:1;width:30px;height:30px;margin:0 auto 8px;border-radius:50%;background:var(--ground);border:3px solid var(--pc);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px;font-weight:700}
-.pline .t{font-family:var(--f-mono);font-size:11.5px;line-height:1.35;color:var(--ink-2)}
-.pdetail .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+/* ---------- DATA SCIENCE PATHWAY (drawn in the same style as each course's route map) ---------- */
+.path-h1{font-size:clamp(26px,3vw,40px);margin-top:8px}
+.path-h1 em{font-style:normal;color:var(--accent)}
+#pathSvg{display:block;width:100%;min-width:980px;height:auto}
+#pathSvg text{font-family:var(--f-mono)}
+#pathSvg .st{cursor:pointer}
+#pathSvg .st:hover .lbl,#pathSvg .st:focus .lbl{fill:var(--accent)}
+#pathSvg .stage-name{cursor:pointer}
+#pathSvg .stage-name:hover .nm{fill:var(--accent)}
+#pathSvg .line{transition:opacity .25s}
+#pathSvg.focus .line:not(.on){opacity:.18}
+.stops .go{display:inline-block;margin-top:4px;font-family:var(--f-mono);font-size:11.5px;color:var(--pc);text-decoration:none;font-weight:600}
+.stops .go:hover{text-decoration:underline}
+.stops .soon{color:var(--muted)}
+.itin .acts{display:flex;flex-wrap:wrap;gap:8px}
 
 /* breadcrumb on a stage's own route page */
 .crumb{display:inline-flex;gap:8px;align-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-bottom:10px}
 .crumb a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:3px 9px}
 .crumb a:hover{border-color:var(--accent);color:var(--accent)}
-
-@media (prefers-reduced-motion:reduce){.pl-pulse{animation:none;opacity:0}}
-@media (max-width:760px){.pl-t{font-size:20px}.pway{margin:0}}

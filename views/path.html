@@ -1,10 +1,14 @@
   <section class="view" id="v-path" hidden aria-label="Data science pathway">
     <div class="pagewrap">
-      <div class="path-head">
-        <h1 class="h-display">From your first line of Python to building with <em>LLMs</em>.</h1>
-        <p>Five stages, in order. Start at the beginning, or jump straight to the stage you need. Each one opens its own route map.</p>
+      <div class="metro-head">
+        <div><h1 class="h-display path-h1">From your first line of Python to building with <em>LLMs</em>.</h1></div>
+        <div>
+          <p>Five stages, in order. Each coloured line is one stage and each station is a chapter. Start at the beginning, or jump straight to the stage you need.</p>
+        </div>
       </div>
-      <div class="pway" id="pway"></div>
-      <div class="pdetail" id="pdetail" hidden></div>
+      <div class="metro-grid">
+        <div class="metro-map"><svg id="pathSvg" viewBox="0 0 1290 760" role="img" aria-label="The data science pathway: five stages drawn as metro lines"></svg></div>
+        <aside class="itin" id="pitin"></aside>
+      </div>
     </div>
   </section>
