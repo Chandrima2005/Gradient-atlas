@@ -24,11 +24,6 @@
 .body h4{font-size:20px;font-weight:700;margin:34px 0 6px}
 .body h5{font-size:17px;font-weight:600;margin:24px 0 6px}
 .body .hn{font-family:var(--f-mono);font-weight:500;color:var(--pc);margin-right:10px;font-size:.72em}
-.deps{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:4px 0 16px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
-.deps .grp{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.deps .grp > span{margin-right:2px}
-.deps a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:5px;padding:0 5px}
-.deps a:hover{border-color:var(--accent);color:var(--accent)}
 .body p{margin:0 0 14px}
 .body ul,.body ol{padding-left:1.3em;margin:0 0 14px}
 .body strong{font-weight:600;color:var(--ink)}
