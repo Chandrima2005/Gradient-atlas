@@ -41,7 +41,7 @@ const HeroBg = {
 /* ======================= HOME FEATURE VIRUS ======================= */
 const FeatViz = {
   F: [
-    { h: '#route', t: 'Route planner', d: 'Pick a goal, get only the chapters you need, in order.', v: '--p1' },
+    { h: '#route', t: 'Route planner', d: 'Python to GenAI in five stages. Pick one and follow its route.', v: '--p1' },
     { h: '#ch1', t: 'Chapter reader', d: 'The notes: maths, code and real output, chapter by chapter.', v: '--p2' },
     { h: '#recall', t: 'Flashcards & quizzes', d: '512 cards and 665 questions built from the notes.', v: '--p3' },
     { h: '#console', t: 'Quick console', d: 'Type a topic or command and jump straight there.', v: '--p5' },
@@ -137,7 +137,7 @@ const Home = {
     { n: 24, ico: '⇪', t: 'Explain and ship a model', eg: 'Why it predicted that, and keeping it healthy live.' },
   ],
   FEATS: [
-    { h: '#route', tag: 'Plan', t: 'Route planner', p: 'Pick a destination and follow only the chapters you need, in order.', go: 'Plan a route', ic: '<path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/>' },
+    { h: '#route', tag: 'Plan', t: 'Route planner', p: 'Five stages from Python to LLMs. Pick a stage, then follow only the chapters you need, in order.', go: 'See the pathway', ic: '<path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/>' },
     { h: '#ch1', tag: 'Read', t: 'Chapter reader', p: 'Clear notes with the maths, the code and its real output. Each heading shows what it builds on.', go: 'Read Chapter 1', ic: '<path d="M3 5.5C6 4 9 4 12 6c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13.5"/>' },
     { h: '#recall', tag: 'Remember', t: 'Flashcards & quizzes', p: '512 cards and 665 questions made from the notes. Cards come back just before you would forget them.', go: 'Practise now', ic: '<rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/>' },
     { h: '#console', tag: 'Jump', t: 'Quick console', p: 'Type “lasso” or open(11) in the box at the top of any page to go straight there.', go: 'Try the console', ic: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/>' },

@@ -11,7 +11,7 @@ const Metro = {
     const sel = $('#dest');
     sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => c.n >= 1 && c.n <= 24).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
     sel.onchange = () => sel.value ? go('route-' + sel.value) : this.setRoute(null);
-    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', '#route'); };
+    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', '#route-ml'); };
     const Q = [[19, 'Gradient boosting'], [16, 'SVMs'], [20, 'Clustering'], [23, 'Hyperparameter tuning'], [24, 'SHAP & deployment'], [13, 'Logistic regression']];
     $('#quick').innerHTML = Q.map(([n, l]) => `<a class="chip" href="#route-${n}"><b>→</b>${l}</a>`).join('');
     // interchange strength: incoming refs from other parts

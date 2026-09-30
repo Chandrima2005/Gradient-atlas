@@ -1,18 +1,20 @@
-// hash router: #home, #route, #route-19, #console, #recall, #quiz-13, #review, #ch11, #s11-2-2
+// hash router: #home, #route (pathway), #route-python etc (stage preview), #route-ml, #route-19, #console, #recall, #quiz-13, #review, #ch11, #s11-2-2
 import { $, $$, M } from './core.js';
 import { Home } from './views/home.js';
 import { Metro } from './views/metro.js';
+import { Path } from './views/path.js';
+import { TRACK } from './tracks.js';
 import { Reader } from './views/reader.js';
 import { Recall } from './views/recall.js';
 import { Con } from './views/console.js';
 
 /* ======================= router ======================= */
-const VIEWS = ['home', 'metro', 'console', 'recall', 'read'];
+const VIEWS = ['home', 'path', 'metro', 'console', 'recall', 'read'];
 let curView = null;
 function show(v) {
   curView = v;
   VIEWS.forEach(k => $('#v-' + k).hidden = k !== v);
-  $$('.rail a').forEach(a => a.classList.toggle('on', a.dataset.v === v));
+  $$('.rail a').forEach(a => a.classList.toggle('on', a.dataset.v === (v === 'path' ? 'metro' : v)));
   if (v !== 'read') document.title = 'Gradient Atlas';
 }
 function route() {
@@ -24,7 +26,9 @@ function route() {
   if (h === 'map') { location.replace('#home'); return; }
   if ((m = h.match(/^node-c(\d+)$/))) { location.replace('#ch' + m[1]); return; }
   if ((m = h.match(/^node-(s\d+(?:-\d+)+)$/))) { location.replace('#' + m[1]); return; }
-  if (h === 'metro' || h === 'route') { show('metro'); Metro.build(); return; }
+  if (h === 'route') { show('path'); Path.show(null); return; }
+  if (h === 'metro' || h === 'route-ml') { show('metro'); Metro.build(); return; }
+  if ((m = h.match(/^route-([a-z]+)$/)) && TRACK[m[1]]) { show('path'); Path.show(m[1]); return; }
   if ((m = h.match(/^route-(\d+)$/))) { show('metro'); Metro.build(); Metro.setRoute(+m[1]); return; }
   if (h === 'console') { show('console'); Con.boot(); return; }
   if (h === 'recall') { show('recall'); Recall.dash(); return; }

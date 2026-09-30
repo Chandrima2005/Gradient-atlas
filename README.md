@@ -18,7 +18,7 @@ You can use it in two ways:
 | View | What it does |
 |---|---|
 | 🏠 **Home** | Explains the site. Its hero is a network with four clickable hubs, one per feature, and there are quick goal cards under "Only need one thing?" |
-| 🧭 **Route** | Pick any chapter as your goal to get the shortest reading route to it, with time estimates and a list of the chapters it skips |
+| 🧭 **Route** | The ultimate data science pathway in five stages: Python → Python libraries → Machine learning → Deep learning → Generative AI (LLMs, LangChain). Click a stage to open its route map. Machine learning is live, and there you can pick any chapter as your goal to get the shortest reading route to it |
 | 📖 **Read** | A chapter reader with typeset maths, highlighted code, figures and clickable cross-references |
 | 🧠 **Recall** | Flashcards on a spaced-repetition schedule, plus multiple-choice quizzes for each chapter |
 | ⌨️ **Console** | A Python-style command line for moving around the site, e.g. `route(15)`, `search("kernel")`, `quiz(11)` |
@@ -68,6 +68,15 @@ You can use it in two ways:
 - **Progress stays on your device.** Chapters read, flashcard schedules, quiz scores, your route and the theme are all kept in `localStorage` (keys start with `s2s2.`).
 
 ---
+
+## 🛤️ The data science pathway
+
+`#route` shows the five stages. Each stage is set in `js/tracks.js`:
+
+- `status: 'live'` makes the stage open its own route map (Machine learning opens `#route-ml`).
+- `status: 'soon'` shows a "Coming soon" preview of the planned modules at `#route-<id>`, for example `#route-python`.
+
+To open a new stage, add its material, then change its `status` to `'live'` and give it an `href`.
 
 ## 🧭 How the Route planner works
 

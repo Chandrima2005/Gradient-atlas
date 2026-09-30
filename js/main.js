@@ -1,7 +1,7 @@
 // Entry point: pull each view's HTML into the page, then load the app modules.
 // The modules are imported only after the partials are in place, because several
 // of them look up their elements (canvases, console log, recall root) as they load.
-const VIEW_FILES = ['home', 'metro', 'console', 'recall', 'read'];
+const VIEW_FILES = ['home', 'path', 'metro', 'console', 'recall', 'read'];
 const stage = document.querySelector('.stage');
 
 try {

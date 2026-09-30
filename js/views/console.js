@@ -77,7 +77,7 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
         case 'open': case 'read': { const t = this.resolveTarget(args[0] ?? kw.n);
           if (!t) { if (args[0]) return this.run(`path_to("${args[0]}")`.replace('path_to', 'search')); return out(`TypeError: open() needs a chapter number or section like "11.3"`, true); }
           return nav(t.sec || 'ch' + t.ch); }
-        case 'metro': return nav('route');
+        case 'metro': return nav('route-ml');
         case 'tour': case 'onboarding': Tour.start(0); return;
         case 'review': return nav('review');
         case 'quiz': { const n = +(args[0] ?? kw.chapter); if (!byN[n] || n < 1 || n > 24) return out(`ValueError: quiz() needs a chapter from 1 to 24, e.g. quiz(13)`, true); return nav('quiz-' + n); }

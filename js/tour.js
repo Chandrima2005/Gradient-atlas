@@ -27,7 +27,7 @@ const Tour = (() => {
       before() { view('home'); scrollTo({ top: 0 }); } },
     { sec: 'Start here', target: el('#ctaRoute'),
       title: 'Start here',
-      body: `<p><b>Plan my study route</b> opens the route planner. Pick the chapter you want to reach and it shows only the chapters you need first, in order, with how long each takes.</p>`,
+      body: `<p><b>Plan my study route</b> opens the full data science pathway: Python, libraries, machine learning, deep learning and generative AI. Pick a stage to open its route map, which shows only the chapters you need, in order.</p>`,
       before() { view('home'); scrollTo({ top: 0 }); } },
     { sec: 'Start here', target: el('#featGrid'),
       title: 'Four ways to study',
