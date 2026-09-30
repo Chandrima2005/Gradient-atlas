@@ -21,35 +21,35 @@ const Path = {
   },
   // label block for one stage. side: 1 = below / right, -1 = above / left
   label(t, x, y, side, anchor, width) {
-    const live = t.status === 'live', lh = 19;
+    const live = t.status === 'live', lh = 17;
     const sub = wrap(t.sub, width);
     const rows = [
       `<text class="pl-k" x="${x}" y="0">STAGE ${t.n} · <tspan class="${live ? 'pl-live' : ''}">${live ? '● LIVE' : 'COMING SOON'}</tspan></text>`,
-      `<text class="pl-t" x="${x}" y="30">${esc(t.title)}</text>`,
-      ...sub.map((l, i) => `<text class="pl-s" x="${x}" y="${56 + i * lh}">${esc(l)}</text>`),
-      `<text class="pl-m" x="${x}" y="${66 + sub.length * lh}">${live ? `${esc(t.stats)} · ` : ''}${t.mods.length} ${live ? 'topics' : 'planned stops'}</text>`,
-      `<text class="pl-go" x="${x}" y="${92 + sub.length * lh}">${live ? 'Open route map →' : 'Preview route →'}</text>`,
+      `<text class="pl-t" x="${x}" y="25">${esc(t.title)}</text>`,
+      ...sub.map((l, i) => `<text class="pl-s" x="${x}" y="${47 + i * lh}">${esc(l)}</text>`),
+      `<text class="pl-m" x="${x}" y="${55 + sub.length * lh}">${live ? `${esc(t.stats)} · ` : ''}${t.mods.length} ${live ? 'topics' : 'planned stops'}</text>`,
+      `<text class="pl-go" x="${x}" y="${77 + sub.length * lh}">${live ? 'Open route map →' : 'Preview route →'}</text>`,
     ];
-    const h = 92 + sub.length * lh;
+    const h = 77 + sub.length * lh;
     const top = side > 0 ? y : y - h;
     return `<g transform="translate(0,${top})" text-anchor="${anchor}">${rows.join('')}</g>`;
   },
   station(t, x, y) {
     const live = t.status === 'live';
-    return `${live ? `<circle class="pl-pulse" cx="${x}" cy="${y}" r="24" fill="none" stroke="var(${t.v})" stroke-width="3"/>` : ''}
-      <circle cx="${x}" cy="${y}" r="24" fill="${live ? `var(${t.v})` : 'var(--ground)'}" stroke="var(${t.v})" stroke-width="8"/>
-      <text class="pl-n" x="${x}" y="${y + 6}" text-anchor="middle" fill="${live ? 'var(--ground)' : 'var(--ink)'}">${t.n}</text>`;
+    return `${live ? `<circle class="pl-pulse" cx="${x}" cy="${y}" r="18" fill="none" stroke="var(${t.v})" stroke-width="3"/>` : ''}
+      <circle cx="${x}" cy="${y}" r="18" fill="${live ? `var(${t.v})` : 'var(--ground)'}" stroke="var(${t.v})" stroke-width="6"/>
+      <text class="pl-n" x="${x}" y="${y + 5}" text-anchor="middle" fill="${live ? 'var(--ground)' : 'var(--ink)'}">${t.n}</text>`;
   },
   // one track segment per stage; stages still being written get hollow stops
   track(pts, t) {
     const [a, b] = pts;
-    return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(${t.v})" stroke-width="14" stroke-linecap="round"/>`;
+    return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(${t.v})" stroke-width="10" stroke-linecap="round"/>`;
   },
   stops(t, from, to, horiz) {
     const n = t.mods.length; let s = '';
     for (let k = 0; k < n; k++) {
       const f = (k + 1) / (n + 1), v = (from + (to - from) * f).toFixed(1);
-      s += `<circle class="pl-stop" ${horiz ? `cx="${v}" cy="${this.Y}"` : `cx="${this.X}" cy="${v}"`} r="4"><title>${esc(t.mods[k])}</title></circle>`;
+      s += `<circle class="pl-stop" ${horiz ? `cx="${v}" cy="${this.Y}"` : `cx="${this.X}" cy="${v}"`} r="3.2"><title>${esc(t.mods[k])}</title></circle>`;
     }
     return s;
   },
@@ -61,20 +61,20 @@ const Path = {
       s += this.track([[a, Y], [b, Y]], t);
     });
     // terminus
-    s += `<rect x="${end - 3}" y="${Y - 20}" width="6" height="40" rx="3" fill="var(${TRACKS[TRACKS.length - 1].v})"/>`;
+    s += `<rect x="${end - 3}" y="${Y - 15}" width="6" height="30" rx="3" fill="var(${TRACKS[TRACKS.length - 1].v})"/>`;
     TRACKS.forEach((t, i) => {
       const x = x0 + zone * i, side = i % 2 === 0 ? 1 : -1, nx = i === TRACKS.length - 1 ? end : x + zone;
-      const ly = Y + side * 46;
+      const ly = Y + side * 36;
       s += `<a class="pl-st ${t.status}" data-id="${t.id}" href="${hrefOf(t)}" aria-label="Stage ${t.n}, ${esc(t.title)}${t.status === 'live' ? '' : ', coming soon'}">
-        <line class="pl-lead" x1="${x}" y1="${Y + side * 30}" x2="${x}" y2="${ly}" stroke="var(${t.v})"/>
-        ${this.stops(t, x + 30, nx - 30, true)}${this.station(t, x, Y)}
-        <g style="--pc:var(${t.v})">${this.label(t, x - 2, ly + side * 14, side, 'start', 30)}</g>
+        <line class="pl-lead" x1="${x}" y1="${Y + side * 24}" x2="${x}" y2="${ly}" stroke="var(${t.v})"/>
+        ${this.stops(t, x + 24, nx - 24, true)}${this.station(t, x, Y)}
+        <g style="--pc:var(${t.v})">${this.label(t, x - 2, ly + side * 12, side, 'start', 30)}</g>
       </a>`;
     });
-    return `<svg viewBox="0 100 1300 425" role="img" aria-label="Data science pathway: five stages on one line">${s}</svg>`;
+    return `<svg viewBox="0 140 1300 330" role="img" aria-label="Data science pathway: five stages on one line">${s}</svg>`;
   },
   vertical() {
-    const X = this.X = 34, gap = 250, y0 = 40, H = y0 + gap * TRACKS.length - 40;
+    const X = this.X = 30, gap = 210, y0 = 40, H = y0 + gap * TRACKS.length - 40;
     let s = '';
     TRACKS.forEach((t, i) => {
       const a = i === 0 ? 14 : y0 + gap * i, b = i === TRACKS.length - 1 ? H - 10 : y0 + gap * (i + 1);
@@ -84,8 +84,8 @@ const Path = {
     TRACKS.forEach((t, i) => {
       const y = y0 + gap * i, ny = i === TRACKS.length - 1 ? H - 10 : y + gap;
       s += `<a class="pl-st ${t.status}" data-id="${t.id}" href="${hrefOf(t)}" aria-label="Stage ${t.n}, ${esc(t.title)}">
-        ${this.stops(t, y + 30, ny - 30, false)}${this.station(t, X, y)}
-        <g style="--pc:var(${t.v})">${this.label(t, 76, y - 20, 1, 'start', 28)}</g>
+        ${this.stops(t, y + 24, ny - 24, false)}${this.station(t, X, y)}
+        <g style="--pc:var(${t.v})">${this.label(t, 66, y - 16, 1, 'start', 30)}</g>
       </a>`;
     });
     return `<svg class="pl-v" viewBox="0 0 360 ${H}" role="img" aria-label="Data science pathway: five stages on one line">${s}</svg>`;
