@@ -40,7 +40,7 @@ const Recall = {
     const newPool = this.newPool().length;
     const tabs = `<div class="ctabs" role="tablist" aria-label="Course">${Object.values(COURSES).sort((a, b) => a.stage - b.stage).map(x => `<a role="tab" href="${LC(x.id, 'recall')}" class="${x.id === C.id ? 'on' : ''}" aria-selected="${x.id === C.id}">${x.name}</a>`).join('')}</div>`;
     r.innerHTML = `${tabs}<div class="recall-head"><div><h1 class="h-display">Reading it once isn't knowing it.</h1>
-      <p>${total} flashcards and ${CARDS.quiz.length} quiz questions, all generated from the chapters' own tables, code outputs and section openings. New cards come from what you've already read. Review intervals grow each time you remember a card, and shrink when you don't.</p></div>
+      <p>${total} flashcards and ${CARDS.quiz.length} quiz questions from the ${C.name} chapters. Cards come back just before you'd forget them.</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="${L('review')}">Review ${due ? due + ' due' : ''}${due && newPool ? ' + ' : ''}${newPool ? Math.min(newPool, 12) + ' new' : ''}${!due && !newPool ? 'cards' : ''} →</a></div></div>
       <div class="tiles"><div class="tile hot"><b>${due}</b><span>due now</span></div><div class="tile"><b>${newPool}</b><span>new from your reading</span></div><div class="tile"><b>${learning}</b><span>learning</span></div><div class="tile"><b>${mastered}</b><span>mastered (21d+)</span></div></div>
       

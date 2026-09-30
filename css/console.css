@@ -21,3 +21,13 @@
 .helpt td:first-child{white-space:nowrap}
 .helpt td:last-child{font-family:var(--f-body);color:var(--ink-2)}
 .hint{color:var(--muted);font-size:12.5px;margin-top:22px}
+
+/* plain search page */
+.console{font-family:var(--f-body);font-size:16px}
+.s-empty,.s-head{margin:10px 0 22px}
+.s-empty h1,.s-head h1{font-size:clamp(26px,3vw,38px);font-weight:700;margin:0 0 10px}
+.s-empty p,.s-head p{margin:0;color:var(--ink-2);max-width:60ch}
+.s-head p{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.s-empty .cmds{margin-top:18px}
+.s-none{color:var(--ink-2)}
+.console .olist a{font-family:var(--f-mono);font-size:13.5px}

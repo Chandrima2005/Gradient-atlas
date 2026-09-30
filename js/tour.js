@@ -24,17 +24,17 @@ const Tour = (() => {
       title: 'Welcome to Gradient Atlas',
       body: `<p>A data science pathway: <b>Python</b> first, then <b>machine learning</b>, with more stages on the way.</p><p>This tour walks you through each part of the site, one at a time.</p>`,
       before() { page('home'); scrollTo({ top: 0 }); } },
-    { sec: 'Home', target: el('#ctaRoute'),
-      title: 'Not sure where to start?',
-      body: `<p><b>Plan my study route</b> shows the whole pathway and where each course fits.</p>`,
+    { sec: 'Home', target: el('#v-home .hero-cta'),
+      title: 'Start here',
+      body: `<p><b>Start with the roadmap</b> to see all five stages and pick where to begin.</p>`,
       before() { page('home'); scrollTo({ top: 0 }); } },
-    { sec: 'Home', target: el('.hero-art'),
+    { sec: 'Home', target: el('#v-home .hero-art'),
       title: 'Four ways to study',
-      body: `<p>Plan a route, read, practise, or search. Hover a bold dot to see what it does.</p>`,
+      body: `<p>Hover a bold circle to see what it does, and click it to go there.</p>`,
       before() { page('home'); scrollTo({ top: 0 }); } },
-    { sec: 'Home', target: el('#goalGrid'),
-      title: 'Only need one thing?',
-      body: `<p>Pick a goal and you get the shortest route to it, skipping everything else.</p>`,
+    { sec: 'Home', target: el('#stageGrid'),
+      title: 'Five stages',
+      body: `<p>Python and machine learning are live. The other stages are coming soon.</p>`,
       before() { page('home'); } },
     { sec: 'Pathway', target: el('#v-path .metro-map'),
       title: 'The whole pathway',
@@ -52,17 +52,13 @@ const Tour = (() => {
       title: 'Only the chapters you need',
       body: `<p>Your route, stop by stop, with reading time. Click any stop to start reading.</p>`,
       before() { page('py/route-15'); } },
-    { sec: 'Read', target: el('#cheat'),
-      title: 'A cheat sheet first',
-      body: `<p>Every chapter opens with each idea in one line, plus the mistakes to watch for.</p>`,
-      before() { page('py/ch6'); } },
-    { sec: 'Read', target: el(() => $('#body details.sec')),
-      title: 'Then the full notes',
-      body: `<p>Open one section at a time: an explanation, then examples with their real output.</p>`,
-      before() { page('py/ch6'); } },
-    { sec: 'Read', target: el('#rtoc .ctabs'),
-      title: 'Switch courses',
-      body: `<p>Jump between Python and Machine learning here.</p>`,
+    { sec: 'Read', target: el('#rinner .rhead'),
+      title: 'Reading a chapter',
+      body: `<p>Each chapter explains one topic, with short examples and their real output.</p>`,
+      before() { page('py/ch6'); scrollTo({ top: 0 }); } },
+    { sec: 'Read', target: el('#rtoc'),
+      title: 'Jump to any section',
+      body: `<p>The list on the side takes you to any part of the chapter. The tabs at the top switch between Python and ML.</p>`,
       before() { page('py/ch6'); scrollTo({ top: 0 }); } },
     { sec: 'Practise', target: el('#recallRoot .tiles'),
       title: 'Flashcards that come back',
@@ -78,11 +74,11 @@ const Tour = (() => {
       before() { page('home'); scrollTo({ top: 0 }); } },
     { sec: 'Tools', target: el('.rail'),
       title: 'Every page, one click away',
-      body: `<p>Home, Route, Console, Recall and Read live here. The <b>?</b> button replays this tour.</p>`,
+      body: `<p>Home, Route, Search and Recall live here. The <b>?</b> button replays this tour.</p>`,
       before() { page('home'); } },
     { sec: 'Done', center: true, finale: true,
       title: 'You\'re all set',
-      body: `<p>Plan a route and follow it, or start from Python Chapter 1 if you're new.</p>`,
+      body: `<p>Start with Python Chapter 1, or pick a stage from the pathway.</p>`,
       before() { page('home'); scrollTo({ top: 0 }); } },
   ];
 
@@ -258,7 +254,7 @@ const Tour = (() => {
     removeEventListener('keydown', onKey, true); removeEventListener('resize', layout);
     store.set('toured2', true);
     zoom(null);
-    if (saved) { KEEP.forEach(k => { if (saved[k] == null) { try { localStorage.removeItem('s2s2.' + k); } catch {} } else store.set(k, saved[k]); }); $('#readLink').href = '#' + (saved.lastRead || 'py/ch1'); saved = null; }
+    if (saved) { KEEP.forEach(k => { if (saved[k] == null) { try { localStorage.removeItem('s2s2.' + k); } catch {} } else store.set(k, saved[k]); }); saved = null; }
     spot.classList.remove('on'); document.body.classList.remove('touring');
     [card, dock, pulse, ...blocks].forEach(e => e.hidden = true);
     setTimeout(() => { [spot, card, dock, pulse, ...blocks].forEach(e => e.remove()); spot = null; }, 450);

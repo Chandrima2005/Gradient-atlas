@@ -1,5 +1,5 @@
 /* ---------- DATA SCIENCE PATHWAY (drawn in the same style as each course's route map) ---------- */
-.path-h1{font-size:clamp(26px,3vw,40px);margin-top:8px}
+.path-h1{font-size:clamp(26px,3vw,40px);font-weight:700;margin-top:8px}
 .path-h1 em{font-style:normal;color:var(--accent)}
 #pathSvg{display:block;width:100%;min-width:760px;height:auto}
 #pathSvg text{font-family:var(--f-mono)}
@@ -19,3 +19,11 @@
 .crumb a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:3px 9px}
 .crumb a:hover{border-color:var(--accent);color:var(--accent)}
 #v-path .metro-map{align-self:start}
+/* pulsing hint that the stations are clickable */
+#pathSvg .p-hint{pointer-events:none}
+#pathSvg .p-arrow{animation:pArrow 1.3s ease-in-out infinite}
+#pathSvg .p-ring{transform-box:fill-box;transform-origin:center;animation:pRing 1.8s ease-out infinite}
+@keyframes pArrow{0%,100%{transform:translate(0,0);opacity:.55}50%{transform:translate(6px,5px);opacity:1}}
+@keyframes pRing{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
+#pathSvg.focus .p-hint{display:none}
+@media (prefers-reduced-motion:reduce){#pathSvg .p-arrow,#pathSvg .p-ring{animation:none}}

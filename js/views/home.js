@@ -1,50 +1,18 @@
-// home page: background network, four-tools visual, goals and features
-import { $, $$, esc, store, PV, css, pad2, chLabel, M, G, byN, partOf, COURSES, C, LC, setCourse, courseStats } from '../core.js';
-import { curView, route, go } from '../router.js';
-import { Metro } from './metro.js';
-import { Tour } from '../tour.js';
+// home page: a short introduction, the four-tools network and the five stages
+import { $, $$, esc, css } from '../core.js';
+import { curView, go } from '../router.js';
+import { TRACKS } from '../tracks.js';
 
-/* ======================= HOME BACKGROUND NETWORK ======================= */
-const HeroBg = {
-  cv: null, t0: 0, raf: null, pal: null, palAt: 0, pts: null,
-  init() {
-    this.cv = $('#heroBg'); if (!this.cv || !G) return;
-    let h = 2166136261;
-    const rnd = s => { let x = 0; for (const c of s) x = Math.imul(x ^ c.charCodeAt(0), 16777619); return ((x >>> 0) % 1000) / 1000; };
-    this.pts = G.nodes.map(n => ({ x: n.x, y: n.y, z: (rnd(n.id) - .5) * (n.hub ? .3 : .9), r: n.hub ? 2.6 : 1.2 + Math.sqrt(n.in) * .35, c: n.c, id: n.id }));
-    this.idx = Object.fromEntries(this.pts.map((p, i) => [p.id, i]));
-    this.links = G.edges.map(([a, b]) => [this.idx[a], this.idx[b]]).filter(([a, b]) => a != null && b != null);
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const loop = t => { this.draw(t); if (!reduce) this.raf = requestAnimationFrame(loop); };
-    this.raf = requestAnimationFrame(loop);
-  },
-  draw(t) {
-    const cv = this.cv; if (curView !== 'home' || document.hidden) return;
-    if (this._last && t - this._last < 33) return; this._last = t;
-    const r = cv.getBoundingClientRect(); if (!r.width) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    if (cv.width !== Math.round(r.width * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
-    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, r.width, r.height);
-    if (!this.pal || t - this.palAt > 1500) { this.palAt = t; this.pal = { edge: css('--edge'), part: Object.fromEntries(Object.keys(PV).map(k => [k, css(PV[k])])) }; }
-    const a = (t || 0) / 1000 * .06, ca = Math.cos(a), sa = Math.sin(a), tilt = .35, ct = Math.cos(tilt), st = Math.sin(tilt);
-    const wide = r.width > 900, S = (wide ? Math.min(r.width * .42, r.height * .62) : Math.min(r.width * .7, 380));
-    const cx = wide ? r.width * .56 : r.width * .5, cy = wide ? r.height * .4 : 360;
-    const P = this.pts.map(p => { const x = p.x * ca - p.z * sa, z = p.x * sa + p.z * ca; const y = p.y * ct - z * st, z2 = p.y * st + z * ct; const k = 1 / (1.6 - z2 * .5); return [cx + x * S * k, cy + y * S * k, k, z2]; });
-    c.lineWidth = .6; c.strokeStyle = `rgba(${this.pal.edge},.13)`; c.beginPath();
-    for (const [i, j] of this.links) { const A = P[i], B = P[j]; c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); }
-    c.stroke();
-    this.pts.forEach((p, i) => { const q = P[i]; c.globalAlpha = .28 + q[3] * .25; c.fillStyle = this.pal.part[partOf[p.c]]; c.beginPath(); c.arc(q[0], q[1], p.r * q[2] * 1.2, 0, 6.283); c.fill(); });
-    c.globalAlpha = 1;
-  }
-};
+const hrefOf = t => t.status === 'live' ? t.href : `#route-${t.id}`;
 
-/* ======================= HOME FEATURE VIRUS ======================= */
+/* ======================= FOUR-TOOLS NETWORK ======================= */
 const FeatViz = {
+  // the four bold hubs: hover to see what each one is, click to go there
   F: [
-    { h: '#route', t: 'Route planner', d: 'Python to GenAI in five stages. Pick one and follow its route.', v: '--p1' },
-    { h: '#py/ch1', t: 'Chapter reader', d: 'A cheat sheet first, then the full notes one section at a time.', v: '--p2' },
-    { h: '#recall', t: 'Flashcards & quizzes', d: '894 cards and 872 questions built from the notes.', v: '--p3' },
-    { h: '#console', t: 'Quick console', d: 'Type a topic or command and jump straight there.', v: '--p5' },
+    { h: '#route', t: 'Pathway', d: 'The five stages, from Python to generative AI.', v: '--p1' },
+    { h: '#py/ch1', t: 'Chapters', d: 'Clear notes with short examples you can run.', v: '--p2' },
+    { h: '#py/recall', t: 'Flashcards & quizzes', d: 'Practise so it sticks.', v: '--p3' },
+    { h: '#console', t: 'Search', d: 'Type any topic to find it in both courses.', v: '--p5' },
   ],
   init() {
     const cv = $('#featViz'); if (!cv) return; this.cv = cv;
@@ -123,57 +91,24 @@ const FeatViz = {
     } else tip.hidden = true;
   }
 };
-/* ======================= HOME ======================= */
+
+
 const Home = {
   built: false,
-  // popular goals across the live courses: c = course, n = the chapter the route ends at
-  GOALS: [
-    { c: 'py', n: 6, ico: 'ƒ', t: 'Write clean functions', eg: 'Arguments, *args and **kwargs, closures and decorators.' },
-    { c: 'py', n: 12, ico: '◇', t: 'Understand classes and OOP', eg: 'Objects, inheritance and how Python picks a method.' },
-    { c: 'py', n: 17, ico: '⇉', t: 'Run things at the same time', eg: 'Threads, processes and asyncio, and which to pick.' },
-    { c: 'py', n: 20, ico: '✓', t: 'Validate data with Pydantic', eg: 'Check and parse API input with type hints.' },
-    { c: 'ml', n: 11, ico: '↗', t: 'Predict a number', eg: 'House prices, next month\'s sales, delivery times.' },
-    { c: 'ml', n: 13, ico: '?', t: 'Answer yes or no', eg: 'Spam or not, will a customer leave, pass or fail.' },
-    { c: 'ml', n: 19, ico: '▲', t: 'Win on spreadsheet data', eg: 'The go-to method for tabular problems at work.' },
-    { c: 'ml', n: 24, ico: '⇪', t: 'Explain and ship a model', eg: 'Why it predicted that, and keeping it healthy live.' },
-  ],
-  FEATS: [
-    { h: '#route', tag: 'Plan', t: 'Route planner', p: 'Five stages from Python to LLMs. Pick a stage, then follow only the chapters you need, in order.', go: 'See the pathway', ic: '<path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/>' },
-    { h: '#py/ch1', tag: 'Read', t: 'Chapter reader', p: 'Each chapter opens with a cheat sheet. The full notes sit underneath, one section at a time, with real code output.', go: 'Start reading', ic: '<path d="M3 5.5C6 4 9 4 12 6c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13.5"/>' },
-    { h: '#recall', tag: 'Remember', t: 'Flashcards & quizzes', p: '894 cards and 872 questions made from the notes. Cards come back just before you would forget them.', go: 'Practise now', ic: '<rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/>' },
-    { h: '#console', tag: 'Jump', t: 'Quick console', p: 'Type “decorator” or “lasso” in the box at the top of any page to search both courses and jump straight there.', go: 'Try the console', ic: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/>' },
-  ],
-  fmt(m) { return m >= 60 ? `${Math.floor(m / 60)}h ${pad2(m % 60)}m` : `${m} min`; },
-  async render() {
-    if (!this.built) {
-      this.built = true;
-      const home = C.id, routes = {}, info = {};
-      // work out each goal's route inside its own course, then go back to the course that was open
-      for (const id of Object.keys(COURSES)) {
-        await setCourse(id);
-        info[id] = { titles: Object.fromEntries(M.chapters.map(c => [c.n, c.title])), parts: { ...partOf }, list: M.chapters.filter(c => c.n >= COURSES[id].first && c.n <= COURSES[id].last).map(c => [c.n, c.title]) };
-        this.GOALS.filter(g => g.c === id).forEach(g => { routes[g.c + g.n] = Metro.compute(g.n).map(r => ({ ...r, min: byN[r.n].minutes, t: byN[r.n].title })); });
-      }
-      await setCourse(home);
-      $('#goalGrid').innerHTML = this.GOALS.map(g => {
-        const rt = routes[g.c + g.n], I = info[g.c], mins = rt.reduce((a, r) => a + r.min, 0), cname = COURSES[g.c].name;
-        const dots = rt.map((r, i) => (i ? '<b></b>' : '') + `<i class="${r.kind === 'target' ? 't' : ''}" style="--c:var(${PV[I.parts[r.n]]})" title="Ch ${r.n} · ${esc(r.t)}"></i>`).join('');
-        return `<a class="goal" href="${LC(g.c, 'route-' + g.n)}" style="--pc:var(${PV[I.parts[g.n]]})"><span class="ico" aria-hidden="true">${g.ico}</span><h3>${g.t}</h3><p class="eg">${g.eg}</p><p class="dest"><span>${cname}</span> Ch ${g.n} · ${esc(I.titles[g.n])}</p><div class="minir" aria-hidden="true">${dots}</div><div class="foot"><span>${rt.length} chapters · ${this.fmt(mins)}</span><em>Route →</em></div></a>`;
-      }).join('');
-      $('#featGrid').innerHTML = this.FEATS.map(f => `<a class="feat" href="${f.h}"><svg viewBox="0 0 24 24" aria-hidden="true">${f.ic}</svg><span class="tag2">${f.tag}</span><h3>${f.t}</h3><p>${f.p}</p><span class="go">${f.go} →</span></a>`).join('');
-      const sel = $('#goalSel'), order = Object.values(COURSES).sort((a, b) => a.stage - b.stage);
-      sel.innerHTML = `<option value="">Choose a chapter…</option>` + order.map(x => `<optgroup label="${x.name}">${info[x.id].list.map(([n, t]) => `<option value="${x.id}:${n}">${pad2(n)} · ${esc(t)}</option>`).join('')}</optgroup>`).join('');
-      sel.onchange = () => { if (sel.value) { const [id, n] = sel.value.split(':'); location.hash = LC(id, 'route-' + n); } };
-      $('#ctaRoute').onclick = () => go('route');
-      $('#homeTour').onclick = () => { if (!Tour.active) { scrollTo({ top: 0 }); Tour.start(0); } };
-    }
-    const r = $('#homeResume'), last = store.get('lastRead', null);
-    const m = last && last.match(/^(py\/)?ch(\d+)$/);
-    if (m) {
-      const id = m[1] ? 'py' : 'ml', st = await courseStats(id), n = +m[2], t = st.titles[n - COURSES[id].first];
-      if (t) { r.innerHTML = `Welcome back. <a href="#${last}">Continue ${COURSES[id].name}, Ch ${n}: ${esc(t)} →</a>`; r.hidden = false; }
-    }
+  render() {
+    if (this.built) return; this.built = true;
+    FeatViz.init();
+    $('#stageGrid').innerHTML = TRACKS.map(t => {
+      const live = t.status === 'live';
+      return `<li class="stage-card ${live ? 'live' : 'soon'}" style="--pc:var(${t.v})"><a href="${hrefOf(t)}">
+        <span class="num">${t.n}</span>
+        <h3>${esc(t.title)}</h3>
+        <p>${esc(t.sub)}</p>
+        <span class="meta">${live ? `<b>● Live</b> · ${esc(t.stats || '')}` : 'Coming soon'}</span>
+        <span class="go">${live ? 'Open →' : 'See what\'s planned →'}</span>
+      </a></li>`;
+    }).join('');
   }
 };
 
-export { HeroBg, FeatViz, Home };
+export { Home };

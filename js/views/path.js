@@ -37,6 +37,12 @@ const Path = {
         ${live ? `<text x="${x}" y="${y + r + 44}" text-anchor="middle" font-size="12.5" fill="var(--muted)">${esc(t.stats || '')}</text>` : ''}
       </a></g>`;
     });
+    // a pulsing arrow at the first station so it's clear the stations can be clicked
+    s += `<g class="p-hint" aria-hidden="true">
+      <circle class="p-ring" cx="${first.x}" cy="${first.y}" r="${r + 6}" fill="none" stroke="var(--accent)" stroke-width="3"/>
+      <text x="24" y="${first.y - 110}" font-size="15" font-weight="700" fill="var(--accent)">Click a station to see details</text>
+      <g class="p-arrow"><path d="M${first.x - 96},${first.y - 92} L${first.x - 25},${first.y - 17}" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M${first.x - 43},${first.y - 17} L${first.x - 24},${first.y - 15} L${first.x - 26},${first.y - 35}" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
     const ly = last.y + 104;
     s += `<g transform="translate(60,${ly})" font-size="13" fill="var(--muted)"><circle cx="8" cy="-4" r="8" fill="var(--p1)" stroke="var(--p1)" stroke-width="3"/><text x="24" y="0">live: open its route map</text><circle cx="228" cy="-4" r="8" fill="var(--panel)" stroke="var(--p3)" stroke-width="3" stroke-dasharray="3 3"/><text x="244" y="0">coming soon: see what's planned</text></g>`;
     const svg = $('#pathSvg'); svg.setAttribute('viewBox', `0 0 ${endX + 40} ${ly + 24}`); svg.innerHTML = s;

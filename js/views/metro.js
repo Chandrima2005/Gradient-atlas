@@ -13,7 +13,6 @@ const Metro = {
     sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => inCourse(c.n)).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
     sel.onchange = () => sel.value ? goC('route-' + sel.value) : this.setRoute(null);
     $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', C.id === 'ml' ? '#route-ml' : L('route')); };
-    $('#quick').innerHTML = C.quick.map(([n, l]) => `<a class="chip" href="${L('route-' + n)}"><b>→</b>${l}</a>`).join('');
     // interchange strength: incoming refs from other parts
     this.xin = {};
     for (const a in G.deps) for (const b in G.deps[a]) if (partOf[+a] !== partOf[+b]) this.xin[b] = (this.xin[b] || 0) + G.deps[a][b];

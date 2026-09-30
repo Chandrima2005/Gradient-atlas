@@ -20,14 +20,14 @@ const COURSES = {
   py: {
     id: 'py', name: 'Python', stage: 1, dir: 'data/py/', pfx: 'py/', first: 1, last: 20,
     quick: [[6, 'Functions'], [10, 'OOP'], [7, 'Exceptions'], [14, 'Generators'], [17, 'Concurrency'], [20, 'Pydantic']],
-    intro: 'Each Part is a line and each chapter is a station. Big ringed stations are interchanges: the chapters other Parts rely on most. Routes come from the notes\' own cross-references, and every route after Chapter 4 starts with the Basics.',
+    intro: 'Each station is a chapter. Pick the chapter you want to reach and the map shows only the chapters you need first, in order.',
     // programming builds on itself, so any single reference counts and the Basics come first
     rule: { direct: 1, background: 2, advised: t => t >= 5 ? [1, 2, 3, 4].map(n => [n, 'the Python basics everything builds on']) : [] },
   },
   ml: {
     id: 'ml', name: 'Machine learning', stage: 3, dir: 'data/', pfx: '', first: 1, last: 24,
     quick: [[19, 'Gradient boosting'], [16, 'SVMs'], [20, 'Clustering'], [23, 'Hyperparameter tuning'], [24, 'SHAP & deployment'], [13, 'Logistic regression']],
-    intro: 'Each Part is a line and each chapter is a station. Big ringed stations are interchanges: the chapters other Parts rely on most. Routes come from the text\'s own cross-references, plus the author\'s advice to read Chapters 8 and 9 before any algorithm.',
+    intro: 'Each station is a chapter. Pick the chapter you want to reach and the map shows only the chapters you need first, in order.',
     rule: { direct: 2, background: 4, advised: t => t >= 11 && t <= 21 ? [[8, 'the book says read first (0.9)'], [9, 'the book says read first (0.9)']] : [] },
   },
 };
