@@ -17,9 +17,8 @@ You can use it in two ways:
 
 | View | What it does |
 |---|---|
-| 🏠 **Home** | Explains the site. Its hero is a network with five clickable hubs, one per feature, and there are quick goal cards under "Only need one thing?" |
+| 🏠 **Home** | Explains the site. Its hero is a network with four clickable hubs, one per feature, and there are quick goal cards under "Only need one thing?" |
 | 🧭 **Route** | Pick any chapter as your goal to get the shortest reading route to it, with time estimates and a list of the chapters it skips |
-| 🕸️ **Map** | An interactive map of all 439 sections and how they reference each other. You can pan, zoom, pinch and filter by part |
 | 📖 **Read** | A chapter reader with typeset maths, highlighted code, figures and clickable cross-references |
 | 🧠 **Recall** | Flashcards on a spaced-repetition schedule, plus multiple-choice quizzes for each chapter |
 | ⌨️ **Console** | A Python-style command line for moving around the site, e.g. `route(15)`, `search("kernel")`, `quiz(11)` |
@@ -46,7 +45,7 @@ You can use it in two ways:
  │  2. Markdown → HTML           │  (LaTeX protected, Pygments code)
  │  3. Link cross-references     │  ("see 8.3", "Chapter 9", "§4.2" …)
  │  4. Build reference graph     │  (833 edges → chapter dependencies)
- │  5. Lay out the map           │  (networkx spring layout)
+ │  5. Lay out the home network  │  (networkx spring layout)
  │  6. Generate flashcards/quiz  │  (from tables and short code cells)
  └──────────────┬───────────────┘
                 ▼
@@ -56,7 +55,7 @@ You can use it in two ways:
  ┌──────────────────────────────┐
  │  Browser (single-page app)   │
  │  Hash router → Home · Route · │
- │  Map · Read · Recall · Console│
+ │  Read · Recall · Console      │
  │  fetch() chapter JSON lazily  │
  │  MathJax renders maths        │
  │  localStorage keeps progress  │
@@ -65,7 +64,7 @@ You can use it in two ways:
 
 - **No backend, no framework.** Everything is vanilla HTML, CSS and JavaScript, served as static files.
 - **Lazy loading.** The first load fetches only the manifest and graph. Each chapter's JSON is fetched the first time you open that chapter.
-- **Rendering.** The Map is drawn on Canvas 2D and the Route on SVG. MathJax 3 typesets the maths.
+- **Rendering.** The home network is drawn on Canvas 2D and the Route on SVG. MathJax 3 typesets the maths.
 - **Progress stays on your device.** Chapters read, flashcard schedules, quiz scores, your route and the theme are all kept in `localStorage` (keys start with `s2s2.`).
 
 ---
@@ -115,7 +114,7 @@ chapters(part="IV") list chapters in a part
 quiz(11)            start a chapter quiz
 review()            review flashcards that are due
 progress()          show your progress
-map() / metro()     jump to the Map or the Route view
+metro()             jump to the Route view
 random()            open a random section
 theme()             switch between dark and light
 tour()              replay the guided tour
@@ -132,7 +131,7 @@ clear()             clear the console
 ├── data/
 │   ├── manifest.json # chapters, parts, sections
 │   ├── ch00–ch25.json# chapter content (HTML)
-│   ├── graph.json    # map nodes, edges, chapter dependencies
+│   ├── graph.json    # section graph and chapter dependencies
 │   ├── cards.json    # flashcards and quiz questions
 │   └── search.json   # search index
 ├── img/              # 93 figures taken from the notebooks

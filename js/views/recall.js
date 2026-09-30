@@ -70,7 +70,7 @@ const Recall = {
     const render = () => {
       if (i >= q.length) {
         this.setKeys(null);
-        r.innerHTML = `<div class="session"><div class="card done-card"><div class="eyebrow">Session complete</div><b>${q.length ? q.length + ' cards' : 'Nothing due'}</b><p style="margin:0;color:var(--ink-2)">${q.length ? `Again ${tally[0]} · Hard ${tally[1]} · Good ${tally[2]} · Easy ${tally[3]}` : 'Read a few sections and new cards will appear here.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><a class="btn" href="#recall">Back to Recall</a><a class="btn primary" href="#map">Explore the map</a></div></div></div>`;
+        r.innerHTML = `<div class="session"><div class="card done-card"><div class="eyebrow">Session complete</div><b>${q.length ? q.length + ' cards' : 'Nothing due'}</b><p style="margin:0;color:var(--ink-2)">${q.length ? `Again ${tally[0]} · Hard ${tally[1]} · Good ${tally[2]} · Easy ${tally[3]}` : 'Read a few sections and new cards will appear here.'}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><a class="btn" href="#recall">Back to Recall</a><a class="btn primary" href="#route">Plan a route</a></div></div></div>`;
         return;
       }
       const f = q[i], n = NODE[f.sec], pv = SRS.preview(f.id);

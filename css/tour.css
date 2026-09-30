@@ -48,6 +48,5 @@
 .t-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .t-btn[disabled]{opacity:.4;cursor:default}
 .t-skip{border:0;background:transparent;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-body.touring .maptip{display:none!important}
 .tour-dock.top{bottom:auto;top:calc(var(--bar) + 10px + env(safe-area-inset-top,0px))}
 @media (max-width:760px){.tour-dock{bottom:calc(72px + env(safe-area-inset-bottom,0px));gap:8px;padding:8px}.tour-dock .seg .nm,.t-count{display:none}.tour-card.welcome{padding:20px}.tour-card.welcome h3{font-size:23px}.t-art{width:64px;height:64px}}

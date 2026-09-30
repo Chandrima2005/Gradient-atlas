@@ -1,7 +1,6 @@
 // chapter reader + code-cell copy buttons
 import { $, $$, esc, store, PV, pad2, chLabel, toast, typeset, M, byN, NODE, chCache, done, seen, saveSeen, isRead } from '../core.js';
 import { curView, route, go } from '../router.js';
-import { Map_ } from './map.js';
 import { Metro } from './metro.js';
 
 /* ======================= copy ======================= */
@@ -17,7 +16,7 @@ const Reader = {
   cur: null, spy: null,
   async load(n) { if (chCache[n]) return chCache[n]; const r = await fetch(`data/ch${pad2(n)}.json`); if (!r.ok) throw 0; return chCache[n] = await r.json(); },
   async open(n, target) {
-    const c = byN[n]; if (!c) return go('map');
+    const c = byN[n]; if (!c) return go('home');
     store.set('lastCh', n); $('#readLink').href = '#ch' + n;
     if (this.cur !== n) {
       this.cur = n;
@@ -29,10 +28,10 @@ const Reader = {
       inner.parentElement.parentElement.style.setProperty('--pc', `var(${PV[c.part]})`);
       inner.innerHTML = `<header class="rhead"><div class="crumb"><span class="sw"></span>${c.part === '0' ? 'Before you start' : c.part === 'A' ? 'Reference' : 'Part ' + c.part + ' · ' + part.name}<span>·</span><span>~${c.minutes} min</span><span>·</span><span>${c.code} cells</span>${c.figs ? `<span>·</span><span>${c.figs} figures</span>` : ''}</div>
         <h1 class="h-display"><span class="cn">${n === 25 ? 'APPENDIX' : 'CHAPTER ' + pad2(n)}</span>${esc(c.title)}</h1>${c.scope ? `<p class="scope">${c.scope}</p>` : ''}
-        <div class="racts"><a class="btn small" href="#node-c${n}">Show on map</a>${n >= 1 && n <= 24 ? `<a class="btn small" href="#route-${n}">Plan a route here</a><a class="btn small" href="#quiz-${n}">Quiz me</a>` : ''}</div></header>
+        <div class="racts">${n >= 1 && n <= 24 ? `<a class="btn small" href="#route-${n}">Plan a route here</a><a class="btn small" href="#quiz-${n}">Quiz me</a>` : ''}</div></header>
         <div class="body" id="body">${d.html}</div>
         <div class="rend">
-          ${n >= 1 && n <= 24 ? `<div class="box"><p>Finished? Marking it complete fills in its station on the route map and its dots on the knowledge map.</p><div class="acts"><button class="btn" type="button" id="doneBtn"></button><a class="btn" href="#quiz-${n}">Take the quiz</a></div></div>` : ''}
+          ${n >= 1 && n <= 24 ? `<div class="box"><p>Finished? Marking it complete fills in its station on the route map.</p><div class="acts"><button class="btn" type="button" id="doneBtn"></button><a class="btn" href="#quiz-${n}">Take the quiz</a></div></div>` : ''}
           <nav class="pn">${prev ? `<a href="#ch${prev.n}"><small>← ${chLabel(prev.n)}</small><span>${esc(prev.title)}</span></a>` : ''}${next ? `<a class="next" href="#ch${next.n}"><small>${chLabel(next.n)} →</small><span>${esc(next.title)}</span></a>` : ''}</nav>
         </div>`;
       const body = $('#body');
@@ -42,7 +41,7 @@ const Reader = {
       this.watch();
       const db = $('#doneBtn');
       if (db) { const paint = () => { db.textContent = done.has(n) ? '✓ Completed' : 'Mark as complete'; db.classList.toggle('is-done', done.has(n)); }; paint();
-        db.onclick = () => { done.has(n) ? done.delete(n) : done.add(n); store.set('done', [...done]); paint(); Map_.draw(); if (Metro.built) Metro.render(); toast(done.has(n) ? `${chLabel(n)} marked complete` : `${chLabel(n)} unmarked`); }; }
+        db.onclick = () => { done.has(n) ? done.delete(n) : done.add(n); store.set('done', [...done]); paint(); if (Metro.built) Metro.render(); toast(done.has(n) ? `${chLabel(n)} marked complete` : `${chLabel(n)} unmarked`); }; }
       document.title = `${chLabel(n)} · ${c.title} — Gradient Atlas`;
     }
     requestAnimationFrame(() => {

@@ -2,7 +2,6 @@
 import { $, $$, store, typeset, G, SECS, NODE, done } from './core.js';
 import { curView, route, go } from './router.js';
 import { Home } from './views/home.js';
-import { Map_ } from './views/map.js';
 import { Recall } from './views/recall.js';
 
 /* ======================= GUIDED TOUR ======================= */
@@ -16,12 +15,7 @@ const Tour = (() => {
   const TOP = () => G.nodes.filter(n => !n.hub).sort((a, b) => b.in - a.in)[0].id;
   const view = v => { if (curView !== v) go(v === 'read' ? 'ch1' : v); };
   const goGoals = () => go('route');
-  const introOpen = () => { const el = $('#mapIntro'); if (el.classList.contains('mini')) { el.classList.remove('mini'); $('#introToggle').textContent = 'Hide'; } };
-  const mapClean = () => { Map_.clear(); Map_.fitted = false; Map_.resize(); };
-  const partsOn = () => { $$('#legend [data-p].off').forEach(b => b.click()); };
   const el = s => () => { const e = typeof s === 'function' ? s() : $(s); return e && e.getClientRects().length ? e : null; };
-  const nodeRect = id => () => { const n = NODE[id]; if (!n || !Map_.ctx) return null; const r = Map_.cv.getBoundingClientRect(); const x = r.left + Map_.X(n), y = r.top + Map_.Y(n); return { left: x - 20, top: y - 20, width: 40, height: 40 }; };
-  const ringRect = () => { if (!Map_.ctx) return null; const r = Map_.cv.getBoundingClientRect(); const s = Map_.s * 1.04; return { left: r.left + Map_.tx - s, top: r.top + Map_.ty - s, width: 2 * s, height: 2 * s }; };
   const union = (...sels) => () => { const rs = sels.map(s => $(s)).filter(Boolean).map(e => e.getBoundingClientRect()); if (!rs.length) return null; const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom)); return { left: l, top: t, width: rr - l, height: b - t }; };
   const entries = () => $$('#log .entry').length;
   let entryBase = 0;
@@ -36,8 +30,8 @@ const Tour = (() => {
       body: `<p><b>Plan my study route</b> opens the route planner. Pick the chapter you want to reach and it shows only the chapters you need first, in order, with how long each takes.</p>`,
       before() { view('home'); scrollTo({ top: 0 }); } },
     { sec: 'Start here', target: el('#featGrid'),
-      title: 'Five ways to study',
-      body: `<p>Plan a route, read the chapters, practise with flashcards, explore how ideas connect, or jump anywhere from the console. Use whichever suits you today.</p>`,
+      title: 'Four ways to study',
+      body: `<p>Plan a route, read the chapters, practise with flashcards, or jump anywhere from the console. Use whichever suits you today.</p>`,
       before() { view('home'); } },
     { sec: 'Start here', target: el('#goalGrid'),
       title: 'Only need one thing?',
@@ -45,7 +39,7 @@ const Tour = (() => {
       before() { view('home'); } },
     { sec: 'Get around', target: el('.rail'),
       title: 'Switch pages here',
-      body: `<p>Home, Map, Route, Console, Recall and Read are always one click away.</p>`,
+      body: `<p>Home, Route, Console, Recall and Read are always one click away.</p>`,
       before() { view('home'); } },
     { sec: 'Get around', target: el('#repl .repl-in'),
       title: 'Or just type',
@@ -73,7 +67,7 @@ const Tour = (() => {
       const b = e.target.closest('[data-t]'); if (!b) return;
       const a = b.dataset.t;
       if (a === 'next') next(); else if (a === 'skip') end();
-      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'goals') { end(); goGoals(); } else if (a === 'map') { end(); go('map'); } else if (a === 'metro') { end(); go('metro'); }
+      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'goals') { end(); goGoals(); } else if (a === 'metro') { end(); go('metro'); }
     });
   }
   function nudge() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); if (!pulse.hidden) { pulse.classList.remove('boost'); void pulse.offsetWidth; pulse.classList.add('boost'); } }
@@ -217,7 +211,6 @@ const Tour = (() => {
     spot.classList.remove('on'); document.body.classList.remove('touring');
     [card, dock, pulse, ...blocks].forEach(e => e.hidden = true);
     setTimeout(() => { [spot, card, dock, pulse, ...blocks].forEach(e => e.remove()); spot = null; }, 450);
-    partsOn();
   }
   return { start, end, get active() { return active; } };
 })();

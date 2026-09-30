@@ -1,6 +1,5 @@
 // light / dark switch
 import { $, store } from './core.js';
-import { Map_ } from './views/map.js';
 import { Metro } from './views/metro.js';
 
 /* ======================= theme ======================= */
@@ -11,6 +10,6 @@ $('#themeBtn').addEventListener('click', () => {
   r.dataset.theme = cur === 'dark' ? 'light' : 'dark'; store.set('theme', r.dataset.theme); onTheme();
 });
 matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => onTheme());
-function onTheme() { Map_.pal = null; Map_.draw(); if (Metro.built) Metro.render(); }
+function onTheme() { if (Metro.built) Metro.render(); }
 
 export { onTheme };

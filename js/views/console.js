@@ -27,7 +27,6 @@ const CMDS = [
   ['quiz(13)', 'Take a quiz built from a chapter\'s tables'],
   ['review()', 'Start a spaced-repetition review session'],
   ['progress()', 'What you\'ve read, completed and memorised'],
-  ['map("11.2")', 'Show the knowledge map, optionally focused on a section'],
   ['route()', 'Open the route planner'],
   ['random()', 'Jump to a random section you haven\'t read'],
   ['theme("light")', 'Switch theme: "light" or "dark"'],
@@ -78,7 +77,6 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
         case 'open': case 'read': { const t = this.resolveTarget(args[0] ?? kw.n);
           if (!t) { if (args[0]) return this.run(`path_to("${args[0]}")`.replace('path_to', 'search')); return out(`TypeError: open() needs a chapter number or section like "11.3"`, true); }
           return nav(t.sec || 'ch' + t.ch); }
-        case 'map': { const t = this.resolveTarget(args[0]); if (t) return nav('node-' + (t.sec || 'c' + t.ch)); return nav('map'); }
         case 'metro': return nav('route');
         case 'tour': case 'onboarding': Tour.start(0); return;
         case 'review': return nav('review');
@@ -95,7 +93,7 @@ Type <b>help()</b> at the &gt;&gt;&gt; prompt at the top, or click a command:</p
         }
         case 'refs': { const t = this.resolveTarget(args[0]); if (!t) return out(`refs() needs a section like "9.2" or a chapter number`, true);
           const id = t.sec || 'c' + t.ch, n = NODE[id]; const li = arr => arr.length ? `<div class="olist">${arr.sort((a, b) => b[1] - a[1]).map(([o, w]) => { const x = NODE[o]; return x ? `<a href="#${x.hub ? 'ch' + x.c : o}"><span class="n">${x.hub ? chLabel(x.c) : x.num}</span><span>${esc(x.t)}</span><span class="m">${w > 1 ? '×' + w : ''}</span></a>` : ''; }).join('')}</div>` : '<p>(none)</p>';
-          return out(`<p><b style="color:var(--ink)">${n.hub ? chLabel(n.c) : n.num} ${esc(n.t)}</b> · <a href="#node-${id}">show on map</a></p><p style="color:var(--accent)">builds on:</p>${li([...(OUTE[id] || [])])}<p style="margin-top:10px">used by:</p>${li([...(INE[id] || [])])}`);
+          return out(`<p><b style="color:var(--ink)">${n.hub ? chLabel(n.c) : n.num} ${esc(n.t)}</b> · <a href="#${n.hub ? 'ch' + n.c : id}">open</a></p><p style="color:var(--accent)">builds on:</p>${li([...(OUTE[id] || [])])}<p style="margin-top:10px">used by:</p>${li([...(INE[id] || [])])}`);
         }
         case 'path_to': case 'route': { if (fn === 'route' && !args.length && !kw.target) return nav('route'); let a = args[0] ?? kw.target; let t = this.resolveTarget(a); let n = t ? (t.ch || NODE[t.sec].c) : null;
           if (!n && a) { await loadSearch(); const h = rank(String(a)).filter(s => s.c >= 1 && s.c <= 24); if (h.length) { const votes = {}; h.slice(0, 10).forEach((s, i) => votes[s.c] = (votes[s.c] || 0) + s.sc / (i + 1)); n = +Object.entries(votes).sort((x, y) => y[1] - x[1])[0][0]; } }
