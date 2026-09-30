@@ -60,8 +60,8 @@
 .fv-legend{margin:4px 0 6px}
 .stages-sec{margin-top:clamp(40px,7vh,88px)}
 
-/* home is one screen: the hero sits in the middle, the footer at the bottom */
-.home{min-height:calc(100dvh - var(--bar) - env(safe-area-inset-top,0px));display:flex;flex-direction:column}
-.home > .hero{flex:1;align-content:center}
-@media (max-width:760px){.home{min-height:calc(100dvh - var(--bar) - 64px)}}
+/* the hero fills the first screen; the five stages start just below it */
+.home > .hero{min-height:calc(100dvh - var(--bar) - env(safe-area-inset-top,0px) - clamp(20px,4vh,56px));align-content:center}
+.stages-sec{margin-top:clamp(24px,4vh,48px)}
+@media (max-width:900px){.home > .hero{min-height:0}}
 .sitefoot{background:transparent;margin-inline:0;padding-inline:0}
