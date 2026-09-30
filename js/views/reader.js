@@ -1,5 +1,5 @@
 // chapter reader + code-cell copy buttons
-import { $, $$, esc, store, PV, pad2, chLabel, toast, typeset, M, byN, NODE, OUTE, INE, chCache, done, seen, saveSeen, isRead } from '../core.js';
+import { $, $$, esc, store, PV, pad2, chLabel, toast, typeset, M, byN, NODE, chCache, done, seen, saveSeen, isRead } from '../core.js';
 import { curView, route, go } from '../router.js';
 import { Map_ } from './map.js';
 import { Metro } from './metro.js';
@@ -54,14 +54,6 @@ const Reader = {
     $$('h3[id],h4[id],h5[id]', body).forEach(h => {
       const m = h.textContent.match(/^\s*(\d+(?:\.\d+)*)\s/);
       if (m) h.innerHTML = h.innerHTML.replace(m[1], `<span class="hn">${m[1]}</span>`);
-      if (!NODE[h.id]) return;
-      const o = (OUTE[h.id] || []).filter(e => NODE[e[0]]), i = (INE[h.id] || []).filter(e => NODE[e[0]]);
-      if (!o.length && !i.length) return;
-      const lnk = ([id]) => { const x = NODE[id]; return `<a href="#${x.hub ? 'ch' + x.c : id}" title="${esc(x.t)}">${x.hub ? chLabel(x.c) : x.num}</a>`; };
-      const cap = (arr) => arr.slice(0, 6).map(lnk).join('') + (arr.length > 6 ? `<span>+${arr.length - 6}</span>` : '');
-      const d = document.createElement('div'); d.className = 'deps';
-      d.innerHTML = (o.length ? `<span class="grp"><span>↰ builds on</span>${cap(o)}</span>` : '') + (i.length ? `<span class="grp"><span>↳ used by</span>${cap(i)}</span>` : '') + `<span class="grp"><a href="#node-${h.id}">◎ map</a></span>`;
-      h.after(d);
     });
   },
   toc(c) {
