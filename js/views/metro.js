@@ -1,45 +1,45 @@
 // route planner (metro map)
-import { $, esc, store, PV, pad2, chLabel, M, G, byN, partOf, done } from '../core.js';
-import { route, go } from '../router.js';
+import { $, esc, store, PV, pad2, chLabel, M, G, byN, partOf, done, C, L, K, inCourse } from '../core.js';
+import { route, go, goC } from '../router.js';
 import { rank } from './console.js';
 
 /* ======================= METRO ======================= */
 const Metro = {
   built: false, target: null, pos: {},
   build() {
-    if (this.built) return; this.built = true;
+    if (this.built === C.id) return; this.built = C.id; this.pos = {};
+    $("#metroStage").textContent = `Stage ${C.stage} of 5 · ${C.name}`; $('#metroIntro').textContent = C.intro;
     const sel = $('#dest');
-    sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => c.n >= 1 && c.n <= 24).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
-    sel.onchange = () => sel.value ? go('route-' + sel.value) : this.setRoute(null);
-    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', '#route-ml'); };
-    const Q = [[19, 'Gradient boosting'], [16, 'SVMs'], [20, 'Clustering'], [23, 'Hyperparameter tuning'], [24, 'SHAP & deployment'], [13, 'Logistic regression']];
-    $('#quick').innerHTML = Q.map(([n, l]) => `<a class="chip" href="#route-${n}"><b>→</b>${l}</a>`).join('');
+    sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => inCourse(c.n)).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
+    sel.onchange = () => sel.value ? goC('route-' + sel.value) : this.setRoute(null);
+    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', C.id === 'ml' ? '#route-ml' : L('route')); };
+    $('#quick').innerHTML = C.quick.map(([n, l]) => `<a class="chip" href="${L('route-' + n)}"><b>→</b>${l}</a>`).join('');
     // interchange strength: incoming refs from other parts
     this.xin = {};
     for (const a in G.deps) for (const b in G.deps[a]) if (partOf[+a] !== partOf[+b]) this.xin[b] = (this.xin[b] || 0) + G.deps[a][b];
-    const top = Object.entries(this.xin).filter(([n]) => +n > 0 && +n < 25).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => +e[0]);
+    const top = Object.entries(this.xin).filter(([n]) => inCourse(+n)).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => +e[0]);
     this.inter = new Set(top);
     // layout
     const order = M.chapters.map(c => c.n); const rows = M.parts.map(p => p.key);
     let x = 50, prevPart = null;
     for (const n of order) { const p = partOf[n]; if (prevPart !== null) x += p !== prevPart ? 64 : 40; this.pos[n] = { x, y: 160 + rows.indexOf(p) * 52 }; prevPart = p; }
-    this.target = store.get('route', null);
+    this.target = store.get(K('route'), null);
     this.render();
   },
   compute(t) {
     const stops = new Map();
-    const add = (n, kind, why) => { if (n === t || n <= 0 || n >= 25) return; const cur = stops.get(n); const rank = { direct: 3, advised: 2, background: 1 }; if (!cur || rank[kind] > rank[cur.kind]) stops.set(n, { n, kind, why }); };
-    const direct = Object.entries(G.deps[t] || {}).filter(([c, w]) => +c < t && w >= 2);
+    const add = (n, kind, why) => { if (n === t || !inCourse(n)) return; const cur = stops.get(n); const rank = { direct: 3, advised: 2, background: 1 }; if (!cur || rank[kind] > rank[cur.kind]) stops.set(n, { n, kind, why }); };
+    const RU = C.rule, direct = Object.entries(G.deps[t] || {}).filter(([c, w]) => +c < t && w >= RU.direct);
     direct.forEach(([c, w]) => add(+c, 'direct', `Ch ${t} points here ${w}×`));
     const seenB = new Set();
-    const walk = (n, via, d) => { if (d > 3) return; for (const [c, w] of Object.entries(G.deps[n] || {})) { if (+c < n && w >= 4 && !seenB.has(+c)) { seenB.add(+c); add(+c, 'background', `needed by Ch ${n}`); } } };
+    const walk = (n, via, d) => { if (d > 3) return; for (const [c, w] of Object.entries(G.deps[n] || {})) { if (+c < n && w >= RU.background && !seenB.has(+c)) { seenB.add(+c); add(+c, 'background', `needed by Ch ${n}`); } } };
     direct.forEach(([c]) => walk(+c, t, 1));
-    if (t >= 11 && t <= 21) { add(8, 'advised', 'the book says read first (0.9)'); add(9, 'advised', 'the book says read first (0.9)'); }
+    RU.advised(t).forEach(([n, why]) => add(n, 'advised', why));
     const list = [...stops.values()].sort((a, b) => a.n - b.n);
     list.push({ n: t, kind: 'target', why: 'your destination' });
     return list;
   },
-  setRoute(t) { this.target = t; store.set('route', t); if (t) $('#dest').value = t; else $('#dest').value = ''; this.render(); },
+  setRoute(t) { if (t && !inCourse(t)) t = null; this.target = t; store.set(K('route'), t); if (t) $('#dest').value = t; else $('#dest').value = ''; this.render(); },
   render() {
     const svg = $('#metroSvg'), P = this.pos, rt = this.target ? this.compute(this.target) : null, on = rt ? new Set(rt.map(s => s.n)) : null;
     const col = n => `var(${PV[partOf[n]]})`;
@@ -78,8 +78,8 @@ const Metro = {
     // legend
     s += `<g transform="translate(40,566)" font-size="12" fill="var(--muted)"><circle cx="6" cy="-4" r="7" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><text x="20" y="0">interchange: most relied on by other Parts</text><circle cx="366" cy="-4" r="6" fill="var(--p1)"/><text x="378" y="0">marked complete</text><rect x="520" y="-12" width="16" height="15" rx="4" fill="var(--accent)"/><text x="542" y="0">stop number on your route</text></g>`;
     svg.innerHTML = s;
-    svg.onclick = e => { const g = e.target.closest('.st'); if (g) go('ch' + g.dataset.n); };
-    svg.onkeydown = e => { const g = e.target.closest('.st'); if (g && e.key === 'Enter') go('ch' + g.dataset.n); };
+    svg.onclick = e => { const g = e.target.closest('.st'); if (g) goC('ch' + g.dataset.n); };
+    svg.onkeydown = e => { const g = e.target.closest('.st'); if (g && e.key === 'Enter') goC('ch' + g.dataset.n); };
     this.itin(rt);
   },
   itin(rt) {
@@ -87,16 +87,16 @@ const Metro = {
     if (!rt) {
       const hubs = [...this.inter].sort((a, b) => a - b);
       el.innerHTML = `<div class="eyebrow">No route yet</div><h2>Where are you heading?</h2><p class="sum">Choose a destination above, or start from an interchange:</p>
-        <ol class="stops">${hubs.map(n => `<li style="--pc:var(${PV[partOf[n]]})"><span class="dot">${n}</span><div><a href="#ch${n}">${esc(byN[n].title)}</a><small>${this.xin[n]} references from other Parts · ${byN[n].minutes} min</small></div></li>`).join('')}</ol>`;
+        <ol class="stops">${hubs.map(n => `<li style="--pc:var(${PV[partOf[n]]})"><span class="dot">${n}</span><div><a href="${L('ch' + n)}">${esc(byN[n].title)}</a><small>${this.xin[n]} references from other Parts · ${byN[n].minutes} min</small></div></li>`).join('')}</ol>`;
       return;
     }
     const left = rt.filter(r => !done.has(r.n));
     const mins = left.reduce((a, r) => a + byN[r.n].minutes, 0);
     const next = left[0];
-    el.innerHTML = `<div class="eyebrow">Route to Chapter ${this.target}</div><h2>${esc(byN[this.target].title)}</h2>
+    el.innerHTML = `<div class="eyebrow">${C.name} · route to Chapter ${this.target}</div><h2>${esc(byN[this.target].title)}</h2>
       <p class="sum">${rt.length} stops · ${left.length} left · about ${Math.floor(mins / 60)}h ${pad2(mins % 60)}m of reading</p>
-      <ol class="stops">${rt.map((r, i) => `<li class="${done.has(r.n) ? 'done' : ''} ${r.kind === 'target' ? 'target' : ''}" style="--pc:var(${PV[partOf[r.n]]})"><span class="dot">${r.kind === 'target' ? '★' : i + 1}</span><div><a href="#ch${r.n}">${pad2(r.n)} · ${esc(byN[r.n].title)}</a><small><span class="kind">${r.kind}</span>${esc(r.why)} · ${byN[r.n].minutes} min${done.has(r.n) ? ' · ✓ done' : ''}</small></div></li>`).join('')}</ol>
-      ${next ? `<a class="btn primary" href="#ch${next.n}">Start at ${chLabel(next.n)} →</a>` : `<p class="sum" style="color:var(--good)">Every stop is marked complete.</p>`}`;
+      <ol class="stops">${rt.map((r, i) => `<li class="${done.has(r.n) ? 'done' : ''} ${r.kind === 'target' ? 'target' : ''}" style="--pc:var(${PV[partOf[r.n]]})"><span class="dot">${r.kind === 'target' ? '★' : i + 1}</span><div><a href="${L('ch' + r.n)}">${pad2(r.n)} · ${esc(byN[r.n].title)}</a><small><span class="kind">${r.kind}</span>${esc(r.why)} · ${byN[r.n].minutes} min${done.has(r.n) ? ' · ✓ done' : ''}</small></div></li>`).join('')}</ol>
+      ${next ? `<a class="btn primary" href="${L('ch' + next.n)}">Start at ${chLabel(next.n)} →</a>` : `<p class="sum" style="color:var(--good)">Every stop is marked complete.</p>`}`;
   }
 };
 

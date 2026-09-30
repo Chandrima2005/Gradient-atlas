@@ -91,3 +91,8 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line-2);bord
 .chip:hover{border-color:var(--accent);color:var(--ink)}
 .sw{width:10px;height:10px;border-radius:50%;background:var(--pc);display:inline-block;flex:none}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);font-family:var(--f-mono);font-size:12.5px;padding:8px 14px;border-radius:8px;z-index:90}
+/* course switch (Python / Machine learning) used by Recall and Read */
+.ctabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:18px}
+.ctabs a{font-family:var(--f-mono);font-size:12.5px;text-decoration:none;color:var(--ink-2);padding:6px 12px;border-radius:7px}
+.ctabs a:hover{color:var(--ink)}
+.ctabs a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}

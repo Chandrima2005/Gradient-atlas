@@ -1,5 +1,5 @@
 // home page: background network, four-tools visual, goals and features
-import { $, $$, esc, store, PV, css, pad2, chLabel, M, G, byN, partOf } from '../core.js';
+import { $, $$, esc, store, PV, css, pad2, chLabel, M, G, byN, partOf, COURSES, C, LC, setCourse, courseStats } from '../core.js';
 import { curView, route, go } from '../router.js';
 import { Metro } from './metro.js';
 import { Tour } from '../tour.js';
@@ -42,8 +42,8 @@ const HeroBg = {
 const FeatViz = {
   F: [
     { h: '#route', t: 'Route planner', d: 'Python to GenAI in five stages. Pick one and follow its route.', v: '--p1' },
-    { h: '#ch1', t: 'Chapter reader', d: 'The notes: maths, code and real output, chapter by chapter.', v: '--p2' },
-    { h: '#recall', t: 'Flashcards & quizzes', d: '512 cards and 665 questions built from the notes.', v: '--p3' },
+    { h: '#py/ch1', t: 'Chapter reader', d: 'A cheat sheet first, then the full notes one section at a time.', v: '--p2' },
+    { h: '#recall', t: 'Flashcards & quizzes', d: '894 cards and 872 questions built from the notes.', v: '--p3' },
     { h: '#console', t: 'Quick console', d: 'Type a topic or command and jump straight there.', v: '--p5' },
   ],
   init() {
@@ -126,46 +126,56 @@ const FeatViz = {
 /* ======================= HOME ======================= */
 const Home = {
   built: false,
+  // popular goals across the live courses: c = course, n = the chapter the route ends at
   GOALS: [
-    { n: 11, ico: '↗', t: 'Predict a number', eg: 'House prices, next month\'s sales, delivery times.' },
-    { n: 13, ico: '✓', t: 'Answer yes or no', eg: 'Spam or not, will a customer leave, pass or fail.' },
-    { n: 17, ico: '⤷', t: 'Make rules you can explain', eg: 'If-this-then-that decisions anyone can read.' },
-    { n: 19, ico: '▲', t: 'Win on spreadsheet data', eg: 'The go-to method for tabular problems at work.' },
-    { n: 20, ico: '◎', t: 'Find natural groups', eg: 'Customer segments and similar items, no labels needed.' },
-    { n: 21, ico: '!', t: 'Spot the odd ones out', eg: 'Fraud, faulty sensors, and items bought together.' },
-    { n: 22, ico: '⚖', t: 'Handle messy, unbalanced data', eg: 'Rare classes, and the leaks that fake a good score.' },
-    { n: 24, ico: '⇪', t: 'Explain and ship a model', eg: 'Why it predicted that, and keeping it healthy live.' },
+    { c: 'py', n: 6, ico: 'ƒ', t: 'Write clean functions', eg: 'Arguments, *args and **kwargs, closures and decorators.' },
+    { c: 'py', n: 12, ico: '◇', t: 'Understand classes and OOP', eg: 'Objects, inheritance and how Python picks a method.' },
+    { c: 'py', n: 17, ico: '⇉', t: 'Run things at the same time', eg: 'Threads, processes and asyncio, and which to pick.' },
+    { c: 'py', n: 20, ico: '✓', t: 'Validate data with Pydantic', eg: 'Check and parse API input with type hints.' },
+    { c: 'ml', n: 11, ico: '↗', t: 'Predict a number', eg: 'House prices, next month\'s sales, delivery times.' },
+    { c: 'ml', n: 13, ico: '?', t: 'Answer yes or no', eg: 'Spam or not, will a customer leave, pass or fail.' },
+    { c: 'ml', n: 19, ico: '▲', t: 'Win on spreadsheet data', eg: 'The go-to method for tabular problems at work.' },
+    { c: 'ml', n: 24, ico: '⇪', t: 'Explain and ship a model', eg: 'Why it predicted that, and keeping it healthy live.' },
   ],
   FEATS: [
     { h: '#route', tag: 'Plan', t: 'Route planner', p: 'Five stages from Python to LLMs. Pick a stage, then follow only the chapters you need, in order.', go: 'See the pathway', ic: '<path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/>' },
-    { h: '#ch1', tag: 'Read', t: 'Chapter reader', p: 'Clear notes with the maths, the code and its real output. Each heading shows what it builds on.', go: 'Read Chapter 1', ic: '<path d="M3 5.5C6 4 9 4 12 6c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13.5"/>' },
-    { h: '#recall', tag: 'Remember', t: 'Flashcards & quizzes', p: '512 cards and 665 questions made from the notes. Cards come back just before you would forget them.', go: 'Practise now', ic: '<rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/>' },
-    { h: '#console', tag: 'Jump', t: 'Quick console', p: 'Type “lasso” or open(11) in the box at the top of any page to go straight there.', go: 'Try the console', ic: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/>' },
+    { h: '#py/ch1', tag: 'Read', t: 'Chapter reader', p: 'Each chapter opens with a cheat sheet. The full notes sit underneath, one section at a time, with real code output.', go: 'Start reading', ic: '<path d="M3 5.5C6 4 9 4 12 6c3-2 6-2 9-.5V19c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13.5"/>' },
+    { h: '#recall', tag: 'Remember', t: 'Flashcards & quizzes', p: '894 cards and 872 questions made from the notes. Cards come back just before you would forget them.', go: 'Practise now', ic: '<rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/>' },
+    { h: '#console', tag: 'Jump', t: 'Quick console', p: 'Type “decorator” or “lasso” in the box at the top of any page to search both courses and jump straight there.', go: 'Try the console', ic: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15H17"/>' },
   ],
   fmt(m) { return m >= 60 ? `${Math.floor(m / 60)}h ${pad2(m % 60)}m` : `${m} min`; },
-  render() {
+  async render() {
     if (!this.built) {
       this.built = true;
+      const home = C.id, routes = {}, info = {};
+      // work out each goal's route inside its own course, then go back to the course that was open
+      for (const id of Object.keys(COURSES)) {
+        await setCourse(id);
+        info[id] = { titles: Object.fromEntries(M.chapters.map(c => [c.n, c.title])), parts: { ...partOf }, list: M.chapters.filter(c => c.n >= COURSES[id].first && c.n <= COURSES[id].last).map(c => [c.n, c.title]) };
+        this.GOALS.filter(g => g.c === id).forEach(g => { routes[g.c + g.n] = Metro.compute(g.n).map(r => ({ ...r, min: byN[r.n].minutes, t: byN[r.n].title })); });
+      }
+      await setCourse(home);
       $('#goalGrid').innerHTML = this.GOALS.map(g => {
-        const rt = Metro.compute(g.n), c = byN[g.n];
-        const mins = rt.reduce((a, r) => a + byN[r.n].minutes, 0);
-        const dots = rt.map((r, i) => (i ? '<b></b>' : '') + `<i class="${r.kind === 'target' ? 't' : ''}" style="--c:var(${PV[partOf[r.n]]})" title="Ch ${r.n} · ${esc(byN[r.n].title)}"></i>`).join('');
-        return `<a class="goal" href="#route-${g.n}" style="--pc:var(${PV[c.part]})"><span class="ico" aria-hidden="true">${g.ico}</span><h3>${g.t}</h3><p class="eg">${g.eg}</p><p class="dest"><span>Ends at</span> Ch ${g.n} · ${esc(c.title)}</p><div class="minir" aria-hidden="true">${dots}</div><div class="foot"><span>${rt.length} chapters · ${this.fmt(mins)}</span><em>Route →</em></div></a>`;
+        const rt = routes[g.c + g.n], I = info[g.c], mins = rt.reduce((a, r) => a + r.min, 0), cname = COURSES[g.c].name;
+        const dots = rt.map((r, i) => (i ? '<b></b>' : '') + `<i class="${r.kind === 'target' ? 't' : ''}" style="--c:var(${PV[I.parts[r.n]]})" title="Ch ${r.n} · ${esc(r.t)}"></i>`).join('');
+        return `<a class="goal" href="${LC(g.c, 'route-' + g.n)}" style="--pc:var(${PV[I.parts[g.n]]})"><span class="ico" aria-hidden="true">${g.ico}</span><h3>${g.t}</h3><p class="eg">${g.eg}</p><p class="dest"><span>${cname}</span> Ch ${g.n} · ${esc(I.titles[g.n])}</p><div class="minir" aria-hidden="true">${dots}</div><div class="foot"><span>${rt.length} chapters · ${this.fmt(mins)}</span><em>Route →</em></div></a>`;
       }).join('');
       $('#featGrid').innerHTML = this.FEATS.map(f => `<a class="feat" href="${f.h}"><svg viewBox="0 0 24 24" aria-hidden="true">${f.ic}</svg><span class="tag2">${f.tag}</span><h3>${f.t}</h3><p>${f.p}</p><span class="go">${f.go} →</span></a>`).join('');
-      const sel = $('#goalSel');
-      sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => c.n >= 1 && c.n <= 24).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
-      sel.onchange = () => { if (sel.value) go('route-' + sel.value); };
+      const sel = $('#goalSel'), order = Object.values(COURSES).sort((a, b) => a.stage - b.stage);
+      sel.innerHTML = `<option value="">Choose a chapter…</option>` + order.map(x => `<optgroup label="${x.name}">${info[x.id].list.map(([n, t]) => `<option value="${x.id}:${n}">${pad2(n)} · ${esc(t)}</option>`).join('')}</optgroup>`).join('');
+      sel.onchange = () => { if (sel.value) { const [id, n] = sel.value.split(':'); location.hash = LC(id, 'route-' + n); } };
       $('#ctaRoute').onclick = () => go('route');
       $('#homeTour').onclick = () => { if (!Tour.active) { scrollTo({ top: 0 }); Tour.start(0); } };
-      const st = $('#homeStats');
-      const nSec = G.nodes.filter(n => !n.hub).length, nCode = M.chapters.reduce((a, c) => a + c.code, 0), hrs = Math.round(M.chapters.filter(c => c.n >= 1 && c.n <= 24).reduce((a, c) => a + c.minutes, 0) / 60);
-      st.innerHTML = `<div><b>24</b><span>chapters</span></div><div><b>${nSec}</b><span>short sections</span></div><div><b>${nCode}</b><span>runnable code cells</span></div><div><b>512</b><span>flashcards</span></div><div><b>~${hrs} h</b><span>of reading</span></div>`;
+      const stats = await Promise.all(order.map(x => courseStats(x.id)));
+      const tot = k => stats.reduce((a, s) => a + s[k], 0);
+      $('#homeStats').innerHTML = `<div><b>${stats.length}</b><span>courses live</span></div><div><b>${tot('chapters')}</b><span>chapters</span></div><div><b>${tot('sections')}</b><span>short sections</span></div><div><b>${tot('code').toLocaleString('en')}</b><span>runnable examples</span></div><div><b>~${Math.round(tot('minutes') / 60)} h</b><span>of reading</span></div>`;
     }
-    const last = store.get('lastCh', null), r = $('#homeResume');
-    if (last != null && byN[last]) { r.innerHTML = `Welcome back. <a href="#ch${last}">Continue ${chLabel(last)}: ${esc(byN[last].title)} →</a>`; r.hidden = false; }
-    const rt = store.get('route', null);
-    if (rt && byN[rt]) { r.innerHTML += `${r.hidden ? '' : '<br>'}Your route: <a href="#route-${rt}">heading to ${chLabel(rt)} →</a>`; r.hidden = false; }
+    const r = $('#homeResume'), last = store.get('lastRead', null);
+    const m = last && last.match(/^(py\/)?ch(\d+)$/);
+    if (m) {
+      const id = m[1] ? 'py' : 'ml', st = await courseStats(id), n = +m[2], t = st.titles[n - COURSES[id].first];
+      if (t) { r.innerHTML = `Welcome back. <a href="#${last}">Continue ${COURSES[id].name}, Ch ${n}: ${esc(t)} →</a>`; r.hidden = false; }
+    }
   }
 };
 

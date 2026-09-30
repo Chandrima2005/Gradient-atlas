@@ -3,9 +3,10 @@
 // The module lists for stages marked 'soon' are a planned outline and can be edited freely.
 export const TRACKS = [
   {
-    id: 'python', n: 1, title: 'Python', v: '--p1', status: 'soon',
-    sub: 'The language everything else is written in.',
-    mods: ['Setup and first program', 'Variables and data types', 'Strings', 'Control flow', 'Loops', 'Functions', 'Lists, tuples, sets, dicts', 'Comprehensions', 'Files and errors', 'Modules and packages', 'Classes and OOP', 'Virtual environments'],
+    id: 'python', n: 1, title: 'Python', v: '--p1', status: 'live', href: '#py/route',
+    sub: 'The language everything else is written in, from the basics to concurrency.',
+    mods: ['Fundamentals', 'Objects and data types', 'Operators', 'Flow control', 'Built-in data types', 'Functions', 'Exceptions', 'Logging and debugging', 'Modules and packages', 'OOP foundations', 'Object relationships', 'Inheritance and MRO', 'Special methods', 'Iterators and generators', 'Regular expressions', 'File handling', 'Concurrency', 'Databases', 'Memory and GC', 'Pydantic'],
+    stats: '20 chapters · ~10 h',
   },
   {
     id: 'libs', n: 2, title: 'Python libraries', v: '--p3', status: 'soon',

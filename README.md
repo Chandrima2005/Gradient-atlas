@@ -1,15 +1,20 @@
-# Gradient Atlas · ML Materials
+# Gradient Atlas
 
-**Learn classical machine learning by building it, not memorising it.**
+**Learn data science end to end, from your first line of Python to GenAI.**
 
 🌐 **Live site:** https://gradient-atlas.chandrima-das.com
 
-Gradient Atlas turns a 24-chapter course on classical machine learning into an interactive study app. For each algorithm you see the maths, build it yourself in plain NumPy, then check that your version gives the same answer as scikit-learn.
+Gradient Atlas is one data science pathway in five stages: **Python → Python libraries → Machine learning → Deep learning → Generative AI** (LLMs, LangChain). Two stages are live now:
+
+| Stage | Course | Chapters | Reading |
+|---|---|---|---|
+| 1 | **Python**, from the fundamentals to concurrency, databases and Pydantic | 20 | ~10 h |
+| 3 | **Machine learning**: every classic algorithm built in NumPy, then checked against scikit-learn | 24 | ~16 h |
 
 You can use it in two ways:
 
-- **Learn everything.** Read all 24 chapters in order, from foundations to real-world practice (about 16 hours).
-- **Learn one topic fast.** Pick a target, such as Naive Bayes or Gradient Boosting, and the site works out the few chapters you need and skips the rest.
+- **Learn everything.** Follow the stages in order, chapter by chapter.
+- **Learn one topic fast.** Pick a target, such as Python decorators or gradient boosting, and the site works out the few chapters you need and skips the rest.
 
 ---
 
@@ -18,18 +23,19 @@ You can use it in two ways:
 | View | What it does |
 |---|---|
 | 🏠 **Home** | Explains the site. Its hero is a network with four clickable hubs, one per feature, and there are quick goal cards under "Only need one thing?" |
-| 🧭 **Route** | The ultimate data science pathway in five stages: Python → Python libraries → Machine learning → Deep learning → Generative AI (LLMs, LangChain). Click a stage to open its route map. Machine learning is live, and there you can pick any chapter as your goal to get the shortest reading route to it |
-| 📖 **Read** | A chapter reader with typeset maths, highlighted code, figures and clickable cross-references |
-| 🧠 **Recall** | Flashcards on a spaced-repetition schedule, plus multiple-choice quizzes for each chapter |
-| ⌨️ **Console** | A Python-style command line for moving around the site, e.g. `route(15)`, `search("kernel")`, `quiz(11)` |
+| 🧭 **Route** | The pathway drawn as one metro line with five stations. Click a live stage (Python or Machine learning) to open its route map, then pick any chapter as your goal to get the shortest reading route to it |
+| 📖 **Read** | Summary first: each chapter opens with a cheat sheet (every section in one line, plus the mistakes to watch for), and the full notes sit underneath, folded one section at a time. Switch between Python and ML in the sidebar |
+| 🧠 **Recall** | Flashcards on a spaced-repetition schedule, plus multiple-choice quizzes for each chapter, with a tab for each course |
+| ⌨️ **Console** | A Python-style command line. `search("decorator")` searches both courses; `course("python")` or `course("ml")` picks which course `open()`, `quiz()` and `path_to()` use |
 | 🎯 **Tour** | A 7-step guided tour of the main parts of the site |
 | 🌗 **Themes** | Dark (the default) and light, with progress saved in your browser |
 
 ### By the numbers
 
-| Chapters | Sections | Code cells | Figures | Cross-links | Flashcards | Quiz questions |
-|---|---|---|---|---|---|---|
-| 24 | 439 | 862 | 93 | 833 | 512 | 665 |
+| Course | Chapters | Sections | Code examples | Flashcards | Quiz questions |
+|---|---|---|---|---|---|
+| Python | 20 | 184 | 515 | 382 | 207 |
+| Machine learning | 24 | 439 | 862 | 512 | 665 |
 
 ---
 
@@ -136,13 +142,17 @@ clear()             clear the console
 
 ```
 .
-├── index.html        # the whole app (markup, styles, scripts)
-├── data/
+├── index.html        # page shell: header, menu, and links to the files below
+├── views/            # the HTML for each page (home, pathway, route map, reader…)
+├── css/              # styles, one file per page
+├── js/               # app code: core.js (courses and data), router.js, tracks.js, views/
+├── data/             # Machine learning course
 │   ├── manifest.json # chapters, parts, sections
 │   ├── ch00–ch25.json# chapter content (HTML)
 │   ├── graph.json    # section graph and chapter dependencies
 │   ├── cards.json    # flashcards and quiz questions
-│   └── search.json   # search index
+│   ├── search.json   # search index
+│   └── py/           # Python course: the same files, ch01–ch20
 ├── img/              # 93 figures taken from the notebooks
 ├── CNAME             # custom domain for GitHub Pages
 └── .nojekyll         # stops GitHub Pages from running Jekyll
@@ -193,7 +203,7 @@ The site uses Google Analytics 4 to count page views. Each view (e.g. `/home`, `
 
 ## 🙏 Credits
 
-- 📝 **Content** created by **Shayan Saha**
+- 📝 **Content** created by **Shayan Saha** (Machine learning) and **Sayan Porey** (Python)
 - 💻 **Website** designed and developed by **Chandrima Das**, with help from an AI coding assistant
 
 © 2026 Gradient Atlas · ML Materials. All rights reserved.

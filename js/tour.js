@@ -13,7 +13,7 @@ const Tour = (() => {
 
   /* ---------- helpers that put the site into the state a step needs ---------- */
   const TOP = () => G.nodes.filter(n => !n.hub).sort((a, b) => b.in - a.in)[0].id;
-  const view = v => { if (curView !== v) go(v === 'read' ? 'ch1' : v); };
+  const view = v => { if (curView !== v) go(v === 'read' ? 'py/ch1' : v); };
   const goGoals = () => go('route');
   const el = s => () => { const e = typeof s === 'function' ? s() : $(s); return e && e.getClientRects().length ? e : null; };
   const union = (...sels) => () => { const rs = sels.map(s => $(s)).filter(Boolean).map(e => e.getBoundingClientRect()); if (!rs.length) return null; const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom)); return { left: l, top: t, width: rr - l, height: b - t }; };
@@ -23,7 +23,7 @@ const Tour = (() => {
   steps = [
     { sec: 'Welcome', center: true, welcome: true,
       title: 'Welcome to Gradient Atlas',
-      body: `<p>Study notes for <b>classical machine learning</b>: 24 chapters where you build each algorithm yourself, then check it against scikit-learn, the library used at work.</p><p>This quick tour shows you the few things you need. It takes about 30 seconds.</p>`,
+      body: `<p>One data science pathway: <b>Python</b>, then <b>machine learning</b>, with deep learning and generative AI on the way. Learn it all in order, or just the topic you need.</p><p>This quick tour shows you the few things you need. It takes about 30 seconds.</p>`,
       before() { view('home'); scrollTo({ top: 0 }); } },
     { sec: 'Start here', target: el('#ctaRoute'),
       title: 'Start here',
@@ -47,7 +47,7 @@ const Tour = (() => {
       before() { view('home'); } },
     { sec: 'Done', center: true, finale: true,
       title: 'You\'re all set',
-      body: `<p>The easiest way to begin is to plan a route and follow it. New to all of this? Chapter 1 starts from zero.</p><p>Replay this tour any time from the <b>?</b> button at the top.</p>`,
+      body: `<p>The easiest way to begin is to plan a route and follow it. New to all of this? Python Chapter 1 starts from zero.</p><p>Replay this tour any time from the <b>?</b> button at the top.</p>`,
       before() { view('home'); scrollTo({ top: 0 }); } },
   ];
 
@@ -67,7 +67,7 @@ const Tour = (() => {
       const b = e.target.closest('[data-t]'); if (!b) return;
       const a = b.dataset.t;
       if (a === 'next') next(); else if (a === 'skip') end();
-      else if (a === 'ch1') { end(); go('ch1'); } else if (a === 'goals') { end(); goGoals(); } else if (a === 'metro') { end(); go('metro'); }
+      else if (a === 'ch1') { end(); go('py/ch1'); } else if (a === 'goals') { end(); goGoals(); } else if (a === 'metro') { end(); go('metro'); }
     });
   }
   function nudge() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); if (!pulse.hidden) { pulse.classList.remove('boost'); void pulse.offsetWidth; pulse.classList.add('boost'); } }

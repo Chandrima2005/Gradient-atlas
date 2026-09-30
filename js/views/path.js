@@ -27,7 +27,7 @@ const Path = {
       `<text class="pl-k" x="${x}" y="0">STAGE ${t.n} · <tspan class="${live ? 'pl-live' : ''}">${live ? '● LIVE' : 'COMING SOON'}</tspan></text>`,
       `<text class="pl-t" x="${x}" y="25">${esc(t.title)}</text>`,
       ...sub.map((l, i) => `<text class="pl-s" x="${x}" y="${47 + i * lh}">${esc(l)}</text>`),
-      `<text class="pl-m" x="${x}" y="${55 + sub.length * lh}">${live ? `${esc(t.stats)} · ` : ''}${t.mods.length} ${live ? 'topics' : 'planned stops'}</text>`,
+      `<text class="pl-m" x="${x}" y="${55 + sub.length * lh}">${live ? esc(t.stats) : t.mods.length + ' planned stops'}</text>`,
       `<text class="pl-go" x="${x}" y="${77 + sub.length * lh}">${live ? 'Open route map →' : 'Preview route →'}</text>`,
     ];
     const h = 77 + sub.length * lh;
