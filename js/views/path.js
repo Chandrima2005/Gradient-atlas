@@ -40,9 +40,10 @@ const Path = {
     // a pulsing arrow at the first station so it's clear the stations can be clicked
     s += `<g class="p-hint" aria-hidden="true">
       <circle class="p-ring" cx="${first.x}" cy="${first.y}" r="${r + 6}" fill="none" stroke="var(--accent)" stroke-width="3"/>
-      <text x="24" y="${first.y - 110}" font-size="15" font-weight="700" fill="var(--accent)">Click a station to see details</text>
-      <g class="p-arrow"><path d="M${first.x - 96},${first.y - 92} L${first.x - 25},${first.y - 17}" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M${first.x - 43},${first.y - 17} L${first.x - 24},${first.y - 15} L${first.x - 26},${first.y - 35}" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+      <defs><marker id="pArrowHead" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs>
+      <g class="p-pill"><rect x="22" y="${first.y - 132}" width="258" height="32" rx="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="151" y="${first.y - 111}" text-anchor="middle" font-size="13.5" font-weight="600" fill="var(--accent)">Click a station to see details</text></g>
+      <path class="p-flow" d="M${first.x - 70},${first.y - 98} Q${first.x - 78},${first.y - 36} ${first.x - 30},${first.y - 20}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 6" marker-end="url(#pArrowHead)"/></g>`;
     const ly = last.y + 104;
     s += `<g transform="translate(60,${ly})" font-size="13" fill="var(--muted)"><circle cx="8" cy="-4" r="8" fill="var(--p1)" stroke="var(--p1)" stroke-width="3"/><text x="24" y="0">live: open its route map</text><circle cx="228" cy="-4" r="8" fill="var(--panel)" stroke="var(--p3)" stroke-width="3" stroke-dasharray="3 3"/><text x="244" y="0">coming soon: see what's planned</text></g>`;
     const svg = $('#pathSvg'); svg.setAttribute('viewBox', `0 0 ${endX + 40} ${ly + 24}`); svg.innerHTML = s;

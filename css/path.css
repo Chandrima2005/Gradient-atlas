@@ -21,9 +21,12 @@
 #v-path .metro-map{align-self:start}
 /* pulsing hint that the stations are clickable */
 #pathSvg .p-hint{pointer-events:none}
-#pathSvg .p-arrow{animation:pArrow 1.3s ease-in-out infinite}
+#pathSvg .p-flow{animation:pFlow 1.1s linear infinite}
+#pathSvg .p-pill{animation:pBob 2.4s ease-in-out infinite}
+@keyframes pFlow{to{stroke-dashoffset:-12}}
+@keyframes pBob{50%{transform:translateY(-3px)}}
 #pathSvg .p-ring{transform-box:fill-box;transform-origin:center;animation:pRing 1.8s ease-out infinite}
 @keyframes pArrow{0%,100%{transform:translate(0,0);opacity:.55}50%{transform:translate(6px,5px);opacity:1}}
 @keyframes pRing{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
 #pathSvg.focus .p-hint{display:none}
-@media (prefers-reduced-motion:reduce){#pathSvg .p-arrow,#pathSvg .p-ring{animation:none}}
+@media (prefers-reduced-motion:reduce){#pathSvg .p-flow,#pathSvg .p-pill,#pathSvg .p-ring{animation:none}}
