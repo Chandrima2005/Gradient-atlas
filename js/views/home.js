@@ -1,9 +1,7 @@
 // home page: a short introduction, the four-tools network and the five stages
 import { $, $$, esc, css } from '../core.js';
 import { curView, go } from '../router.js';
-import { TRACKS } from '../tracks.js';
 
-const hrefOf = t => t.status === 'live' ? t.href : `#route-${t.id}`;
 
 /* ======================= FOUR-TOOLS NETWORK ======================= */
 const FeatViz = {
@@ -98,16 +96,6 @@ const Home = {
   render() {
     if (this.built) return; this.built = true;
     FeatViz.init();
-    $('#stageGrid').innerHTML = TRACKS.map(t => {
-      const live = t.status === 'live';
-      return `<li class="stage-card ${live ? 'live' : 'soon'}" style="--pc:var(${t.v})"><a href="${hrefOf(t)}">
-        <span class="num">${t.n}</span>
-        <h3>${esc(t.title)}</h3>
-        <p>${esc(t.sub)}</p>
-        <span class="meta">${live ? `<b>● Live</b> · ${esc(t.stats || '')}` : 'Coming soon'}</span>
-        <span class="go">${live ? 'Open →' : 'See what\'s planned →'}</span>
-      </a></li>`;
-    }).join('');
   }
 };
 

@@ -26,7 +26,7 @@
 @media (max-width:1000px){.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.stages::before{display:none}}
 @media (max-width:600px){.stages{grid-template-columns:minmax(0,1fr)}.btn.big{width:100%;justify-content:center}}
 /* footer */
-.sitefoot{margin:64px calc(-1 * clamp(16px,4vw,48px)) -70px;padding:18px clamp(16px,4vw,48px) 22px;border-top:1px solid var(--line);background:var(--foot);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.sitefoot{margin:40px calc(-1 * clamp(16px,4vw,48px)) 0;padding:18px clamp(16px,4vw,48px) 22px;border-top:1px solid var(--line);background:var(--foot);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .sitefoot b{color:var(--ink-2);font-weight:500}
 .sitefoot i{font-style:normal;margin:0 6px;opacity:.6}
 @media (max-width:760px){.sitefoot{flex-direction:column}}
@@ -52,10 +52,16 @@
 .hero-art figcaption{text-align:center}
 .fv-stage{max-height:460px}
 /* fit the first screen on shorter laptop displays: size the network by the window height too */
-.home{padding-block:clamp(20px,4vh,56px) 70px}
+.home{padding-block:clamp(20px,4vh,56px) 0}
 .hero1 h1{font-size:clamp(30px,min(3.8vw,6.4vh),52px)}
 .hero1 .lead{font-size:clamp(16px,min(1.5vw,2.4vh),20px);margin-bottom:24px}
 .hero-art.fv{padding:12px 14px 10px}
 .fv-stage{width:min(100%,56vh,460px);max-height:none;margin:0 auto}
 .fv-legend{margin:4px 0 6px}
 .stages-sec{margin-top:clamp(40px,7vh,88px)}
+
+/* home is one screen: the hero sits in the middle, the footer at the bottom */
+.home{min-height:calc(100dvh - var(--bar) - env(safe-area-inset-top,0px));display:flex;flex-direction:column}
+.home > .hero{flex:1;align-content:center}
+@media (max-width:760px){.home{min-height:calc(100dvh - var(--bar) - 64px)}}
+.sitefoot{background:transparent;margin-inline:0;padding-inline:0}
