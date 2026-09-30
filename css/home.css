@@ -51,3 +51,11 @@
 
 .hero-art figcaption{text-align:center}
 .fv-stage{max-height:460px}
+/* fit the first screen on shorter laptop displays: size the network by the window height too */
+.home{padding-block:clamp(20px,4vh,56px) 70px}
+.hero1 h1{font-size:clamp(30px,min(3.8vw,6.4vh),52px)}
+.hero1 .lead{font-size:clamp(16px,min(1.5vw,2.4vh),20px);margin-bottom:24px}
+.hero-art.fv{padding:12px 14px 10px}
+.fv-stage{width:min(100%,56vh,460px);max-height:none;margin:0 auto}
+.fv-legend{margin:4px 0 6px}
+.stages-sec{margin-top:clamp(40px,7vh,88px)}
