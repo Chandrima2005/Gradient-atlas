@@ -29,4 +29,7 @@
 @keyframes pArrow{0%,100%{transform:translate(0,0);opacity:.55}50%{transform:translate(6px,5px);opacity:1}}
 @keyframes pRing{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
 #pathSvg.focus .p-hint{display:none}
-@media (prefers-reduced-motion:reduce){#pathSvg .p-flow,#pathSvg .p-pill,#pathSvg .p-ring{animation:none}}
+/* light dots drifting along every line, on the pathway and on each course's route map */
+.ln-flow{fill:none;stroke:#fff;stroke-opacity:.8;stroke-width:3.5;stroke-linecap:round;stroke-dasharray:1 21;pointer-events:none;animation:lnFlow 1.6s linear infinite}
+@keyframes lnFlow{to{stroke-dashoffset:-22}}
+@media (prefers-reduced-motion:reduce){#pathSvg .p-flow,#pathSvg .p-pill,#pathSvg .p-ring,.ln-flow{animation:none}}

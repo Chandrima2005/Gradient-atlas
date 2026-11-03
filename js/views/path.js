@@ -4,6 +4,8 @@ import { $, $$, esc } from '../core.js';
 import { TRACKS, TRACK } from '../tracks.js';
 import { toPath } from '../paths.js';
 
+// light dots that drift along a line, so the map reads as moving (css/path.css)
+const flow = d => `<path class="ln-flow" d="${d}"/>`;
 const hrefOf = t => toPath(t.status === 'live' ? t.href : `route-${t.id}`);
 
 const Path = {
@@ -19,13 +21,14 @@ const Path = {
     let s = '';
     // lead-in before stage 1 and a terminus after stage 5
     const first = P[0], last = P[P.length - 1], endX = last.x + 150;
-    s += `<g class="line" data-id="${first.t.id}"><path d="M60,${first.y} H${first.x}" stroke="var(${first.t.v})" stroke-width="8" stroke-linecap="round" fill="none"/></g>`;
+    s += `<g class="line" data-id="${first.t.id}"><path d="M60,${first.y} H${first.x}" stroke="var(${first.t.v})" stroke-width="8" stroke-linecap="round" fill="none"/>${flow(`M60,${first.y} H${first.x}`)}</g>`;
     P.forEach((p, k) => {
       if (!k) return;
       const a = P[k - 1], flat = (p.x - a.x - (p.y - a.y)) / 2;
-      s += `<g class="line" data-id="${p.t.id}"><path d="M${a.x},${a.y} H${a.x + flat} L${p.x - flat},${p.y} H${p.x}" fill="none" stroke="var(${p.t.v})" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+      const d = `M${a.x},${a.y} H${a.x + flat} L${p.x - flat},${p.y} H${p.x}`;
+      s += `<g class="line" data-id="${p.t.id}"><path d="${d}" fill="none" stroke="var(${p.t.v})" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>${flow(d)}</g>`;
     });
-    s += `<g class="line" data-id="${last.t.id}"><path d="M${last.x},${last.y} H${endX}" stroke="var(${last.t.v})" stroke-width="8" stroke-linecap="round" fill="none"/><rect x="${endX - 3}" y="${last.y - 14}" width="6" height="28" rx="3" fill="var(${last.t.v})"/></g>`;
+    s += `<g class="line" data-id="${last.t.id}"><path d="M${last.x},${last.y} H${endX}" stroke="var(${last.t.v})" stroke-width="8" stroke-linecap="round" fill="none"/>${flow(`M${last.x},${last.y} H${endX}`)}<rect x="${endX - 3}" y="${last.y - 14}" width="6" height="28" rx="3" fill="var(${last.t.v})"/></g>`;
     // stations
     P.forEach(({ t, x, y }) => {
       const live = t.status === 'live', col = `var(${t.v})`;

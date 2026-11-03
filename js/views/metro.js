@@ -51,7 +51,7 @@ const Metro = {
       if (a.y === b.y) d = `M${a.x},${a.y} H${b.x}`;
       else { const dy = b.y - a.y, dx = b.x - a.x, flat = (dx - dy) / 2; d = `M${a.x},${a.y} H${a.x + flat} L${b.x - flat},${b.y} H${b.x}`; }
       const dim = on && !(on.has(order[i]) && on.has(order[i + 1])) ? .28 : 1;
-      s += `<path d="${d}" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="${dim}"/>`;
+      s += `<path d="${d}" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="${dim}"/><path class="ln-flow" d="${d}" opacity="${dim}"/>`;
     }
     // line names at left of each row
     for (const p of M.parts) { const first = P[p.chapters[0]]; if (p.key === '0' || p.key === 'A') continue; s += `<text x="${first.x - 16}" y="${first.y + 4}" text-anchor="end" font-size="11" fill="${`var(${PV[p.key]})`}" font-weight="600">${p.key}</text>`; }
