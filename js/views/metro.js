@@ -2,6 +2,7 @@
 import { $, esc, store, PV, pad2, chLabel, M, G, byN, partOf, done, C, L, K, inCourse } from '../core.js';
 import { route, go, goC } from '../router.js';
 import { rank } from './console.js';
+import { toPath } from '../paths.js';
 
 /* ======================= METRO ======================= */
 const Metro = {
@@ -12,7 +13,7 @@ const Metro = {
     const sel = $('#dest');
     sel.innerHTML = `<option value="">Choose a chapter…</option>` + M.chapters.filter(c => inCourse(c.n)).map(c => `<option value="${c.n}">${pad2(c.n)} · ${esc(c.title)}</option>`).join('');
     sel.onchange = () => sel.value ? goC('route-' + sel.value) : this.setRoute(null);
-    $('#clearRoute').onclick = () => { this.setRoute(null); history.replaceState(null, '', C.id === 'ml' ? '#route-ml' : L('route')); };
+    $('#clearRoute').onclick = $('#mapClear').onclick = () => { this.setRoute(null); history.replaceState(history.state, '', toPath(C.id === 'ml' ? 'route-ml' : 'py/route')); };
     // interchange strength: incoming refs from other parts
     this.xin = {};
     for (const a in G.deps) for (const b in G.deps[a]) if (partOf[+a] !== partOf[+b]) this.xin[b] = (this.xin[b] || 0) + G.deps[a][b];
@@ -40,6 +41,7 @@ const Metro = {
   },
   setRoute(t) { if (t && !inCourse(t)) t = null; this.target = t; store.set(K('route'), t); if (t) $('#dest').value = t; else $('#dest').value = ''; this.render(); },
   render() {
+    $('#mapClear').hidden = !this.target;
     const svg = $('#metroSvg'), P = this.pos, rt = this.target ? this.compute(this.target) : null, on = rt ? new Set(rt.map(s => s.n)) : null;
     const col = n => `var(${PV[partOf[n]]})`;
     let s = '';

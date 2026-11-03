@@ -8,6 +8,8 @@
 .planner select{height:38px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-family:var(--f-mono);font-size:13px;padding:0 10px;max-width:100%}
 .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .metro-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}
+.metro-mapwrap{position:relative;min-width:0}
+.map-clear{position:absolute;top:12px;right:12px;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .metro-map{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;padding:8px}
 #metroSvg{display:block;width:100%;min-width:980px;height:auto}
 #metroSvg text{font-family:var(--f-mono)}

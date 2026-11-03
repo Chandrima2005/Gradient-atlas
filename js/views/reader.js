@@ -64,9 +64,12 @@ const Reader = {
     const el = $('#rtoc');
     el.style.setProperty('--pc', `var(${PV[c.part]})`);
     const tabs = `<div class="ctabs" role="tablist" aria-label="Course">${Object.values(COURSES).sort((a, b) => a.stage - b.stage).map(x => `<a role="tab" href="${LC(x.id, 'ch' + store.get(x.id === 'ml' ? 'lastCh' : x.id + '.lastCh', x.first))}" class="${x.id === C.id ? 'on' : ''}" aria-selected="${x.id === C.id}">${x.id === 'ml' ? 'ML' : x.name}</a>`).join('')}</div>`;
-    el.innerHTML = `${tabs}<select id="chsel" aria-label="${C.name} chapter">${M.chapters.map(x => `<option value="${x.n}" ${x.n === c.n ? 'selected' : ''}>${C.id === 'ml' && x.n === 25 ? 'A' : pad2(x.n)} · ${esc(x.title)}${done.has(x.n) ? ' ✓' : ''}</option>`).join('')}</select>
+    const back = `<a class="rback" id="rback" href="${toPath(C.id === 'ml' ? 'route-ml' : 'py/route')}" aria-label="Back"><span aria-hidden="true">←</span> Back</a>`;
+    el.innerHTML = `${back}${tabs}<select id="chsel" aria-label="${C.name} chapter">${M.chapters.map(x => `<option value="${x.n}" ${x.n === c.n ? 'selected' : ''}>${C.id === 'ml' && x.n === 25 ? 'A' : pad2(x.n)} · ${esc(x.title)}${done.has(x.n) ? ' ✓' : ''}</option>`).join('')}</select>
       <div class="links">${c.sections.map(s => `<a href="${L(s.id)}" class="l${s.lvl} ${isRead(s.id) ? 'seen' : ''}" data-id="${s.id}"><span class="d"></span><span>${s.num} ${esc(s.title)}</span></a>`).join('')}</div>`;
     $('#chsel').onchange = e => goC('ch' + e.target.value);
+    // back to the page you came from inside the site; from a search result or a shared link, to the route map
+    $('#rback').onclick = e => { if (history.state && history.state.app) { e.preventDefault(); history.back(); } };
   },
   watch() {
     if (this.spy) this.spy.disconnect();

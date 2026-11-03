@@ -1,6 +1,9 @@
 /* ---------- READER ---------- */
 .reader{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1260px;margin:0 auto}
 .rtoc{position:sticky;top:calc(var(--bar) + env(safe-area-inset-top,0px));height:calc(100dvh - var(--bar));overflow-y:auto;padding:26px 14px 40px 20px;font-family:var(--f-mono);font-size:11.8px;border-right:1px solid var(--line)}
+.rtoc a.rback{display:flex;width:fit-content;align-items:center;gap:6px;margin:0 0 14px;padding:6px 12px 6px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--panel);color:var(--ink-2);font-size:12px}
+.rtoc a.rback span{font-size:15px;line-height:1}
+.rtoc a.rback:hover{color:var(--accent);border-color:var(--accent)}
 .rtoc select{width:100%;height:36px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-family:var(--f-mono);font-size:12px;margin-bottom:16px;padding:0 6px}
 .rtoc a{display:flex;gap:8px;padding:4px 6px;border-radius:6px;color:var(--muted);text-decoration:none;line-height:1.4}
 .rtoc a .d{width:6px;height:6px;border-radius:50%;border:1.5px solid var(--muted);flex:none;margin-top:6px}

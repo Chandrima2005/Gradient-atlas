@@ -81,7 +81,7 @@ addEventListener('popstate', () => { served = false; route(); dispatchEvent(new 
 const go = h => {
   if (h !== 'console') document.getElementById('cmd').blur();
   served = false;
-  if (toKey() !== h) history.pushState(null, '', toPath(h));
+  if (toKey() !== h) history.pushState({ app: 1 }, '', toPath(h));   // { app } lets a Back button tell an in-app page from an outside one
   route();
   dispatchEvent(new Event('pageview'));
 };
