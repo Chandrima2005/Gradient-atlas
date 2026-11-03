@@ -6,6 +6,17 @@
 .planner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
 .planner label{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .planner select{height:38px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-family:var(--f-mono);font-size:13px;padding:0 10px;max-width:100%}
+/* no destination yet: the picker pulses so people find the route planner, not just the stations */
+.planner .tag{display:none;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.planner.wait label{color:var(--accent);font-weight:600}
+.planner.wait .tag{display:inline-block}
+.planner.wait select{border:2px solid var(--accent);animation:destPulse 1.8s ease-out infinite}
+@keyframes destPulse{0%{box-shadow:0 0 0 0 var(--accent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+.map-hint{position:absolute;top:12px;left:12px;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 14px;border:1.5px solid var(--accent);border-radius:999px;background:linear-gradient(var(--accent-soft),var(--accent-soft)),var(--panel);color:var(--accent);font-family:var(--f-mono);font-size:12.5px;font-weight:600;cursor:pointer;animation:hintBob 2.4s ease-in-out infinite}
+.map-hint span{font-size:15px}
+.map-hint:hover{background:var(--accent);color:var(--accent-ink)}
+@keyframes hintBob{50%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.planner.wait select,.map-hint{animation:none}}
 .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .metro-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}
 .metro-mapwrap{position:relative;min-width:0}
