@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Operators and Expressions – Python Chapter 3 | Gradient Atlas</title>
+<meta name="description" content="Operator categories and how expressions are evaluated.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python/03-operators-and-expressions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Operators and Expressions – Python Chapter 3 | Gradient Atlas">
+<meta property="og:description" content="Operator categories and how expressions are evaluated.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python/03-operators-and-expressions/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Operators and Expressions", "headline": "Operators and Expressions", "description": "Operator categories and how expressions are evaluated.", "url": "https://gradient-atlas.chandrima-das.com/python/03-operators-and-expressions/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT21M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for data science", "url": "https://gradient-atlas.chandrima-das.com/python/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python", "item": "https://gradient-atlas.chandrima-das.com/python/"}, {"@type": "ListItem", "position": 4, "name": "Operators and Expressions", "item": "https://gradient-atlas.chandrima-das.com/python/03-operators-and-expressions/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/python/">Python</a> › Chapter 3</p>
+<h1><small>Python · Chapter 3</small>Operators and Expressions</h1>
+<p class="lead">Operator categories and how expressions are evaluated.</p>
+<p class="cta"><a class="sbtn" href="/#py/ch3">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s3-1">3.1 Operator Categories</a></li><li class="l3"><a href="#s3-2">3.2 Precedence and Associativity</a></li></ol></nav>
+<article class="body"><div class="md"><h3 id="s3-1">3.1 Operator Categories</h3>
+<p>Python's operators fall into 8 categories — each covered in its own sub-section below,
+with the operator symbols and a simple example.</p>
+<ul>
+<li>3.1.1 Arithmetic Operators</li>
+<li>3.1.2 Relational Operators</li>
+<li>3.1.3 Boolean Operators</li>
+<li>3.1.4 Non-Boolean Operators</li>
+<li>3.1.5 Bitwise Operators</li>
+<li>3.1.6 Assignment Operators</li>
+<li>3.1.7 Ternary Operators</li>
+<li>3.1.8 Special Operators — Identity and Membership</li>
+</ul></div>
+<div class="md"><h4 id="s3-1-1">3.1.1 Arithmetic Operators</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>Addition</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Subtraction</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>Multiplication</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Division — always returns a <code>float</code>, even for exact division</td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td>Floor division — divides then rounds <em>down</em> (towards <code>-∞</code>)</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Modulus — remainder left over after <code>//</code> division</td>
+</tr>
+<tr>
+<td><code>**</code></td>
+<td>Exponentiation</td>
+</tr>
+</tbody>
+</table></div>
+<p>Run the cell below and compare each output to the operator used.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a + b  =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># addition</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a - b  =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># subtraction</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a * b  =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># multiplication</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a / b  =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># division -&gt; always a float</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a // b =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">//</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># floor division -&gt; rounds down to whole number</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a % b  =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">%</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># modulus -&gt; remainder of a / b</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a ** b =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">**</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># exponent -&gt; a raised to the power b</span>
+</code></pre><div class="outs"><pre class="out-text">a + b  = 9
+a - b  = 5
+a * b  = 14
+a / b  = 3.5
+a // b = 3
+a % b  = 1
+a ** b = 49</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — <code>//</code> and <code>%</code> round towards <code>-∞</code>, not towards zero, so results with a
+negative operand can be surprising:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>   <span class="c1"># -4 1  -&gt; NOT -3, -1 (which is what &quot;towards zero&quot; would give)</span>
+</code></pre><div class="outs"><pre class="out-text">-4 1</pre></div></div>
+<div class="md"><p>Beyond numbers, <code>+</code> and <code>*</code> also work on <strong>sequences</strong> — <code>str</code>, <code>list</code>, <code>tuple</code> — but they
+mean something different there: <code>+</code> <strong>concatenates</strong> (joins two sequences into a new one)
+and <code>*</code> <strong>repeats</strong> (builds a new sequence by repeating the operand). These are separate
+from the numeric arithmetic above — <code>-</code>, <code>/</code>, <code>//</code>, <code>%</code> aren't defined for sequences at all.</p>
+<p><strong>Going deeper</strong> — this isn't hardcoded into <code>+</code>/<code>*</code>; <code>str</code>/<code>list</code>/<code>tuple</code> implement it
+themselves via <code>__add__</code>/<code>__mul__</code> — operator overloading, covered in <a class="xref" href="/python/13-special-methods-overloading-and-overriding/#s13-2">13.2</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ab&quot;</span> <span class="o">+</span> <span class="s2">&quot;cd&quot;</span><span class="p">)</span>   <span class="c1"># abcd -&gt; concatenation, not addition</span>
+<span class="nb">print</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>        <span class="c1"># [0, 0, 0, 0, 0] -&gt; repetition, not multiplication</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>       <span class="c1"># a 40-character separator line, handy for printed output</span>
+</code></pre><div class="outs"><pre class="out-text">abcd
+[0, 0, 0, 0, 0]
+----------------------------------------</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — CLI output formatting and building SQL.</strong> <code>"-" * 60</code> for a readable
+separator line in command-line tool output, or <code>", ".join(["?"] * len(values))</code> to
+build a batched SQL <code>IN (?, ?, ?)</code> clause with the right number of placeholders (<a class="xref" href="/python/18-database-connectivity-pdbc/#s18-4">18.4</a>),
+both lean directly on sequence repetition/concatenation rather than a loop.</p></div>
+<div class="md"><h4 id="s3-1-2">3.1.2 Relational Operators</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>==</code></td>
+<td>Equal to</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>Not equal to</td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>Greater than</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>Less than</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>Greater than or equal to</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>Less than or equal to</td>
+</tr>
+</tbody>
+</table></div>
+<p>These compare <strong>value</strong> and always produce a <code>bool</code> — don't confuse this with <code>is</code>, which
+compares object identity instead (<a class="xref" href="/python/03-operators-and-expressions/#s3-1-8">3.1.8</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a == b:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># equal?</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a != b:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># not equal?</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &gt; b :&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># greater than?</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &lt; b :&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># less than?</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &gt;= b:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># greater than or equal?</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &lt;= b:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># less than or equal?</span>
+</code></pre><div class="outs"><pre class="out-text">a == b: False
+a != b: True
+a &gt; b : True
+a &lt; b : False
+a &gt;= b: True
+a &lt;= b: False</pre></div></div>
+<div class="md"><p>Comparisons can also be <strong>chained</strong>: <code>a &lt; b &lt; c</code> is not evaluated left-to-right as
+<code>(a &lt; b) &lt; c</code> — Python treats it as <code>a &lt; b and b &lt; c</code>, except each operand (<code>b</code> here) is
+evaluated only <strong>once</strong>. Plenty of languages don't have this at all; it reads naturally and
+avoids repeating a subexpression.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span>   <span class="c1"># True  -&gt; equivalent to (1 &lt; 5) and (5 &lt; 10)</span>
+<span class="nb">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>    <span class="c1"># False -&gt; 5 &lt; 3 is False, so the whole chain is False</span>
+</code></pre><div class="outs"><pre class="out-text">True
+False</pre></div></div>
+<div class="md"><h4 id="s3-1-3">3.1.3 Boolean Operators</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>and</code></td>
+<td><code>True</code> only if <strong>both</strong> operands are <code>True</code></td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td><code>True</code> if <strong>at least one</strong> operand is <code>True</code></td>
+</tr>
+<tr>
+<td><code>not</code></td>
+<td>Flips a <code>True</code>/<code>False</code> value</td>
+</tr>
+</tbody>
+</table></div>
+<p>With <code>bool</code> operands the result is always a <code>bool</code> — 3.1.4 covers what happens when the
+operands aren't <code>bool</code> at all.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True and False:&quot;</span><span class="p">,</span> <span class="kc">True</span> <span class="ow">and</span> <span class="kc">False</span><span class="p">)</span>   <span class="c1"># both must be True -&gt; False</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True or False :&quot;</span><span class="p">,</span> <span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="p">)</span>    <span class="c1"># either can be True -&gt; True</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;not True      :&quot;</span><span class="p">,</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">)</span>          <span class="c1"># flips it -&gt; False</span>
+</code></pre><div class="outs"><pre class="out-text">True and False: False
+True or False : True
+not True      : False</pre></div></div>
+<div class="md"><p>The same <code>and</code> / <code>or</code> operators also work on <strong>non-<code>bool</code></strong> operands. Instead of a <code>bool</code>,
+they return one of the actual <strong>operands</strong> — whichever one decided the outcome — based on
+truthiness:</p>
+<p><strong>Note</strong> — "truthy" means a value that acts like <code>True</code> in a boolean context (e.g.
+inside an <code>if</code>); "falsy" means it acts like <code>False</code>. Every object is one or the other — the
+full list of falsy values is in <a class="xref" href="/python/04-flow-control/#s4-1">4.1</a>.</p>
+<ul>
+<li><code>and</code> evaluates left to right and stops at the first <strong>falsy</strong> value (or returns the last
+  value if every operand is truthy).</li>
+<li><code>or</code> evaluates left to right and stops at the first <strong>truthy</strong> value (or returns the last
+  value if every operand is falsy).</li>
+</ul>
+<p>This is called <strong>short-circuit evaluation</strong> — the second operand is never even evaluated
+once the result is already decided. It's commonly used to supply a default value, e.g.
+<code>name = user_input or "Guest"</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;3 and 5:&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="ow">and</span> <span class="mi">5</span><span class="p">)</span>   <span class="c1"># both truthy -&gt; `and` returns the LAST one -&gt; 5</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;0 and 5:&quot;</span><span class="p">,</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mi">5</span><span class="p">)</span>   <span class="c1"># 0 is falsy   -&gt; `and` stops early, returns it -&gt; 0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;3 or 5 :&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="ow">or</span> <span class="mi">5</span><span class="p">)</span>    <span class="c1"># 3 is truthy  -&gt; `or` stops early, returns it -&gt; 3</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;0 or 5 :&quot;</span><span class="p">,</span> <span class="mi">0</span> <span class="ow">or</span> <span class="mi">5</span><span class="p">)</span>    <span class="c1"># 0 is falsy   -&gt; `or` moves on, returns the next -&gt; 5</span>
+</code></pre><div class="outs"><pre class="out-text">3 and 5: 5
+0 and 5: 0
+3 or 5 : 3
+0 or 5 : 5</pre></div></div>
+<div class="md"><h4 id="s3-1-5">3.1.5 Bitwise Operators</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&amp;</code></td>
+<td>AND — bit set only where <strong>both</strong> operands have a <code>1</code></td>
+</tr>
+<tr>
+<td><code>\|</code></td>
+<td>OR — bit set where <strong>either</strong> operand has a <code>1</code></td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>XOR — bit set where the operands <strong>differ</strong></td>
+</tr>
+<tr>
+<td><code>~</code></td>
+<td>NOT — flips every bit</td>
+</tr>
+<tr>
+<td><code>&lt;&lt;</code></td>
+<td>Left shift — shifts bits left (equivalent to multiplying by <code>2ⁿ</code>)</td>
+</tr>
+<tr>
+<td><code>&gt;&gt;</code></td>
+<td>Right shift — shifts bits right (equivalent to floor-dividing by <code>2ⁿ</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>These operate directly on an integer's binary representation, and are common in flags,
+bitmasks and low-level/performance-sensitive code.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span>               <span class="c1"># in binary: a = 101, b = 011</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &amp; b :&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># AND  -&gt; bit set only where BOTH have 1  -&gt; 001 = 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a | b :&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">|</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># OR   -&gt; bit set where EITHER has 1      -&gt; 111 = 7</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a ^ b :&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">^</span> <span class="n">b</span><span class="p">)</span>    <span class="c1"># XOR  -&gt; bit set where they DIFFER       -&gt; 110 = 6</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;~a    :&quot;</span><span class="p">,</span> <span class="o">~</span><span class="n">a</span><span class="p">)</span>       <span class="c1"># NOT  -&gt; flips all bits                  -&gt; -6</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &lt;&lt; 1:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># shift bits left  (x2)                   -&gt; 10</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a &gt;&gt; 1:&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># shift bits right (/2, rounded down)      -&gt; 2</span>
+</code></pre><div class="outs"><pre class="out-text">a &amp; b : 1
+a | b : 7
+a ^ b : 6
+~a    : -6
+a &lt;&lt; 1: 10
+a &gt;&gt; 1: 2</pre></div></div>
+<div class="md"><p>A common real use of bitwise operators is <strong>flags</strong>: pack several boolean options into a
+single integer using distinct powers of two, combine them with <code>|</code>, and test for one with
+<code>&amp;</code>. Separately — <code>~x</code> flips every bit, which for signed integers works out to
+<code>~x == -(x + 1)</code>; that's why <code>~5</code> above is <code>-6</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">READ</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># 0b001</span>
+<span class="n">WRITE</span> <span class="o">=</span> <span class="mi">2</span>    <span class="c1"># 0b010</span>
+<span class="n">EXEC</span> <span class="o">=</span> <span class="mi">4</span>     <span class="c1"># 0b100</span>
+
+<span class="n">perms</span> <span class="o">=</span> <span class="n">READ</span> <span class="o">|</span> <span class="n">WRITE</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">perms</span><span class="p">)</span>                <span class="c1"># 3     -&gt; READ and WRITE both set</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">perms</span> <span class="o">&amp;</span> <span class="n">READ</span><span class="p">))</span>   <span class="c1"># True  -&gt; READ bit is set</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">perms</span> <span class="o">&amp;</span> <span class="n">EXEC</span><span class="p">))</span>   <span class="c1"># False -&gt; EXEC bit is not set</span>
+</code></pre><div class="outs"><pre class="out-text">3
+True
+False</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — real permission systems.</strong> Unix file permissions (<code>rwx</code> bits), Django
+REST Framework's permission flags, and feature-flag systems in backend config all pack
+several independent boolean options into one integer using exactly this bitmask
+pattern — combining with <code>|</code>, checking with <code>&amp;</code>, precisely as shown above.</p></div>
+<div class="md"><h4 id="s3-1-6">3.1.6 Assignment Operators</h4>
+<p><code>=</code> binds a name to an object. The augmented forms update and reassign in one step:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Equivalent to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+=</code></td>
+<td><code>x = x + y</code></td>
+</tr>
+<tr>
+<td><code>-=</code></td>
+<td><code>x = x - y</code></td>
+</tr>
+<tr>
+<td><code>*=</code></td>
+<td><code>x = x * y</code></td>
+</tr>
+<tr>
+<td><code>/=</code></td>
+<td><code>x = x / y</code></td>
+</tr>
+<tr>
+<td><code>//=</code></td>
+<td><code>x = x // y</code></td>
+</tr>
+<tr>
+<td><code>%=</code></td>
+<td><code>x = x % y</code></td>
+</tr>
+<tr>
+<td><code>**=</code></td>
+<td><code>x = x ** y</code></td>
+</tr>
+<tr>
+<td><code>&amp;=</code>, <code>\|=</code>, <code>^=</code>, <code>&lt;&lt;=</code>, <code>&gt;&gt;=</code></td>
+<td>same idea, for the bitwise operators (<a class="xref" href="/python/03-operators-and-expressions/#s3-1-5">3.1.5</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>=</code> also supports <strong>chained assignment</strong> (<code>a = b = c = 5</code>) and <strong>multiple
+assignment/unpacking</strong> (<code>a, b = 1, 2</code>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="n">b</span> <span class="o">=</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>     <span class="c1"># chained assignment -&gt; all three point to the same object</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>         <span class="c1"># unpacking -&gt; x gets 1, y gets 2</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">n</span> <span class="o">+=</span> <span class="mi">3</span>               <span class="c1"># same as: n = n + 3</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>             <span class="c1"># 8</span>
+</code></pre><div class="outs"><pre class="out-text">5 5 5
+1 2
+8</pre></div></div>
+<div class="md"><p>For <strong>mutable</strong> types like <code>list</code>, <code>+=</code> mutates the same object in place; plain <code>x = x + [...]</code>
+always builds a brand-new object. Compare the two below:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+<span class="n">x</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span>              <span class="c1"># in-place: mutates the same object</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;y after += :&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>   <span class="c1"># [1, 2, 3] -&gt; y sees the change too</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span>           <span class="c1"># NOT in-place: builds a new list</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;y after x=x+[3]:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>   <span class="c1"># [1, 2] -&gt; y is unaffected</span>
+</code></pre><div class="outs"><pre class="out-text">y after += : [1, 2, 3]
+y after x=x+[3]: [1, 2]</pre></div></div>
+<div class="md"><p><strong>Going deeper</strong> — <code>+=</code> isn't magic: Python first looks for an <code>__iadd__</code> method on the left
+operand. A mutable type like <code>list</code> defines it to mutate in place and return <code>self</code> — which
+is why <code>y</code> saw the change above. If <code>__iadd__</code> isn't defined (as for <code>int</code>, <code>str</code>, <code>tuple</code>),
+Python falls back to <code>__add__</code> and rebinds the name to a brand-new object instead. 13.2
+covers operator overloading in full.</p></div>
+<div class="md"><p><code>:=</code> — the <strong>walrus operator</strong> — is also an assignment operator, but unlike
+<code>=</code> it's usable <em>inside</em> an expression: it assigns a value to a name and produces that same
+value as the expression's result. Handy when you'd otherwise compute something once just to
+test it, then use it again right after.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># 3 -&gt; n was assigned inside the condition and is still usable here</span>
+</code></pre><div class="outs"><pre class="out-text">3</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — reading a stream in fixed-size chunks.</strong> <code>while (chunk := f.read(8192)):</code>
+is the standard production idiom for reading a large file, a socket, or a file-upload
+body in bounded chunks instead of all at once — the walrus operator lets the read and
+the "did we get anything?" check happen in one line instead of two.</p></div>
+<div class="md"><h4 id="s3-1-7">3.1.7 Ternary Operators</h4>
+<p>A conditional <strong>expression</strong> — not a statement — that picks one of two values inline:
+<code>value_if_true if condition else value_if_false</code>. Because it's an expression (it evaluates
+to a value), it can be used anywhere a value is expected — assignment, a function argument,
+inside an f-string — a full <code>if</code>/<code>else</code> <em>statement</em> cannot. Python has no separate <code>?:</code>
+symbol like C/Java/JavaScript; it spells the same idea out with keywords instead.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;even&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;odd&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>                             <span class="c1"># odd</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># ternaries can be chained for more than 2 outcomes</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;positive&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;negative&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;zero&quot;</span><span class="p">)</span>   <span class="c1"># zero</span>
+</code></pre><div class="outs"><pre class="out-text">odd
+zero</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — resolving a config value with a fallback.</strong> <code>timeout = config.get("timeout")
+if config else DEFAULT_TIMEOUT</code>-style expressions are a common real pattern in settings/
+config-loading code, picking an override when one is present and falling back to a
+sane default otherwise, all in one line.</p></div>
+<div class="md"><h4 id="s3-1-8">3.1.8 Special Operators — Identity and Membership</h4>
+<p><strong>Identity</strong> (<code>is</code>, <code>is not</code>) compares object <strong>identity</strong> — whether two names point to the
+<em>exact same object</em> in memory (<code>id()</code>) — not whether their values are equal. Two
+equal-value objects are usually <strong>not</strong> the same object (2.4 covers when CPython does, or
+doesn't, reuse an existing object).</p>
+<p><strong>Membership</strong> (<code>in</code>, <code>not in</code>) checks whether a value exists inside a sequence or
+collection — <code>list</code>, <code>tuple</code>, <code>str</code>, <code>set</code>, or the keys of a <code>dict</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x == y:&quot;</span><span class="p">,</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span>         <span class="c1"># True  -&gt; same value</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x is y:&quot;</span><span class="p">,</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">y</span><span class="p">)</span>         <span class="c1"># False -&gt; NOT the same object</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;id(x) :&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>          <span class="c1"># each object has its own id</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;id(y) :&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>          <span class="c1"># a different id, even though the value is equal</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;3 in x    :&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span>         <span class="c1"># True  -&gt; 3 is present in x</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;5 not in x:&quot;</span><span class="p">,</span> <span class="mi">5</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span>     <span class="c1"># True  -&gt; 5 is absent from x</span>
+</code></pre><div class="outs"><pre class="out-text">x == y: True
+x is y: False
+id(x) : 140458367031808
+id(y) : 140458367005760
+3 in x    : True
+5 not in x: True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — an access-control check.</strong> <code>if role in ADMIN_ROLES:</code> guarding an
+admin-only action is a real, extremely common use of membership testing — and per
+<a class="xref" href="/python/03-operators-and-expressions/#s3-1-8">3.1.8</a>'s own note above, using a <code>set</code> for <code>ADMIN_ROLES</code> instead of a <code>list</code> keeps that
+check fast even as the list of privileged roles grows.</p></div>
+<div class="md"><p><strong>Going deeper</strong> — membership testing (<code>in</code>) is O(n) for a <code>list</code> or <code>tuple</code> (Python scans
+element by element) but O(1) on average for a <code>set</code> or <code>dict</code> (hash-based lookup) — chapter
+5 covers why.</p></div>
+<div class="md"><p>The precedence table just below also lists three <strong>unary</strong> operators — operators that take
+a single operand, written immediately before it: <code>-x</code> (negation), <code>+x</code> (unary plus — the
+value unchanged, defined mostly for symmetry with <code>-x</code>), and <code>~x</code> (bitwise NOT — flips every
+bit, <a class="xref" href="/python/03-operators-and-expressions/#s3-1-5">3.1.5</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># -5 -&gt; negation</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">+</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># 5  -&gt; unary plus, value unchanged</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">~</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># -6 -&gt; bitwise NOT: flips every bit</span>
+</code></pre><div class="outs"><pre class="out-text">-5
+5
+-6</pre></div></div>
+<div class="md"><h3 id="s3-2">3.2 Precedence and Associativity</h3>
+<p><strong>Precedence</strong> decides which operator binds first when an expression mixes several of
+them. When in doubt, parenthesize — this table is a reference, not a memorization target.
+From highest to lowest:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Operators</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>()</code></td>
+<td>Parentheses (grouping)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>**</code></td>
+<td>Exponentiation</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>+x</code>, <code>-x</code>, <code>~x</code></td>
+<td>Unary plus / minus / bitwise not</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>*</code>, <code>/</code>, <code>//</code>, <code>%</code></td>
+<td>Multiplication, division, floor division, modulus</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>+</code>, <code>-</code></td>
+<td>Addition, subtraction</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>&lt;&lt;</code>, <code>&gt;&gt;</code></td>
+<td>Bitwise shifts</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>&amp;</code></td>
+<td>Bitwise AND</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>^</code></td>
+<td>Bitwise XOR</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>\|</code></td>
+<td>Bitwise OR</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>is</code>, <code>is not</code>, <code>in</code>, <code>not in</code></td>
+<td>Comparisons</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>not</code></td>
+<td>Boolean NOT</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>and</code></td>
+<td>Boolean AND</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>or</code></td>
+<td>Boolean OR</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>x if c else y</code></td>
+<td>Ternary</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>=</code>, <code>+=</code>, <code>-=</code>, ...</td>
+<td>Assignment</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>     <span class="c1"># 14 -&gt; * (row 4) binds tighter than + (row 5)</span>
+<span class="nb">print</span><span class="p">((</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>   <span class="c1"># 20 -&gt; parentheses (row 1) always override the default order</span>
+</code></pre><div class="outs"><pre class="out-text">14
+20</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — unary minus binds <em>looser</em> than <code>**</code> (row 3 vs row 2 in the table
+above), so <code>-2 ** 2</code> is <code>-(2 ** 2)</code>, not <code>(-2) ** 2</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>     <span class="c1"># -4 -&gt; ** binds first: -(2 ** 2), NOT (-2) ** 2 which would be 4</span>
+<span class="nb">print</span><span class="p">((</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>   <span class="c1"># 4  -&gt; parenthesize to force the other order</span>
+</code></pre><div class="outs"><pre class="out-text">-4
+4</pre></div></div>
+<div class="md"><p><strong>Associativity</strong> decides the order when operators of the <em>same</em> precedence appear
+together. Most operators are <strong>left-to-right</strong>; <code>**</code> and assignment are the exceptions —
+they are <strong>right-to-left</strong> (which is what makes chained assignment in <a class="xref" href="/python/03-operators-and-expressions/#s3-1-6">3.1.6</a> work: <code>a = b = 5</code>
+assigns to <code>b</code> first, then assigns that same object to <code>a</code>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>   <span class="c1"># 512 -&gt; evaluated right-to-left as 2 ** (3 ** 2) = 2 ** 9, not (2**3)**2 = 64</span>
+</code></pre><div class="outs"><pre class="out-text">512</pre></div></div></article>
+<nav class="spn"><a href="/python/02-objects-and-data-types/">← Objects and Data Types</a><a href="/python/04-flow-control/">Flow Control →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

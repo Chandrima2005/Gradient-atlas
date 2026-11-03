@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Logging and Debugging – Python Chapter 8 | Gradient Atlas</title>
+<meta name="description" content="Observing and diagnosing running code.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python/08-logging-and-debugging/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Logging and Debugging – Python Chapter 8 | Gradient Atlas">
+<meta property="og:description" content="Observing and diagnosing running code.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python/08-logging-and-debugging/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Logging and Debugging", "headline": "Logging and Debugging", "description": "Observing and diagnosing running code.", "url": "https://gradient-atlas.chandrima-das.com/python/08-logging-and-debugging/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT17M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for data science", "url": "https://gradient-atlas.chandrima-das.com/python/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python", "item": "https://gradient-atlas.chandrima-das.com/python/"}, {"@type": "ListItem", "position": 4, "name": "Logging and Debugging", "item": "https://gradient-atlas.chandrima-das.com/python/08-logging-and-debugging/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/python/">Python</a> › Chapter 8</p>
+<h1><small>Python · Chapter 8</small>Logging and Debugging</h1>
+<p class="lead">Observing and diagnosing running code.</p>
+<p class="cta"><a class="sbtn" href="/#py/ch8">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s8-1">8.1 Logging Fundamentals</a></li><li class="l3"><a href="#s8-2">8.2 Loggers, Handlers, Formatters and Levels</a></li><li class="l3"><a href="#s8-3">8.3 Logging Configuration</a></li><li class="l3"><a href="#s8-4">8.4 Debugging Approaches</a></li><li class="l3"><a href="#s8-5">8.5 pdb and Interactive Debugging</a></li><li class="l3"><a href="#s8-6">8.6 Assertions, Tracing and Diagnostics</a></li></ol></nav>
+<article class="body"><div class="md"><h3 id="s8-1">8.1 Logging Fundamentals</h3>
+<p><code>print()</code> shows something happened; it can't say <em>how serious</em> it was, can't be turned
+down in production without editing code, and can't be redirected to a file/monitoring
+system without wrapping every call. The <code>logging</code> module (stdlib) fixes all three:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th><code>print()</code></th>
+<th><code>logging</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>always shown, no severity</td>
+<td>each message has a <strong>level</strong> (<a class="xref" href="/python/08-logging-and-debugging/#s8-2">8.2</a>) — filter by importance</td>
+</tr>
+<tr>
+<td>output hard-coded to stdout</td>
+<td>routed to console, file, or both, without touching call sites</td>
+</tr>
+<tr>
+<td>no built-in timestamp / source info</td>
+<td>can auto-include time, module, line number, level</td>
+</tr>
+<tr>
+<td>always on</td>
+<td>can be turned off/down for whole modules without deleting the calls</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Uses of logging:</strong> diagnosing problems in code that's already running (production,
+someone else's machine) where attaching a debugger isn't an option; leaving a permanent,
+timestamped record (audit trail) of what a program did; separating "routine detail"
+(<code>DEBUG</code>) from "something is actually wrong" (<code>ERROR</code>) so the two don't drown each other
+out.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># straight out of the box, with zero configuration:</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;debug msg&quot;</span><span class="p">)</span>       <span class="c1"># (nothing printed)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;info msg&quot;</span><span class="p">)</span>           <span class="c1"># (nothing printed)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;warning msg&quot;</span><span class="p">)</span>   <span class="c1"># WARNING:root:warning msg</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;error msg&quot;</span><span class="p">)</span>         <span class="c1"># ERROR:root:error msg</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;critical msg&quot;</span><span class="p">)</span>   <span class="c1"># CRITICAL:root:critical msg</span>
+</code></pre><div class="outs"><pre class="out-text">WARNING:root:warning msg
+ERROR:root:error msg
+CRITICAL:root:critical msg</pre></div></div>
+<div class="md"><p><strong>Note:</strong> that <code>root</code> in the output above is not "no logger" — it's the name of
+an actual, implicit default <code>Logger</code> object. Every call to a module-level function like
+<code>logging.debug()</code> or <code>logging.warning()</code> is really <code>logging.getLogger("root").debug()</code> /
+<code>.warning()</code> under the hood (the first such call also silently runs <code>basicConfig()</code> for
+you, which is why a handler and format appeared with zero setup).</p></div>
+<div class="md"><h3 id="s8-2">8.2 Loggers, Handlers, Formatters and Levels</h3>
+<p>Three cooperating pieces do the work:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Logger</strong></td>
+<td>the object your code calls (<code>logger.info(...)</code>) — decides <em>whether</em> a message is important enough to go anywhere at all</td>
+</tr>
+<tr>
+<td><strong>Handler</strong></td>
+<td>decides <em>where</em> an accepted message goes — console, a file, both</td>
+</tr>
+<tr>
+<td><strong>Formatter</strong></td>
+<td>decides <em>what the message looks like</em> — plain text, with a timestamp, etc.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Log levels</strong> — every message has a severity, and every logger/handler has a threshold;
+a message is only emitted if its level is <strong>at or above</strong> that threshold:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Numeric value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEBUG</code></td>
+<td>10</td>
+<td>fine-grained detail, useful only while diagnosing something</td>
+</tr>
+<tr>
+<td><code>INFO</code></td>
+<td>20</td>
+<td>confirmation that things are working as expected</td>
+</tr>
+<tr>
+<td><code>WARNING</code></td>
+<td>30</td>
+<td>something unexpected, but the program can keep going — <strong>the default level</strong></td>
+</tr>
+<tr>
+<td><code>ERROR</code></td>
+<td>40</td>
+<td>a real problem — some functionality failed</td>
+</tr>
+<tr>
+<td><code>CRITICAL</code></td>
+<td>50</td>
+<td>a severe error — the program itself may be unable to continue</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <strong>default level is <code>WARNING</code></strong> — that's exactly why <code>debug()</code> and <code>info()</code> printed
+nothing in the previous demo: they're below the root logger's default threshold.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span>
+<span class="c1"># 10 20 30 40 50</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">getLevelName</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()))</span>
+<span class="c1"># WARNING -&gt; confirms the root logger&#39;s default threshold</span>
+</code></pre><div class="outs"><pre class="out-text">10 20 30 40 50
+WARNING</pre></div></div>
+<div class="md"><p>Every later example in this chapter configures things through <code>basicConfig()</code> (<a class="xref" href="/python/08-logging-and-debugging/#s8-3">8.3</a>),
+which builds a handler and formatter behind the scenes. Building them by hand once,
+here, makes the wiring from the table above concrete: a <code>Handler</code> decides <em>where</em>
+output goes, a <code>Formatter</code> decides what it looks like, and <code>addHandler()</code> is what
+actually attaches one to a logger.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">demo_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;demo.handler_example&quot;</span><span class="p">)</span>
+<span class="n">demo_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">demo_logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># keep this demo isolated from the root logger&#39;s own handler</span>
+
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>                          <span class="c1"># writes to sys.stderr by default</span>
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2"> | </span><span class="si">%(name)s</span><span class="s2"> | </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">demo_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+<span class="n">demo_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;built by hand, no basicConfig involved&quot;</span><span class="p">)</span>
+<span class="c1"># DEBUG | demo.handler_example | built by hand, no basicConfig involved</span>
+</code></pre><div class="outs"><pre class="out-text">DEBUG | demo.handler_example | built by hand, no basicConfig involved</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — structured JSON logging.</strong> A production service typically swaps the
+plain-text <code>Formatter</code> above for one that emits JSON (<code>{"level": "ERROR", "request_id":
+"abc123", "user_id": 42, "message": "..."}</code>) so a log-aggregation platform like the ELK
+stack, Datadog, or Splunk can index and alert on individual fields — searching "every
+ERROR for user 42" only works if the logs are structured data, not free text.</p></div>
+<div class="md"><h3 id="s8-3">8.3 Logging Configuration</h3>
+<p><strong>Implementing logging in a module</strong> always starts the same way — get a logger named
+after the current module, then log through it instead of the bare <code>logging.*</code>
+functions used above (those actually go through a hidden shared "root" logger):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>   <span class="c1"># named after this module — &quot;__main__&quot; here</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>   <span class="c1"># __main__</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;module-level logger still uses the same default WARNING threshold&quot;</span><span class="p">)</span>
+<span class="c1"># WARNING:__main__:module-level logger still uses the same default WARNING threshold</span>
+</code></pre><div class="outs"><pre class="out-text">__main__</pre></div></div>
+<div class="md"><p><strong>Logging an exception</strong> is the single most common real-world logging call: inside an
+<code>except</code> block, <code>logger.exception(msg)</code> logs at <code>ERROR</code> level <em>and</em> automatically
+attaches the full traceback of the exception currently being handled — no need to
+format it yourself. It's exactly equivalent to
+<code>logger.error(msg, exc_info=True)</code>, spelled more conveniently.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">divide</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;division failed&quot;</span><span class="p">)</span>   <span class="c1"># reuses the `logger` object from the cell above</span>
+    <span class="c1"># ERROR:__main__:division failed</span>
+    <span class="c1"># Traceback (most recent call last):</span>
+    <span class="c1">#   ...</span>
+    <span class="c1">#   File &quot;...&quot;, line ..., in divide</span>
+    <span class="c1">#     return a / b</span>
+    <span class="c1"># ZeroDivisionError: division by zero</span>
+
+<span class="c1"># equivalent, spelled out explicitly:</span>
+<span class="c1"># logger.error(&quot;division failed&quot;, exc_info=True)</span>
+</code></pre></div>
+<div class="md callout practice"><p><strong>In practice — this is exactly what Sentry (and similar error-tracking tools) hook
+into.</strong> An error-monitoring integration attaches itself to the logging module so that
+every <code>logger.exception()</code> call — like the one above — is automatically captured,
+grouped with similar errors, and used to page an on-call engineer, all without the
+application code knowing the monitoring tool exists.</p></div>
+<div class="md"><p><strong><code>logging.basicConfig()</code></strong> is the quick way to configure the root logger in one call —
+set the threshold level and the message format without manually wiring up a handler and
+formatter. It only has an effect <strong>once per process</strong>: later calls are ignored unless
+<code>force=True</code> is passed:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2"> </span><span class="si">%(name)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;now visible, threshold lowered to DEBUG&quot;</span><span class="p">)</span>
+<span class="c1"># DEBUG __main__: now visible, threshold lowered to DEBUG</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span>   <span class="c1"># ignored -&gt; root logger is already configured</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;still visible, second basicConfig call was a no-op&quot;</span><span class="p">)</span>
+<span class="c1"># DEBUG __main__: still visible, second basicConfig call was a no-op</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># force=True actually reconfigures</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;this one is now suppressed&quot;</span><span class="p">)</span>   <span class="c1"># (nothing printed)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;only CRITICAL gets through now&quot;</span><span class="p">)</span>   <span class="c1"># CRITICAL:__main__:only CRITICAL gets through now</span>
+</code></pre><div class="outs"><pre class="out-text">CRITICAL:__main__:only CRITICAL gets through now</pre></div></div>
+<div class="md"><p><strong>Logging to a file</strong> — pass <code>filename</code> to <code>basicConfig()</code> and messages go there instead
+of the console. <code>filemode</code> controls what happens to any content already in that file:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th><code>filemode</code></th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"a"</code> (default)</td>
+<td><strong>append</strong> — new runs add on to the end, old log history is kept</td>
+</tr>
+<tr>
+<td><code>"w"</code></td>
+<td><strong>overwrite</strong> — the file is truncated at the start of each run, only this run's messages remain</td>
+</tr>
+</tbody>
+</table></div>
+<p>(<code>force=True</code> is needed below only because <code>basicConfig</code> was already called earlier in
+this notebook session — a fresh script wouldn't need it.)</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">25 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">log_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mktemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.log&quot;</span><span class="p">)</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span> <span class="n">filemode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+                     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;first run&quot;</span><span class="p">)</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span> <span class="n">filemode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+                     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;second run, still appended&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="c1"># INFO: first run</span>
+    <span class="c1"># INFO: second run, still appended</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span> <span class="n">filemode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+                     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;third run, file was truncated first&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>   <span class="c1"># INFO: third run, file was truncated first -&gt; the earlier two lines are gone</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">INFO: first run
+INFO: second run, still appended
+
+INFO: third run, file was truncated first</pre></div></div>
+<div class="md"><p><strong>Going deeper — duplicate log lines and <code>propagate</code>.</strong> By default a logger doesn't just
+hand a record to <em>its own</em> handlers — it also passes the record up to its parent
+logger's handlers, and so on up to the root logger (this is <code>propagate</code>, <code>True</code> by
+default). That's harmless as long as only one logger in the chain has handlers. But if a
+module logger has its own handler <em>and</em> the root logger also has one (e.g. from
+<code>basicConfig()</code>, or from the <code>addHandler()</code> demo in <a class="xref" href="/python/08-logging-and-debugging/#s8-2">8.2</a>), the same message gets emitted
+once per handler it reaches — the classic "why is everything printed twice" bug. The
+fix is <code>logger.propagate = False</code> on the logger that shouldn't also report to its
+parent.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">:</span><span class="si">%(name)s</span><span class="s2">:</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">dup_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;app.duplicate_demo&quot;</span><span class="p">)</span>
+<span class="n">dup_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2">:</span><span class="si">%(name)s</span><span class="s2">:</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">))</span>
+<span class="n">dup_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>   <span class="c1"># a *second* handler, in addition to root&#39;s own</span>
+
+<span class="n">dup_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;one call...&quot;</span><span class="p">)</span>
+<span class="c1"># INFO:app.duplicate_demo:one call...   &lt;- from dup_logger&#39;s own handler</span>
+<span class="c1"># INFO:app.duplicate_demo:one call...   &lt;- from root&#39;s handler, via propagation</span>
+
+<span class="n">dup_logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># stop it from also reaching the root logger&#39;s handler</span>
+<span class="n">dup_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;...now printed only once&quot;</span><span class="p">)</span>
+<span class="c1"># INFO:app.duplicate_demo:...now printed only once</span>
+</code></pre><div class="outs"><pre class="out-text">INFO:app.duplicate_demo:one call...
+INFO:app.duplicate_demo:one call...
+INFO:app.duplicate_demo:...now printed only once</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a real, commonly-hit bug in microservices.</strong> A shared internal library
+that calls <code>logging.basicConfig()</code> (or otherwise attaches its own handler) on import,
+inside an application that has already configured its own root logger, produces exactly
+this duplicate-log-lines symptom in production — a frequent enough gotcha that many
+library style guides explicitly forbid a library from configuring logging itself,
+leaving that entirely to the application.</p></div>
+<div class="md"><h3 id="s8-4">8.4 Debugging Approaches</h3>
+<p>When something's wrong, there are a few standard ways to find out <em>why</em>, roughly from
+least to most effort:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>How</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Print debugging</td>
+<td>sprinkle <code>print()</code> at suspect points</td>
+<td>a quick, throwaway check on a small script</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td><code>logging</code> calls with levels (8.1–8.3)</td>
+<td>anything that needs to stay in the codebase, or runs where no one is watching live</td>
+</tr>
+<tr>
+<td>Assertions</td>
+<td><code>assert</code> on invariants that must hold (<a class="xref" href="/python/08-logging-and-debugging/#s8-6">8.6</a>)</td>
+<td>catching a corrupted state <em>immediately</em>, at its source, instead of downstream</td>
+</tr>
+<tr>
+<td>Interactive debugger (<code>pdb</code>, <a class="xref" href="/python/08-logging-and-debugging/#s8-5">8.5</a>)</td>
+<td>pause execution and inspect/step through live state</td>
+<td>when the bug depends on state that's too complex to guess from print output alone</td>
+</tr>
+</tbody>
+</table></div>
+<p>None of these is strictly better — print debugging is fine for a five-line script;
+reaching for <code>pdb</code> to debug a five-line script is overkill, while reaching for <code>print()</code>
+in a bug that depends on deeply nested object state usually just produces more
+confusion, not less.</p></div>
+<div class="md"><h3 id="s8-5">8.5 pdb and Interactive Debugging</h3>
+<p><code>pdb</code> is Python's built-in interactive debugger. Dropping <code>breakpoint()</code> (shorthand for
+<code>import pdb; pdb.set_trace()</code>) into a line of code pauses execution right
+there and opens a <code>(Pdb)</code> prompt where you can inspect and step through the <em>live</em>
+program state:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>l</code> (list)</td>
+<td>show the source code around the current line</td>
+</tr>
+<tr>
+<td><code>p &lt;expr&gt;</code> (print)</td>
+<td>evaluate and print an expression in the current scope</td>
+</tr>
+<tr>
+<td><code>n</code> (next)</td>
+<td>run the current line, stop at the next one (steps <em>over</em> function calls)</td>
+</tr>
+<tr>
+<td><code>s</code> (step)</td>
+<td>like <code>n</code>, but steps <em>into</em> a function call instead of over it</td>
+</tr>
+<tr>
+<td><code>c</code> (continue)</td>
+<td>resume normal execution until the next breakpoint (or the program ends)</td>
+</tr>
+<tr>
+<td><code>w</code> (where)</td>
+<td>show the current call stack</td>
+</tr>
+<tr>
+<td><code>q</code> (quit)</td>
+<td>abort the debugging session entirely</td>
+</tr>
+</tbody>
+</table></div>
+<p>A real session waits for you to type these at a terminal. The cell below reproduces one
+exactly by feeding it a fixed sequence of commands as input, so the transcript below is
+what actually typing <code>l</code>, <code>p a</code>, <code>p b</code>, <code>p total</code>, <code>n</code>, <code>c</code> at the <code>(Pdb)</code> prompt
+produces:</p></div>
+<div class="md"><p><strong>Walking the transcript below:</strong> <code>l</code> lists the source around the paused line; <code>p a</code> →
+<code>2</code>, <code>p b</code> → <code>3</code>, <code>p total</code> → <code>5</code> (line 2, <code>total = a + b</code>, already ran before the
+breakpoint paused execution at line 4); <code>n</code> steps to the <code>return total</code> line; <code>c</code>
+resumes execution to completion, and the script's own <code>print(buggy_add(2, 3))</code> prints
+the final <code>5</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">36 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">script</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;def buggy_add(a, b):</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;    total = a + b</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;    breakpoint()</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;    return total</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;print(buggy_add(2, 3))</span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="n">script_path</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+
+<span class="n">commands</span> <span class="o">=</span> <span class="s2">&quot;l</span><span class="se">\n</span><span class="s2">p a</span><span class="se">\n</span><span class="s2">p b</span><span class="se">\n</span><span class="s2">p total</span><span class="se">\n</span><span class="s2">n</span><span class="se">\n</span><span class="s2">c</span><span class="se">\n</span><span class="s2">&quot;</span>   <span class="c1"># what you&#39;d type at each (Pdb) prompt</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">],</span> <span class="nb">input</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">script_path</span><span class="p">,</span> <span class="s2">&quot;buggy_add.py&quot;</span><span class="p">))</span>
+<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span>
+
+<span class="c1"># &gt; buggy_add.py(4)buggy_add()</span>
+<span class="c1"># -&gt; return total</span>
+<span class="c1"># (Pdb)   1  	def buggy_add(a, b):</span>
+<span class="c1">#   2  	    total = a + b</span>
+<span class="c1">#   3  	    breakpoint()</span>
+<span class="c1">#   4  -&gt;	    return total</span>
+<span class="c1">#   5  	</span>
+<span class="c1">#   6  	print(buggy_add(2, 3))</span>
+<span class="c1"># [EOF]</span>
+<span class="c1"># (Pdb) 2</span>
+<span class="c1"># (Pdb) 3</span>
+<span class="c1"># (Pdb) 5</span>
+<span class="c1"># (Pdb) --Return--</span>
+<span class="c1"># &gt; buggy_add.py(4)buggy_add()-&gt;5</span>
+<span class="c1"># -&gt; return total</span>
+<span class="c1"># (Pdb) 5</span>
+</code></pre><div class="outs"><pre class="out-text">&gt; buggy_add.py(4)buggy_add()
+-&gt; return total
+(Pdb)   1  	def buggy_add(a, b):
+  2  	    total = a + b
+  3  	    breakpoint()
+  4  -&gt;	    return total
+  5  	
+  6  	print(buggy_add(2, 3))
+[EOF]
+(Pdb) 2
+(Pdb) 3
+(Pdb) 5
+(Pdb) --Return--
+&gt; buggy_add.py(4)buggy_add()-&gt;5
+-&gt; return total
+(Pdb) 5</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — this is the everyday "why is this test failing" tool.</strong> Before a bug
+ever reaches production logging, a developer chasing down a failing test or a script
+that's misbehaving locally reaches for exactly this — dropping a <code>breakpoint()</code> at the
+suspect line and inspecting live variables — far more often than reading logs, since
+the code hasn't shipped anywhere yet.</p></div>
+<div class="md"><h3 id="s8-6">8.6 Assertions, Tracing and Diagnostics</h3>
+<p>The <code>assert</code> statement's mechanics (syntax, <code>AssertionError</code>, the <code>-O</code> stripping
+behavior) are covered in <a class="xref" href="/python/07-exception-handling/#s7-9">7.9</a> — this section is about <em>using</em> it as a debugging tool.</p>
+<p><strong>Fail fast, at the source.</strong> Without an assertion, a corrupted value can travel through
+several more function calls before it finally causes a crash — and by then, the
+traceback points at the <em>symptom</em>, not the <em>cause</em>. An assertion placed right where an
+invariant is expected to hold turns that into an immediate, precisely located failure:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">divide_all</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">divisor</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">divisor</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;divisor must not be zero&quot;</span>   <span class="c1"># catches the real cause immediately</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="n">divisor</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">divide_all</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="mi">5</span><span class="p">))</span>   <span class="c1"># [2.0, 4.0, 6.0]</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">divide_all</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AssertionError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># AssertionError: divisor must not be zero</span>
+</code></pre><div class="outs"><pre class="out-text">[2.0, 4.0, 6.0]
+AssertionError: divisor must not be zero</pre></div></div>
+<div class="md"><p>Assertions and <code>pdb</code> (<a class="xref" href="/python/08-logging-and-debugging/#s8-5">8.5</a>) pair naturally: an assertion tells you <em>that</em> and <em>where</em>
+something went wrong; when the message alone isn't enough to explain <em>why</em>, that's the
+moment to drop a <code>breakpoint()</code> right before the failing <code>assert</code> and inspect the live
+state that led to it.</p></div>
+<div class="md callout mistake"><p><strong>Common mistake:</strong> using <code>assert</code> for input validation or security/permission checks.
+<code>assert</code> statements are meant for catching <em>programmer</em> bugs during development, and
+Python lets them be stripped out entirely: running with <code>python -O</code> (or setting
+<code>PYTHONOPTIMIZE</code>) removes every <code>assert</code> from the compiled bytecode, as if it were never
+written. A permission check written as <code>assert user_is_admin, "not an admin"</code> simply
+vanishes in an optimized run — silently granting access. Use a real <code>if ...: raise
+PermissionError(...)</code> (or equivalent) for anything that must hold in production.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">script</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;def check_permission(user_is_admin):</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;    assert user_is_admin, &#39;not an admin&#39;   # a security check written as an assert</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;    return &#39;granted&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;print(check_permission(False))</span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="n">script_path</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+
+<span class="n">normal</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">optimized</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="s2">&quot;-O&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;normal run:   &quot;</span><span class="p">,</span> <span class="n">normal</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;python -O run:&quot;</span><span class="p">,</span> <span class="n">optimized</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span>
+
+<span class="c1"># normal run:    AssertionError: not an admin</span>
+<span class="c1"># python -O run: granted   -&gt; the whole permission check silently vanished</span>
+</code></pre><div class="outs"><pre class="out-text">normal run:    AssertionError: not an admin
+python -O run: granted</pre></div></div></article>
+<nav class="spn"><a href="/python/07-exception-handling/">← Exception Handling</a><a href="/python/09-modules-and-packages/">Modules and Packages →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

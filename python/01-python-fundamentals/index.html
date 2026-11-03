@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Python Fundamentals – Python Chapter 1 | Gradient Atlas</title>
+<meta name="description" content="The language itself, how code is executed, and the mechanics of names and basic I/O.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python/01-python-fundamentals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Python Fundamentals – Python Chapter 1 | Gradient Atlas">
+<meta property="og:description" content="The language itself, how code is executed, and the mechanics of names and basic I/O.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python/01-python-fundamentals/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Python Fundamentals", "headline": "Python Fundamentals", "description": "The language itself, how code is executed, and the mechanics of names and basic I/O.", "url": "https://gradient-atlas.chandrima-das.com/python/01-python-fundamentals/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT23M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for data science", "url": "https://gradient-atlas.chandrima-das.com/python/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python", "item": "https://gradient-atlas.chandrima-das.com/python/"}, {"@type": "ListItem", "position": 4, "name": "Python Fundamentals", "item": "https://gradient-atlas.chandrima-das.com/python/01-python-fundamentals/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/python/">Python</a> › Chapter 1</p>
+<h1><small>Python · Chapter 1</small>Python Fundamentals</h1>
+<p class="lead">The language itself, how code is executed, and the mechanics of names and basic I/O.</p>
+<p class="cta"><a class="sbtn" href="/#py/ch1">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s1-1">1.1 Language Overview and Execution Model</a></li><li class="l3"><a href="#s1-2">1.2 Identifiers and Reserved Keywords in Python</a></li><li class="l3"><a href="#s1-3">1.3 Syntax, Statements and Code Structure</a></li><li class="l3"><a href="#s1-4">1.4 Basic Input and Output</a></li></ol></nav>
+<article class="body"><div class="md"><h3 id="s1-1">1.1 Language Overview and Execution Model</h3>
+<p>Covers what Python is, how it actually runs, the feature and limitation lists from the
+notes, and the two foundational claims the notes open with: Python is <strong>dynamically
+typed</strong>, and in Python <strong>everything is an object</strong>.</p></div>
+<div class="md"><h4 id="s1-1-1">1.1.1 What Python Is</h4>
+<p><strong>Explanation</strong></p>
+<blockquote>
+<p><em>Python is a general purpose high level programming language.</em></p>
+</blockquote>
+<p>Two independent claims:</p>
+<p><strong>General purpose</strong> — Python is not tied to one problem domain. The same language is used
+for scripting, web backends, automation, data analysis, machine learning, testing, GUIs and
+glue code. Contrast with domain-specific languages: SQL only queries data, HTML only
+describes documents, MATLAB targets numerical work.</p>
+<p><strong>High level</strong> — the language is far from the machine. There are no registers, no pointer
+arithmetic, no manual <code>malloc</code>/<code>free</code>, no explicit types. You describe <em>what</em> should happen;
+the interpreter decides how.</p>
+<p><strong>Comparison — level of abstraction</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Language</th>
+<th>What you must manage yourself</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low</td>
+<td>Assembly</td>
+<td>Registers, memory addresses, instructions</td>
+</tr>
+<tr>
+<td>Mid</td>
+<td>C</td>
+<td>Memory allocation/deallocation, pointers, types</td>
+</tr>
+<tr>
+<td>High</td>
+<td>Python</td>
+<td>Almost nothing — memory and types are handled for you</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Why it matters</strong></p>
+<p>High level buys developer speed and readability at the cost of execution speed — which is
+exactly the limitation recorded later in <a class="xref" href="/python/01-python-fundamentals/#s1-1-6">1.1.6</a>. The two facts are the same trade-off seen
+from opposite sides.</p></div>
+<div class="md callout practice"><p><strong>In practice — Python's real-world footprint.</strong> Instagram's backend, Dropbox's file-sync
+engine, and large parts of YouTube's core services are all built substantially in
+Python, alongside its heavy use in data science, machine learning research, and
+scripting at NASA/JPL for mission tooling — a direct payoff of being general-purpose
+rather than tied to one problem domain.</p></div>
+<div class="md"><h4 id="s1-1-2">1.1.2 Dynamically Typed Language</h4>
+<p><strong>Explanation</strong></p>
+<blockquote>
+<p><em>Dynamically typed language: given a value, type will be assigned automatically.</em></p>
+</blockquote>
+<p>You never declare a type. You bind a name to a value, and the <strong>type belongs to the value
+(the object), not to the name</strong>. The name is only a label pointing at an object; rebinding
+it to a different kind of object is legal.</p>
+<p><strong>Syntax</strong></p>
+<pre class="fence" data-lang="python"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>          <span class="c1"># Python  — no type declaration</span>
+</code></pre>
+<pre class="fence" data-lang="java"><code><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">     </span><span class="c1">// Java   — type declared, fixed forever</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># &lt;class &#39;int&#39;&gt;</span>
+<span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;hi&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># &lt;class &#39;str&#39;&gt; -- same name x, rebound to a different type of object</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;int&#x27;&gt;
+&lt;class &#x27;str&#x27;&gt;</pre></div></div>
+<div class="md"><p><strong>Important behaviour — dynamic typing is not weak typing</strong></p>
+<p>This is the single most common confusion around this note. Python is <strong>dynamically typed</strong>
+(types are resolved at runtime) <em>and</em> <strong>strongly typed</strong> (it will not silently convert
+unrelated types for you).</p></div>
+<div class="md"><p><strong>Comparison — two independent axes</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Typing discipline</th>
+<th>Type strength</th>
+<th><code>"2" + 2</code> gives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Java, C++</td>
+<td>Static (checked before running)</td>
+<td>Strong</td>
+<td>Compile error</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><strong>Dynamic</strong> (checked while running)</td>
+<td><strong>Strong</strong></td>
+<td><code>TypeError</code> at runtime</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>Dynamic</td>
+<td>Weak</td>
+<td><code>"22"</code> — silently coerced</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Common mistakes</strong></p>
+<ul>
+<li>Saying "the variable is an integer". The <em>object</em> is an integer; the variable is a name.</li>
+<li>Treating dynamic typing as "no types" — Python has types, it just does not require you to
+  write them down.</li>
+<li>Assuming dynamic typing implies automatic conversion. It does not.</li>
+</ul></div>
+<div class="md callout practice"><p><strong>In practice — why large Python codebases adopt <code>mypy</code>.</strong> Companies running Python at
+scale (Dropbox and Instagram are both well-documented examples) layer a static type
+checker like <code>mypy</code>/<code>pyright</code> on top of their codebase specifically because dynamic
+typing without one gets harder to safely refactor as a codebase grows — the checker
+gives back some of the "caught before running" guarantee a statically-typed language
+has, without giving up dynamic typing itself.</p></div>
+<div class="md"><h4 id="s1-1-3">1.1.3 In Python, Everything Is an Object</h4>
+<p><strong>Explanation</strong></p>
+<blockquote>
+<p><em>In Python everything is an object — variable, method, everything.</em></p>
+</blockquote>
+<p>Every value you can bind to a name is an object, and every object has three things:
+an <strong>identity</strong> (its address, via <code>id()</code>), a <strong>type</strong>, and a <strong>value</strong>. Crucially this
+includes things that are <em>not</em> objects in most other languages: functions, methods, classes,
+modules, and even types themselves.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>   <span class="c1"># e.g. 132695655973232 &lt;class &#39;int&#39;&gt; 5 -- identity, type and value, all at once</span>
+</code></pre><div class="outs"><pre class="out-text">10454408 &lt;class &#x27;int&#x27;&gt; 5</pre></div></div>
+<div class="md"><p>Functions, classes, modules, built-in types such as <code>int</code>, and even <code>type</code> itself all report as objects — nothing is a special non-object case.</p>
+<p><strong>Why it matters</strong></p>
+<p>This is not trivia; it is the property that makes large parts of Python possible. Because
+functions are objects, they can be stored in variables, passed as arguments, given
+attributes and returned from other functions — which is what enables higher-order functions
+(<a class="xref" href="/python/06-functions/#s6-8-2">6.8.2</a>), closures and decorators.</p></div>
+<div class="md"><p><strong>Edge case / precision</strong></p>
+<p>The note says "variable... everything", and the spirit is right, but two refinements are
+worth writing down now:</p>
+<ul>
+<li>A <strong>variable is not itself an object</strong> — it is a name in a namespace that <em>refers</em> to an
+  object. The object is what has identity, type and value. (<code>id(x)</code> returns the id of the
+  object, not of <code>x</code>.)</li>
+<li><strong>Syntax is not an object.</strong> Keywords and operators (<code>if</code>, <code>while</code>, <code>=</code>, <code>+</code>) are language
+  grammar, not values — you cannot bind <code>if</code> to a name. Everything that is a <em>value</em> is an
+  object; the grammar is not a value.</li>
+</ul></div>
+<div class="md"><h4 id="s1-1-4">1.1.4 Interpreted — the Execution Model</h4>
+<p><strong>Explanation</strong></p>
+<p>The note lists <em>interpreted</em> as a feature. What actually happens is a two-stage process,
+and knowing both stages explains several behaviours later in the notebook.</p>
+<pre class="fence" data-lang="text"><code>   source.py
+      │  (1) compile  — done automatically by Python
+      ▼
+   bytecode  ────────►  cached in __pycache__/source.cpython-3xx.pyc
+      │  (2) interpret — instruction by instruction
+      ▼
+Python Virtual Machine (PVM)
+      │
+      ▼
+  operating system / CPU
+</code></pre>
+<p>So Python <em>is</em> compiled — just not to machine code. It compiles to <strong>bytecode</strong>, a portable
+intermediate instruction set, which the <strong>PVM</strong> then executes. This is precisely the
+mechanism that delivers platform independence (<a class="xref" href="/python/01-python-fundamentals/#s1-1-5">1.1.5</a>): the bytecode is the same everywhere,
+only the PVM differs per OS.</p></div>
+<div class="md"><p><strong>Important behaviour — the compile step catches errors before anything runs</strong></p>
+<p>Because compilation happens first and covers the whole file, a <em>syntax</em> error means <strong>no
+line executes at all</strong>. A <em>name</em> error is only found when execution reaches that line.</p></div>
+<div class="md"><p><strong>Comparison — "interpreted" is a property of the implementation, not the language</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Written in</th>
+<th>How it runs your code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPython</strong> (the default)</td>
+<td>C</td>
+<td>Compiles to bytecode, interprets it</td>
+</tr>
+<tr>
+<td>PyPy</td>
+<td>Python (RPython)</td>
+<td>Bytecode + JIT compilation to machine code</td>
+</tr>
+<tr>
+<td>Jython</td>
+<td>Java</td>
+<td>Compiles to Java bytecode, runs on the JVM</td>
+</tr>
+<tr>
+<td>IronPython</td>
+<td>C#</td>
+<td>Runs on .NET</td>
+</tr>
+</tbody>
+</table></div>
+<p>The language specification says nothing about interpretation. "Python is interpreted" is
+shorthand for "CPython interprets bytecode".</p>
+<p><strong>Common mistakes</strong></p>
+<ul>
+<li>Thinking <code>.pyc</code> files make the program run faster. They only skip <strong>recompilation</strong> at
+  import time; execution speed is unchanged.</li>
+<li>Expecting <code>__pycache__</code> for the script you run directly — only <em>imported</em> modules get
+  cached, not the top-level script.</li>
+</ul></div>
+<div class="md"><p><strong>Demo — watching <code>__pycache__</code> appear</strong></p>
+<p>The diagram above is not just theory — importing a module really does leave a compiled
+<code>.pyc</code> file behind. To show this without depending on any file already on disk, the demo
+below creates a throwaway module in a temporary directory first.</p>
+<p><strong>Note</strong> — the <code>tempfile.mkdtemp()</code> + write-a-<code>.py</code>-file step below is just
+notebook scaffolding to get a real, importable module on disk; it has nothing to do with
+the bytecode-caching behaviour being demonstrated.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">demo_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">demo_dir</span><span class="p">,</span> <span class="s2">&quot;tinymod.py&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;VALUE = 42</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">demo_dir</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tinymod</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tinymod</span><span class="o">.</span><span class="n">VALUE</span><span class="p">)</span>                        <span class="c1"># 42</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">demo_dir</span><span class="p">)))</span>         <span class="c1"># [&#39;__pycache__&#39;, &#39;tinymod.py&#39;]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">demo_dir</span><span class="p">,</span> <span class="s2">&quot;__pycache__&quot;</span><span class="p">)))</span>
+<span class="c1"># [&#39;tinymod.cpython-3XX.pyc&#39;] -- the compiled bytecode, tagged with the interpreter version</span>
+</code></pre><div class="outs"><pre class="out-text">42
+[&#x27;__pycache__&#x27;, &#x27;tinymod.py&#x27;]
+[&#x27;tinymod.cpython-313.pyc&#x27;]</pre></div></div>
+<div class="md"><h4 id="s1-1-5">1.1.5 Features of Python</h4>
+<p>The full list from the notes, with what each one actually claims:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Simple and easy to learn</td>
+<td>Small keyword set, English-like syntax, indentation instead of braces, no boilerplate</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Freeware and open source</td>
+<td>Free to use, source available, permissive PSF licence — usable commercially</td>
+</tr>
+<tr>
+<td>3</td>
+<td>High level</td>
+<td>No memory management, no pointers, no type declarations (see <a class="xref" href="/python/01-python-fundamentals/#s1-1-1">1.1.1</a>)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Platform independent</td>
+<td>Same source runs on Windows, Linux, macOS — via bytecode + per-OS PVM</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Portability</td>
+<td>Code migrates from one OS to another <strong>without any changes</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Both procedure oriented and object oriented</td>
+<td>Multi-paradigm — write either style, or mix them</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Interpreted</td>
+<td>Bytecode executed by the PVM, no separate build step (see <a class="xref" href="/python/01-python-fundamentals/#s1-1-4">1.1.4</a>)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Extensible</td>
+<td>Code from other languages (C/C++, Java) can be integrated <strong>into</strong> Python</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Embedded</td>
+<td>Python code can be embedded <strong>inside</strong> programs written in other languages</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Extensive library</td>
+<td>"Batteries included" — a large standard library plus a huge third-party ecosystem</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><h5>Platform independence and portability (features 4 and 5)</h5>
+<p>The notes list these separately, and there is a real distinction:</p>
+<ul>
+<li><strong>Platform independence</strong> is a property of the <em>implementation</em> — the bytecode is
+  OS-neutral, so the same <code>.py</code> file runs anywhere a PVM exists.</li>
+<li><strong>Portability</strong> is the practical consequence stated in the notes: <em>migrating code from one
+  OS to another without any changes.</em></li>
+</ul>
+<p>The interpreter absorbs the OS differences — path separators, line endings, system calls —
+so your source does not have to.</p></div>
+<div class="md"><p><strong>Edge case:</strong> portability is "without changes" only while you stay inside the
+abstractions. Hard-coding <code>"C:\\data\\file.txt"</code>, shelling out to <code>dir</code> or <code>ls</code>, or relying
+on a C extension that has no build for the target OS all break it. The language is portable;
+a given program is portable only if written that way.</p>
+<h5>Extensible and embedded (features 8 and 9)</h5>
+<p>These two are constantly swapped in exam answers. They are opposite directions:</p>
+<pre class="fence" data-lang="text"><code>Extensible :  C / C++ / Java code  ──►  used from inside Python
+Embedded   :  Python code          ──►  used from inside a C / C++ / Java program
+</code></pre>
+<p>Extensibility is not theoretical — a large part of the standard library itself is implemented in C, with the Python layer only providing the interface around it.</p></div>
+<div class="md"><p>This is also <em>why</em> the performance limitation in <a class="xref" href="/python/01-python-fundamentals/#s1-1-6">1.1.6</a> is survivable: heavy work is pushed
+down into C extensions (NumPy, pandas) while the Python layer just orchestrates.</p>
+<h5>Both procedure oriented and object oriented (feature 6)</h5>
+<p>Python supports procedural, object-oriented and even functional style for the same task — none is "the" Python way.</p></div>
+<div class="md callout practice"><p><strong>In practice — this is why NumPy/pandas are fast despite being "Python."</strong> Both
+libraries implement their actual number-crunching in C (extensibility, in action), with
+the Python layer only orchestrating calls into it — which is exactly why vectorized
+NumPy code runs orders of magnitude faster than an equivalent hand-written Python loop
+over the same data.</p></div>
+<div class="md"><h5>Extensive library (feature 10)</h5>
+<p>The standard library ships with the interpreter — no installation needed for file handling,
+regex, JSON, databases, threading, testing, math, dates, networking and more. Nearly every
+chapter in this notebook is backed by a stdlib module.</p></div>
+<div class="md"><h4 id="s1-1-6">1.1.6 Limitations of Python</h4>
+<p>From the notes:</p>
+<h5 id="s1">1 Interpreter performance is always low</h5>
+<p><strong>Why</strong> — every operation pays overhead that a compiled language does not:</p>
+<ul>
+<li>bytecode is dispatched instruction by instruction at runtime,</li>
+<li>types are unknown until runtime, so every operation must be looked up dynamically
+  (<code>a + b</code> cannot be reduced to one CPU instruction — Python must ask what <code>a</code> is first),</li>
+<li>every value is a heap object with a header, so even small integers cost memory,</li>
+<li>in CPython, the GIL prevents threads from running Python bytecode in parallel (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-5">17.5</a>).</li>
+</ul></div>
+<div class="md"><p><strong>Going deeper</strong> — CPython also offers an optional <strong>free-threaded</strong> build that removes
+the GIL entirely, distinct from the standard build most people actually run. "The GIL
+always applies" describes that standard build specifically, not an absolute rule for
+every CPython build. See <a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-5">17.5</a> for the timed proof of the GIL's CPU-bound-vs-I/O-bound
+effect, and for how that proof changes on the free-threaded build.</p></div>
+<div class="md"><p>Against a compiled language like C, pure Python loops doing equivalent arithmetic are typically one to two orders of magnitude slower.</p>
+<p><strong>Qualifying "always"</strong> — worth writing in the margin, because interviewers push on it:</p>
+<ul>
+<li>CPU-heavy work is normally delegated to C extensions (NumPy, pandas), so the Python layer
+  only orchestrates and the penalty largely disappears.</li>
+<li>Alternative runtimes change the picture — PyPy's JIT, or Cython / C extensions for hot paths.</li>
+<li>For <strong>I/O-bound</strong> work (network, disk, database) the bottleneck is waiting, not the
+  interpreter, and Python is no slower than anything else.</li>
+</ul>
+<p>So: the interpreter <em>is</em> slower, but "always low performance" describes the interpreter, not
+necessarily the program.</p>
+<h5 id="s2">2 Mobile app development</h5>
+<p>Python has no first-class position on mobile. There is no standard Python UI toolkit for iOS
+or Android, app-store packaging is awkward, and runtime size and battery cost work against
+it. Frameworks exist (Kivy, BeeWare) but they are niche compared with Swift/Kotlin or
+cross-platform frameworks.</p>
+<p>This is softening rather than fixed: CPython now includes officially supported
+(though lower-tier) iOS and Android build targets, so the gap is narrowing — but as a
+practical recommendation the limitation still holds.</p>
+<blockquote>
+<p><em>Further limitations to be added if the notes list more (e.g. GIL, memory footprint,
+runtime-only error detection).</em></p>
+</blockquote></div>
+<div class="md callout practice"><p><strong>In practice — offloading CPU-heavy work out of the request cycle.</strong> A web backend
+that needs to do something genuinely CPU-intensive (resizing an image, generating a
+PDF, running a scoring model) typically hands that work to a background worker system
+like Celery instead of doing it inline while a user waits — sidestepping this exact
+interpreter-performance limitation rather than fighting it.</p></div>
+<div class="md"><h4 id="s1-1-7">1.1.7 Distinctions Worth Pinning Down</h4>
+<p>Pairs from this section that are routinely confused — useful as a self-test:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Often confused</th>
+<th>The actual difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dynamically typed vs weakly typed</td>
+<td><em>When</em> types are checked vs <em>whether</em> types are enforced. Python is dynamic <strong>and</strong> strong.</td>
+</tr>
+<tr>
+<td>Platform independent vs portable</td>
+<td>A property of the implementation (OS-neutral bytecode) vs the practical result (no code changes when migrating).</td>
+</tr>
+<tr>
+<td>Extensible vs embedded</td>
+<td>Other languages used <em>inside</em> Python vs Python used <em>inside</em> other languages.</td>
+</tr>
+<tr>
+<td>Interpreted vs compiled</td>
+<td>Python does both — compiles to bytecode, then interprets it. "Interpreted" describes CPython, not the language.</td>
+</tr>
+<tr>
+<td>Variable vs object</td>
+<td>The name vs the thing it points to. Only the object has a type.</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><h3 id="s1-2">1.2 Identifiers and Reserved Keywords in Python</h3>
+<p><strong>Identifiers</strong></p>
+<p>An identifier is the name given to a variable, function, class, module or any other object
+in Python. Rules for a valid identifier:</p>
+<ul>
+<li>May contain letters (<code>a</code>-<code>z</code>, <code>A</code>-<code>Z</code>), digits (<code>0</code>-<code>9</code>) and the underscore <code>_</code>.</li>
+<li>Must not start with a digit.</li>
+<li>Cannot be a reserved keyword.</li>
+<li>Case-sensitive (<code>age</code> and <code>Age</code> are different identifiers).</li>
+<li>No spaces or special characters (<code>@</code>, <code>$</code>, <code>%</code>, <code>-</code>, etc.) are allowed.</li>
+</ul>
+<p><strong>Reserved Keywords</strong></p>
+<p>Keywords are words that are reserved by Python and cannot be used as identifiers. Python
+3.x has 35 reserved keywords:</p>
+<pre class="fence" data-lang="text"><code>False    None     True     and      as       assert   async    await
+break    class    continue def      del      elif     else     except
+finally  for      from     global   if       import   in       is
+lambda   nonlocal not      or       pass     raise    return   try
+while    with     yield
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">keyword</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">keyword</span><span class="o">.</span><span class="n">kwlist</span><span class="p">)</span>
+<span class="c1"># [&#39;False&#39;, &#39;None&#39;, &#39;True&#39;, &#39;and&#39;, &#39;as&#39;, &#39;assert&#39;, &#39;async&#39;, &#39;await&#39;, &#39;break&#39;, &#39;class&#39;,</span>
+<span class="c1">#  &#39;continue&#39;, &#39;def&#39;, &#39;del&#39;, &#39;elif&#39;, &#39;else&#39;, &#39;except&#39;, &#39;finally&#39;, &#39;for&#39;, &#39;from&#39;, &#39;global&#39;,</span>
+<span class="c1">#  &#39;if&#39;, &#39;import&#39;, &#39;in&#39;, &#39;is&#39;, &#39;lambda&#39;, &#39;nonlocal&#39;, &#39;not&#39;, &#39;or&#39;, &#39;pass&#39;, &#39;raise&#39;,</span>
+<span class="c1">#  &#39;return&#39;, &#39;try&#39;, &#39;while&#39;, &#39;with&#39;, &#39;yield&#39;]</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;False&#x27;, &#x27;None&#x27;, &#x27;True&#x27;, &#x27;and&#x27;, &#x27;as&#x27;, &#x27;assert&#x27;, &#x27;async&#x27;, &#x27;await&#x27;, &#x27;break&#x27;, &#x27;class&#x27;, &#x27;continue&#x27;, &#x27;def&#x27;, &#x27;del&#x27;, &#x27;elif&#x27;, &#x27;else&#x27;, &#x27;except&#x27;, &#x27;finally&#x27;, &#x27;for&#x27;, &#x27;from&#x27;, &#x27;global&#x27;, &#x27;if&#x27;, &#x27;import&#x27;, &#x27;in&#x27;, &#x27;is&#x27;, &#x27;lambda&#x27;, &#x27;nonlocal&#x27;, &#x27;not&#x27;, &#x27;or&#x27;, &#x27;pass&#x27;, &#x27;raise&#x27;, &#x27;return&#x27;, &#x27;try&#x27;, &#x27;while&#x27;, &#x27;with&#x27;, &#x27;yield&#x27;]</pre></div></div>
+<div class="md"><p>A keyword can never be used as an identifier — trying to bind a value to one is a
+<code>SyntaxError</code>, caught here at compile time before anything runs (see <a class="xref" href="/python/01-python-fundamentals/#s1-1-4">1.1.4</a>):</p>
+<p><strong>Going deeper</strong> — <code>keyword.softkwlist</code> holds Python's <em>soft</em> keywords — names like
+<code>match</code>, <code>case</code>, <code>_</code>, and <code>type</code> that are only special in the specific
+syntactic position they were introduced for (<code>match</code>/<code>case</code> statements, wildcard patterns,
+<code>type</code> aliases). Everywhere else they remain perfectly ordinary identifiers, unlike the
+words in <code>kwlist</code> above.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;class = 5&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>   <span class="c1"># invalid syntax (&lt;test&gt;, line 1) -- &#39;class&#39; is a keyword, not a valid identifier</span>
+</code></pre><div class="outs"><pre class="out-text">invalid syntax (&lt;test&gt;, line 1)</pre></div></div>
+<div class="md"><h3 id="s1-3">1.3 Syntax, Statements and Code Structure</h3>
+<p><strong>Statements</strong> — A statement is a complete instruction Python executes (an assignment, a
+function call, a <code>return</code>, an <code>import</code>, etc.). Normally one statement per line; <code>;</code> lets you
+chain multiple statements on one line (discouraged), and a line ending in <code>\</code>, or an
+unclosed bracket, lets a single statement continue across multiple lines.</p>
+<p><strong>Indentation defines blocks</strong> — Python uses indentation, not braces <code>{}</code>, to mark the body
+of a function, loop, conditional, class, etc. Indentation is not a style choice —
+inconsistent indentation raises an <code>IndentationError</code>. Convention is 4 spaces per level;
+tabs and spaces must not be mixed.</p>
+<p><strong>The colon <code>:</code></strong> introduces a block header — <code>if</code>, <code>for</code>, <code>while</code>, <code>def</code>, <code>class</code>, <code>try</code>,
+<code>with</code> all end their header line with <code>:</code>, followed by an indented block.</p>
+<p><strong>Case sensitivity</strong> — Python is case-sensitive: <code>Name</code> and <code>name</code> are different
+identifiers, and keywords must be written exactly as reserved (lowercase, except <code>True</code>,
+<code>False</code>, <code>None</code>).</p></div>
+<div class="md"><p><strong>Comments</strong> — anything after a <code>#</code> on a line is ignored entirely by Python; it exists
+purely for human readers. Comments are used constantly from chapter 2 onward (to annotate
+expected output, for instance) without ever being formally introduced until now.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># this is a comment, ignored by Python</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># 5</span>
+</code></pre><div class="outs"><pre class="out-text">5</pre></div></div>
+<div class="md"><p><strong>Indentation in practice</strong> — the block below (the <code>print("adult")</code> line) only runs
+because it is indented under the <code>if</code>; the line after it is <em>not</em> indented, so it is
+outside the <code>if</code> block and always runs regardless of the condition.</p>
+<p><strong>Going deeper</strong> — the walrus operator <code>:=</code> assigns a value
+<em>and</em> produces it as an expression result in one step (e.g. inside an <code>if</code> condition).
+It is covered in full in chapter 3.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">age</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="k">if</span> <span class="n">age</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adult&quot;</span><span class="p">)</span>   <span class="c1"># inside the block - runs because indented under if</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>         <span class="c1"># outside the block - always runs, indentation ends the if</span>
+</code></pre><div class="outs"><pre class="out-text">adult
+done</pre></div></div>
+<div class="md"><p><strong>Naming conventions (PEP 8)</strong> — the identifier rules above say what is <em>legal</em>; PEP 8
+(the standard Python style guide) additionally recommends what is <em>conventional</em>:
+<code>snake_case</code> (lowercase words separated by underscores) for variables and functions,
+<code>PascalCase</code> (each word capitalized, no separators) for classes, and <code>UPPER_CASE</code> for
+constants. None of this is enforced by the interpreter — code that ignores it still runs
+— but following it is what makes Python code immediately readable to other Python
+developers.</p></div>
+<div class="md callout practice"><p><strong>In practice — enforced automatically, not by memory.</strong> Real teams don't rely on
+everyone remembering PEP 8 — a formatter (<code>black</code>) and a linter (<code>ruff</code>/<code>flake8</code>) run
+in CI and/or as a pre-commit hook, automatically rejecting or auto-fixing code that
+doesn't conform, so style consistency doesn't depend on manual code review catching it.</p></div>
+<div class="md"><h3 id="s1-4">1.4 Basic Input and Output</h3>
+<p><strong>Output — <code>print()</code></strong> — Prints any number of values to standard output, converting each to
+its string form automatically. <code>sep</code> (default <code>" "</code>) controls the separator between values;
+<code>end</code> (default <code>"\n"</code>) controls what is written after the last one.</p>
+<p><strong>Input — <code>input([prompt])</code></strong> — Reads a line of text typed by the user and always returns it
+as a <code>str</code>, regardless of what it looks like — explicit conversion (<code>int()</code>, <code>float()</code>, ...)
+is required to use it as another type. The optional <code>prompt</code> argument is displayed before
+the program waits for input.</p>
+<p><strong>Formatted output</strong> — f-strings (<code>f"...{value}..."</code>) are the standard way to embed values
+inside printed text without manual string concatenation.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># a-b!</span>
+</code></pre><div class="outs"><pre class="out-text">a-b!</pre></div></div>
+<div class="md"><p><strong>Note</strong> — the line below monkeypatches <code>input()</code> only so this cell can run
+non-interactively in the notebook; real usage is just <code>age = int(input("Enter your age: "))</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
+<span class="n">builtins</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="s2">&quot;42&quot;</span>   <span class="c1"># non-interactive stand-in for this demo only</span>
+
+<span class="n">age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your age: &quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">age</span><span class="p">)</span>   <span class="c1"># 42</span>
+</code></pre><div class="outs"><pre class="out-text">42</pre></div></div></article>
+<nav class="spn"><span></span><a href="/python/02-objects-and-data-types/">Objects and Data Types →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

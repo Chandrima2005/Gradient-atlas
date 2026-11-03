@@ -195,6 +195,18 @@ GitHub Pages redeploys within a minute or two.
 
 ---
 
+## 🔎 Search engine pages
+
+Google treats every `#` link as the same page, so the app at `/` is indexed as one URL. `tools/build_seo.py` writes plain pages that search engines can read: `/data-science-roadmap/`, `/python/`, `/machine-learning/`, one page per chapter, plus `sitemap.xml` and `robots.txt`. Each page links back into the interactive app.
+
+Run it again after changing anything in `data/` or the stages in `js/tracks.js`, and commit the output:
+
+```bash
+python tools/build_seo.py
+```
+
+---
+
 ## 📊 Analytics
 
 The site uses Google Analytics 4 to count page views. Each view (e.g. `/home`, `/route`, `/ch11`) is recorded when you change pages. No personal study data is sent anywhere, because your progress stays in your own browser.

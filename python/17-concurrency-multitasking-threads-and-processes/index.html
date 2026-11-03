@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Concurrency: Multitasking, Threads and Processes – Python Chapter 17 | Gradient Atlas</title>
+<meta name="description" content="Doing more than one thing at a time, and what Python actually allows.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python/17-concurrency-multitasking-threads-and-processes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Concurrency: Multitasking, Threads and Processes – Python Chapter 17 | Gradient Atlas">
+<meta property="og:description" content="Doing more than one thing at a time, and what Python actually allows.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python/17-concurrency-multitasking-threads-and-processes/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Concurrency: Multitasking, Threads and Processes", "headline": "Concurrency: Multitasking, Threads and Processes", "description": "Doing more than one thing at a time, and what Python actually allows.", "url": "https://gradient-atlas.chandrima-das.com/python/17-concurrency-multitasking-threads-and-processes/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT32M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for data science", "url": "https://gradient-atlas.chandrima-das.com/python/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python", "item": "https://gradient-atlas.chandrima-das.com/python/"}, {"@type": "ListItem", "position": 4, "name": "Concurrency: Multitasking, Threads and Processes", "item": "https://gradient-atlas.chandrima-das.com/python/17-concurrency-multitasking-threads-and-processes/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/python/">Python</a> › Chapter 17</p>
+<h1><small>Python · Chapter 17</small>Concurrency: Multitasking, Threads and Processes</h1>
+<p class="lead">Doing more than one thing at a time, and what Python actually allows.</p>
+<p class="cta"><a class="sbtn" href="/#py/ch17">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s17-1">17.1 Concurrency Concepts and Terminology</a></li><li class="l3"><a href="#s17-2">17.2 Multithreading</a></li><li class="l3"><a href="#s17-3">17.3 Daemon Threads</a></li><li class="l3"><a href="#s17-4">17.4 Multiprocessing</a></li><li class="l3"><a href="#s17-5">17.5 The GIL and Performance Implications</a></li><li class="l3"><a href="#s17-6">17.6 Asynchronous Programming</a></li><li class="l3"><a href="#s17-7">17.7 Choosing a Concurrency Model</a></li><li class="l3"><a href="#s17-9">17.9 Thread Synchronization: Race Conditions and Locks</a></li></ol></nav>
+<article class="body"><div class="md"><h3 id="s17-1">17.1 Concurrency Concepts and Terminology</h3>
+<p><strong>A thread</strong>, in programming, is the smallest independently-schedulable unit of
+execution within a running program — a single sequence of instructions the CPU works
+through, with its own call stack and instruction pointer. Every running program starts
+with exactly <strong>one</strong> thread automatically (the <em>main thread</em>); more can be created to
+run additional sequences of instructions inside the <em>same</em> program.</p>
+<p><strong>Thread vs. process</strong> — a thread is not the same thing as a <strong>process</strong> (a running
+instance of a program, with its own private memory, created by the OS):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Thread</th>
+<th>Process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory</td>
+<td>shared with every other thread in the same process</td>
+<td>its own separate, isolated address space</td>
+</tr>
+<tr>
+<td>Creation cost</td>
+<td>lightweight, fast to create</td>
+<td>heavyweight, slower to create</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>direct — reads/writes the same variables</td>
+<td>needs explicit IPC (a <code>Queue</code>, a pipe, ...) (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-4">17.4</a>)</td>
+</tr>
+<tr>
+<td>Crash isolation</td>
+<td>one thread crashing can take the whole process down</td>
+<td>one process crashing doesn't affect others</td>
+</tr>
+<tr>
+<td>Parallelism in Python</td>
+<td>limited by the GIL for CPU-bound work (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-5">17.5</a>)</td>
+<td>true parallelism across CPU cores (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-4">17.4</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Concurrency vs. parallelism</strong> — another pair that looks interchangeable but isn't:</p>
+<pre class="fence" data-lang="text"><code>Concurrency (can happen on a single core - tasks take turns, interleaved):
+core 1: [-- task A --][-- task B --][-- task A --][-- task B --]
+
+Parallelism (needs multiple cores - tasks run at the literal same instant):
+core 1: [------ task A ------]
+core 2: [------ task B ------]
+</code></pre>
+<p>Concurrency is about <em>structuring</em> a program to deal with more than one task at once —
+it doesn't require more than one CPU core. Parallelism is about actually <em>executing</em>
+more than one task at the literal same instant, which does require multiple cores.</p>
+<p><strong>Why bother at all</strong> — it depends on what a task spends its time doing:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Task type</th>
+<th>Spends most time...</th>
+<th>Best fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I/O-bound</td>
+<td>waiting (network, disk, user input)</td>
+<td>threading (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-2">17.2</a>) or <code>asyncio</code> (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-6">17.6</a>) — either lets the CPU work on something else while waiting</td>
+</tr>
+<tr>
+<td>CPU-bound</td>
+<td>computing</td>
+<td>multiprocessing (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-4">17.4</a>) — the only one of the three that achieves real parallel <em>computation</em> in Python</td>
+</tr>
+</tbody>
+</table></div>
+<p>The rest of this chapter works through Python's three concurrency tools in that order:
+multithreading, multiprocessing, and <code>asyncio</code> — then 17.7 gives a single table for
+picking between them. Every program already has at least a <code>MainThread</code>, visible via
+<code>threading</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">active_count</span><span class="p">())</span>          <span class="c1"># 1 -&gt; only the main thread exists so far</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>   <span class="c1"># MainThread</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span> <span class="ow">is</span> <span class="n">threading</span><span class="o">.</span><span class="n">main_thread</span><span class="p">())</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">1
+MainThread
+True</pre></div></div>
+<div class="md"><h3 id="s17-2">17.2 Multithreading</h3>
+<p>The <code>threading</code> module offers three ways to get code running on another thread —
+picking one over another is mostly a matter of how much structure the job needs:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Way</th>
+<th>Shape</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Thread(target=fn, args=...)</code></td>
+<td>pass a plain function</td>
+<td>one-off, simple jobs</td>
+</tr>
+<tr>
+<td>Subclass <code>Thread</code>, override <code>run()</code></td>
+<td>a class</td>
+<td>a job that needs its own state/methods</td>
+</tr>
+<tr>
+<td><code>concurrent.futures.ThreadPoolExecutor</code></td>
+<td>a managed pool</td>
+<td>running <em>many</em> similar jobs, capped concurrency</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Way 1 — <code>target=</code> and <code>args=</code>.</strong> The function runs on a new thread as soon as
+<code>.start()</code> is called; <code>.join()</code> blocks the calling thread until it finishes:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">greet</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,))</span>   <span class="c1"># target + args</span>
+<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>   <span class="c1"># begins running greet() on a new OS thread</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>      <span class="c1"># block here until t finishes</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;main thread continues&quot;</span><span class="p">)</span>   <span class="c1"># only reached after &quot;Hello, Ada!&quot; has printed</span>
+</code></pre><div class="outs"><pre class="out-text">Hello, Ada!
+main thread continues</pre></div></div>
+<div class="md"><p><strong>Way 2 — subclassing <code>Thread</code>.</strong> Override <code>run()</code> instead of passing <code>target=</code>; useful
+when the job needs its own attributes or several helper methods around it. <code>__init__</code>
+must call <code>super().__init__()</code> first, to set up the <code>Thread</code> machinery it relies on:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">GreeterThread</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>   <span class="c1"># required - sets up the Thread machinery</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">person</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># override run() instead of passing target=</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">person</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">GreeterThread</span><span class="p">(</span><span class="s2">&quot;Grace&quot;</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>   <span class="c1"># calls run() on a new thread</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;main thread continues&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">Hello, Grace!
+main thread continues</pre></div></div>
+<div class="md"><p><strong>Way 3 — <code>ThreadPoolExecutor</code>.</strong> For running the <em>same</em> job across many inputs, a
+pool manages a fixed number of worker threads and reuses them, instead of creating and
+destroying a new <code>Thread</code> object per job. <code>.map()</code> runs the function across every item
+and collects the results in order:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">slow_greet</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+
+<span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>   <span class="c1"># a managed pool of (at most 2) worker threads</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">slow_greet</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;Grace&quot;</span><span class="p">,</span> <span class="s2">&quot;Alan&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>   <span class="c1"># [&#39;Hello, Ada!&#39;, &#39;Hello, Grace!&#39;, &#39;Hello, Alan!&#39;]</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;Hello, Ada!&#x27;, &#x27;Hello, Grace!&#x27;, &#x27;Hello, Alan!&#x27;]</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — an API client or web scraper.</strong> This <code>ThreadPoolExecutor</code> pattern is
+exactly how a real API client pulls data for many items at once — fetching account
+details for 500 users from a REST API, or scraping product pages across 100 URLs. Each
+request spends almost all of its time waiting on the network, so a pool of a few dozen
+threads (each running something like <code>requests.get(url)</code>) finishes the whole batch many
+times faster than looping through the requests one at a time. <code>asyncio</code> (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-6">17.6</a>) is the
+usual next step once the number of concurrent requests grows into the thousands, where
+per-thread overhead starts to matter.</p></div>
+<div class="md"><p><strong><code>.start()</code></strong> schedules <code>run()</code> to begin executing on a new OS thread and returns
+immediately — it does <strong>not</strong> wait for that code to finish. It can only be called
+<strong>once</strong> per <code>Thread</code> object; calling it again raises <code>RuntimeError</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">worker</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>   <span class="c1"># a Thread can only be started ONCE</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RuntimeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># threads can only be started once</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">RuntimeError: threads can only be started once</pre></div></div>
+<div class="md"><p><strong><code>.join([timeout])</code></strong> is the primary tool for waiting on a thread — it blocks the
+<em>calling</em> thread until the target thread finishes (or <code>timeout</code> seconds pass, if
+given). Skipping it means the main thread can reach code that depends on the worker's
+result before that worker is actually done:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_that_prints</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;worker done&quot;</span><span class="p">)</span>
+
+<span class="n">t1</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">worker_that_prints</span><span class="p">)</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;without join(): this often prints FIRST, before the worker finishes&quot;</span><span class="p">)</span>
+
+<span class="n">t2</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">worker_that_prints</span><span class="p">)</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>   <span class="c1"># blocks the main thread here until t2 actually finishes</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;with join(): this only prints AFTER the worker is done&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">without join(): this often prints FIRST, before the worker finishes
+worker done
+worker done
+with join(): this only prints AFTER the worker is done</pre></div></div>
+<div class="md"><p><strong>Introspecting threads</strong> — a <code>Thread</code> object carries identifying information, and
+<code>threading</code> itself can list every thread currently alive:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Gives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.name</code></td>
+<td>a human-readable label — auto-generated (<code>"Thread-N (target)"</code>) unless <code>name=</code> is passed</td>
+</tr>
+<tr>
+<td><code>.ident</code></td>
+<td>a unique integer identifier, assigned once the thread has actually started; <code>None</code> before that</td>
+</tr>
+<tr>
+<td><code>.is_alive()</code></td>
+<td>whether the thread is currently running</td>
+</tr>
+<tr>
+<td><code>threading.active_count()</code></td>
+<td>how many <code>Thread</code> objects are currently alive, including <code>MainThread</code></td>
+</tr>
+<tr>
+<td><code>threading.enumerate()</code></td>
+<td>a <code>list</code> of every currently alive <code>Thread</code> object</td>
+</tr>
+</tbody>
+</table></div>
+<p>A couple of threads, introspected at each stage of their life, makes all of this concrete:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">25 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">slow_worker</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">t1</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">slow_worker</span><span class="p">)</span>                       <span class="c1"># default name, auto-generated</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">slow_worker</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Downloader&quot;</span><span class="p">)</span>   <span class="c1"># explicit name</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>          <span class="c1"># Thread-N (slow_worker) -&gt; auto-generated, includes the target&#39;s name</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>          <span class="c1"># Downloader</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">ident</span><span class="p">)</span>           <span class="c1"># None -&gt; not started yet, no OS-level identifier assigned</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())</span>    <span class="c1"># False -&gt; not started yet</span>
+
+<span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">ident</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>   <span class="c1"># True -&gt; now it has a real thread identifier</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())</span>                <span class="c1"># True -&gt; currently running</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">active_count</span><span class="p">())</span>                            <span class="c1"># 3 -&gt; MainThread + t1 + t2</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">th</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">threading</span><span class="o">.</span><span class="n">enumerate</span><span class="p">()])</span>   <span class="c1"># every currently alive thread, by name</span>
+
+<span class="n">t1</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())</span>                    <span class="c1"># False -&gt; finished</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">active_count</span><span class="p">())</span>   <span class="c1"># 1 -&gt; back down to just MainThread</span>
+</code></pre><div class="outs"><pre class="out-text">Thread-6 (slow_worker)
+Downloader
+None
+False
+True
+True
+3
+[&#x27;MainThread&#x27;, &#x27;Thread-6 (slow_worker)&#x27;, &#x27;Downloader&#x27;]
+False
+1</pre></div></div>
+<div class="md"><p><strong>A thread's exceptions stay local.</strong> If a <code>Thread</code>'s target function raises and
+nothing inside it catches the exception, Python prints the traceback to <code>stderr</code> and
+that thread simply stops — the exception does <strong>not</strong> propagate to the main thread and
+does <strong>not</strong> crash the process; everything else keeps running as if nothing happened,
+which can make a silently-dead worker thread a surprisingly hard bug to notice.</p></div>
+<div class="md"><h3 id="s17-3">17.3 Daemon Threads</h3>
+<p>A <strong>daemon thread</strong> is a background thread that doesn't keep the program alive — when
+every <em>non</em>-daemon thread has finished, Python exits immediately, killing any daemon
+threads still running, without waiting for them. A regular ("non-daemon") thread does
+the opposite: the program won't exit until it finishes, however long that takes.</p>
+<p><strong>Every thread is non-daemonic by default</strong> — <code>.daemon</code> starts out <code>False</code> unless set
+otherwise, so a plain <code>Thread(target=...)</code> will always be waited for:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">worker</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">daemon</span><span class="p">)</span>   <span class="c1"># False -&gt; non-daemonic by default</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><p><strong>Setting <code>.daemon</code></strong> must happen <strong>before</strong> <code>.start()</code> — either as a constructor
+argument (<code>Thread(target=..., daemon=True)</code>) or by assignment beforehand. Trying to
+flip it on an already-running thread raises <code>RuntimeError</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>   <span class="c1"># too late - must be set BEFORE start()</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RuntimeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># cannot set daemon status of active thread</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">RuntimeError: cannot set daemon status of active thread</pre></div></div>
+<div class="md"><p><strong>Seeing the actual exit behaviour</strong> needs a real, separate process — inside this
+notebook's own process, "exiting" isn't observable. Running two tiny scripts and timing
+them makes the difference concrete: one has a <code>daemon=True</code> background thread, the
+other a plain (non-daemon) one, otherwise identical:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">work_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+
+<span class="n">daemon_script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;daemon_demo.py&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">daemon_script</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;import threading, time</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;def background_work():</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;    time.sleep(1)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;    print(&#39;background finished&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;t = threading.Thread(target=background_work, daemon=True)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;t.start()</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;print(&#39;main exiting&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">daemon_script</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>   <span class="c1"># main exiting -&gt; the ONLY output; &quot;background finished&quot; never runs</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">elapsed</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>                    <span class="c1"># True -&gt; the process exited immediately, didn&#39;t wait a full second</span>
+</code></pre><div class="outs"><pre class="out-text">main exiting
+True</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">nondaemon_script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;nondaemon_demo.py&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nondaemon_script</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;import threading, time</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;def background_work():</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;    time.sleep(1)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;    print(&#39;background finished&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;t = threading.Thread(target=background_work)</span><span class="se">\n</span><span class="s2">&quot;</span>   <span class="c1"># daemon defaults to False</span>
+        <span class="s2">&quot;t.start()</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;print(&#39;main reaching its end&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">nondaemon_script</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>   <span class="c1"># main reaching its end \n background finished -&gt; both lines this time</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">elapsed</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span>                    <span class="c1"># True -&gt; the process waited for the non-daemon thread</span>
+</code></pre><div class="outs"><pre class="out-text">main reaching its end
+background finished
+True</pre></div></div>
+<div class="md"><h3 id="s17-4">17.4 Multiprocessing</h3>
+<p>The <code>multiprocessing</code> module mirrors <code>threading</code>'s API almost exactly —
+<code>Process(target=fn, args=...)</code>, <code>.start()</code>, <code>.join()</code> — but each <code>Process</code> is a
+genuinely separate operating-system process, with its <strong>own</strong> private memory and its
+<strong>own</strong> Python interpreter, rather than another thread inside the same one. That's what
+buys real parallelism (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-5">17.5</a>): two <code>Process</code>es can run Python bytecode on two different
+CPU cores at the literal same instant, which two <code>Thread</code>s in the same process cannot.</p>
+<p><strong>Common mistake — no <code>if __name__ == "__main__":</code> guard.</strong> Starting a child process
+re-imports the launching script in a fresh interpreter to set itself up; without the
+guard (<a class="xref" href="/python/09-modules-and-packages/#s9-4">9.4</a>), that re-import re-runs everything at module level, including the
+<code>Process(...).start()</code> call itself — spawning children recursively. Every demo below
+uses the guard for exactly this reason.</p>
+<p><strong>Separate memory, made concrete</strong> — a global variable changed by a <em>thread</em> is visible
+everywhere (shared memory); the same change made inside a <em>process</em> never reaches the
+parent at all (separate memory):</p></div>
+<div class="md"><p><strong>Going deeper — platform note.</strong> "Re-imports the launching script" describes the
+<strong>spawn</strong> start method specifically — the default on Windows and macOS, where a child
+process starts as a brand-new interpreter with nothing inherited from the parent, so it
+has to re-import the module to rebuild what it needs. Linux defaults to <strong>fork</strong>
+instead, which clones the <em>existing</em> parent process (memory and all) rather than
+starting fresh — no re-import happens there, though the guard is still good practice
+for portability. One more spawn-specific gotcha: because a spawned child rebuilds
+everything from scratch, whatever is passed as a <code>Process</code>'s <code>target=</code>/<code>args=</code> must be
+<strong>picklable</strong> — a <code>lambda</code>, an open file handle, or a live network/database connection
+will fail to cross the process boundary, even though the exact same code runs fine
+under fork on Linux.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">23 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bump_in_thread</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">counter</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bump_in_process</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">counter</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;counter INSIDE the child process:&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>   <span class="c1"># sees its own separate copy</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">bump_in_thread</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;counter after a THREAD modifies it:&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>     <span class="c1"># 1 -&gt; shared memory, the change is visible</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">bump_in_process</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;counter after a PROCESS modifies it:&quot;</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>   <span class="c1"># still 1 -&gt; separate memory, no effect here</span>
+</code></pre><div class="outs"><pre class="out-text">counter after a THREAD modifies it: 1
+counter after a PROCESS modifies it: 1</pre></div></div>
+<div class="md"><p>Since a child process can't hand results back through shared memory, getting a value
+out requires explicit <strong>inter-process communication (IPC)</strong> — <code>multiprocessing.Queue</code>
+is a process-safe queue built exactly for this:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_square</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">result_queue</span><span class="p">):</span>
+    <span class="n">result_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>   <span class="c1"># the way to get a value back - shared memory doesn&#39;t work here</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">compute_square</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>   <span class="c1"># 49 -&gt; retrieved across the process boundary</span>
+</code></pre><div class="outs"><pre class="out-text">49</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — background task queues.</strong> Job-processing systems like <strong>Celery</strong> are
+built on this same worker-process model: a task (send a confirmation email, generate a
+PDF invoice, resize an uploaded image) is placed on a message broker's queue, and a
+pool of separate Celery <em>worker processes</em> pulls tasks off it and runs them outside the
+request/response cycle of the web server that enqueued them. <code>multiprocessing.Queue</code>
+above is that same idea in miniature — work and results crossing a process boundary
+through a queue, since (as just shown) shared memory isn't an option.</p></div>
+<div class="md"><h3 id="s17-5">17.5 The GIL and Performance Implications</h3>
+<p>The <strong>Global Interpreter Lock (GIL)</strong> is a single lock inside CPython (the reference
+interpreter this material targets) that only lets <strong>one</strong> thread execute Python
+bytecode at a time — even on a machine with many CPU cores. This is exactly the
+limitation 1.1.6 mentions: multiple threads in CPython can never run Python bytecode in
+parallel, no matter how many cores are available.</p>
+<p>The GIL is released, though, whenever a thread is <strong>waiting</strong> — on <code>time.sleep()</code>, a
+network response, a disk read — which is precisely why threading still helps I/O-bound
+work (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-1">17.1</a>) despite it. Three timed comparisons make the whole picture concrete:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">cpu_bound</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">total</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">8_000_000</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">cpu_bound</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">cpu_bound</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">sequential_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">cpu_bound</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">cpu_bound</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span> <span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span> <span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="n">threaded_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequential: </span><span class="si">{</span><span class="n">sequential_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, threaded: </span><span class="si">{</span><span class="n">threaded_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>   <span class="c1"># roughly equal</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">threaded_time</span> <span class="o">&gt;=</span> <span class="n">sequential_time</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span>   <span class="c1"># True -&gt; no real speedup - the GIL serializes CPU-bound work</span>
+</code></pre><div class="outs"><pre class="out-text">sequential: 0.85s, threaded: 0.86s
+True</pre></div></div>
+<div class="md"><p><strong>Going deeper — this is the standard-build story specifically (1.1.6 already flags
+this).</strong> CPython also offers an optional <strong>free-threaded</strong> build that removes the GIL
+entirely, distinct from the standard build most people actually run. On that build, the
+timed comparison above stops holding: two threads running <code>cpu_bound</code> genuinely execute
+on separate cores, with a real speedup much like the <code>multiprocessing</code> version below —
+without needing separate processes or IPC at all. <code>sys._is_gil_enabled()</code> reports which
+kind of build is currently running — <code>True</code> on the standard build, <code>False</code> on the
+free-threaded one.</p></div>
+<div class="md"><p>Swapping those same two <code>cpu_bound</code> calls onto separate <strong>processes</strong> instead of
+threads sidesteps the GIL entirely — each process has its own interpreter and its own
+GIL, so they run on separate cores in true parallel:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">cpu_bound</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">cpu_bound</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span> <span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span> <span class="n">p2</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="n">multiprocess_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequential: </span><span class="si">{</span><span class="n">sequential_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, multiprocess: </span><span class="si">{</span><span class="n">multiprocess_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">multiprocess_time</span> <span class="o">&lt;</span> <span class="n">sequential_time</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>   <span class="c1"># True -&gt; a real speedup, on separate cores</span>
+</code></pre><div class="outs"><pre class="out-text">sequential: 0.85s, multiprocess: 0.47s
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — CPU-bound batch processing.</strong> A batch thumbnail-generation service
+(resizing every image a user uploads into several sizes) or a data pipeline parsing and
+transforming millions of CSV/log rows are classic CPU-bound workloads where
+<code>multiprocessing</code> (or <code>ProcessPoolExecutor</code>) delivers a real, measurable speedup on a
+multi-core machine. Each worker process has its own interpreter and its own GIL, so,
+unlike threads, several of them really can crunch numbers on separate cores at the
+same instant.</p></div>
+<div class="md"><p>By contrast, an <strong>I/O-bound</strong> task (<code>time.sleep()</code> standing in for a network/disk wait)
+<em>does</em> speed up with threads — because the GIL is released for the entire duration of
+the wait, leaving it free for another thread to use:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">io_bound</span><span class="p">():</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>   <span class="c1"># stands in for waiting on a network/disk response</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">io_bound</span><span class="p">()</span>
+<span class="n">io_bound</span><span class="p">()</span>
+<span class="n">sequential_io_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">io_bound</span><span class="p">)</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">io_bound</span><span class="p">)</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span> <span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span> <span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="n">threaded_io_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequential: </span><span class="si">{</span><span class="n">sequential_io_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s, threaded: </span><span class="si">{</span><span class="n">threaded_io_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">threaded_io_time</span> <span class="o">&lt;</span> <span class="n">sequential_io_time</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>   <span class="c1"># True -&gt; a real speedup - the GIL was released during sleep</span>
+</code></pre><div class="outs"><pre class="out-text">sequential: 0.60s, threaded: 0.30s
+True</pre></div></div>
+<div class="md"><h3 id="s17-6">17.6 Asynchronous Programming</h3>
+<p><code>asyncio</code> achieves concurrency (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-1">17.1</a>) with <strong>no extra threads or processes at all</strong> —
+everything runs on a single thread, in a single process, taking turns cooperatively
+instead of being preemptively switched by the OS. An <code>async def</code> function is a
+<strong>coroutine function</strong>: calling it doesn't run its body, it returns a <strong>coroutine
+object</strong>, which only actually executes when it's <code>await</code>ed. Each <code>await</code> is a
+deliberate handoff point — "pause me here, let something else run, resume me once
+what I'm waiting on is ready" — managed by an <strong>event loop</strong>, started with
+<code>asyncio.run()</code>. <code>asyncio.gather()</code> runs several coroutines concurrently and waits for
+all of them:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">delay</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: starting&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>   <span class="c1"># yields control back to the event loop instead of blocking</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: done&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>                                              <span class="c1"># [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mf">0.6</span><span class="p">)</span>   <span class="c1"># True -&gt; all three ran CONCURRENTLY, not one after another</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+<span class="c1"># A: starting   -&gt; all three reach their first &quot;await&quot; before any of them resumes</span>
+<span class="c1"># B: starting</span>
+<span class="c1"># C: starting</span>
+<span class="c1"># A: done            -&gt; then all three finish sleeping at roughly the same time</span>
+<span class="c1"># B: done</span>
+<span class="c1"># C: done</span>
+</code></pre><div class="outs"><pre class="out-text">A: starting
+B: starting
+C: starting
+A: done
+B: done
+C: done
+[&#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;]
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — high-throughput web services.</strong> This single-thread, many-coroutines
+model is the standard architecture behind modern async Python web frameworks:
+<strong>FastAPI</strong> and <strong>aiohttp</strong> use <code>asyncio</code> under the hood to hold thousands of
+concurrent client connections open at once — an API gateway, a chat backend, or a
+webhook/notification dispatcher — without needing a dedicated OS thread per connection,
+which stops scaling long before that.</p></div>
+<div class="md callout mistake"><p><strong>Common mistake — forgetting <code>await</code>.</strong> Calling a coroutine function is not the same
+as running it — without <code>await</code>, the call just produces an unstarted coroutine object
+and moves on, silently skipping the body entirely:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">demo_missing_await</span><span class="p">():</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">greet</span><span class="p">()</span>   <span class="c1"># forgot &quot;await&quot; - this does NOT run the coroutine body yet</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>   <span class="c1"># &lt;class &#39;coroutine&#39;&gt; -&gt; just an unstarted coroutine object</span>
+    <span class="k">await</span> <span class="n">result</span>                <span class="c1"># NOW it actually runs</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">demo_missing_await</span><span class="p">())</span>
+<span class="c1"># &lt;class &#39;coroutine&#39;&gt;</span>
+<span class="c1"># hello</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;coroutine&#x27;&gt;
+hello</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — calling a blocking function inside a coroutine.</strong> <code>asyncio</code> is
+cooperative (<a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-6">17.6</a>): every coroutine runs on the <em>same</em> single thread, and control only
+passes to another task at an <code>await</code>. A genuinely blocking call like <code>time.sleep()</code> or
+a synchronous (non-async) HTTP request doesn't <code>await</code> anything, so it never hands
+control back — it freezes the <strong>entire event loop</strong>, not just the task that made the
+call, until it returns:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">bad_task</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: starting (blocking sleep)&quot;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>   <span class="c1"># BLOCKS the entire event loop - no other task can run meanwhile</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: done&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">demo_blocking</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">bad_task</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">),</span> <span class="n">bad_task</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>   <span class="c1"># ~0.4s -&gt; ran SEQUENTIALLY, not concurrently</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">demo_blocking</span><span class="p">())</span>
+<span class="c1"># A: starting (blocking sleep)</span>
+<span class="c1"># A: done          -&gt; B never even gets to start until A&#39;s blocking call finally returns</span>
+<span class="c1"># B: starting (blocking sleep)</span>
+<span class="c1"># B: done</span>
+<span class="c1"># took 0.40s -&gt; compare to the ~0.3s asyncio.sleep() version above, which ran truly concurrently</span>
+</code></pre><div class="outs"><pre class="out-text">A: starting (blocking sleep)
+A: done
+B: starting (blocking sleep)
+B: done
+took 0.40s</pre></div></div>
+<div class="md"><h3 id="s17-7">17.7 Choosing a Concurrency Model</h3>
+<p>Putting 17.2/17.4/17.6 side by side:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Threading</th>
+<th>Multiprocessing</th>
+<th><code>asyncio</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Best for</td>
+<td>I/O-bound, using existing blocking libraries</td>
+<td>CPU-bound work</td>
+<td>I/O-bound, <em>many</em> concurrent tasks</td>
+</tr>
+<tr>
+<td>Real parallelism?</td>
+<td>no (GIL, <a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-5">17.5</a>)</td>
+<td>yes — separate processes/cores</td>
+<td>no — single thread, single process</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>shared</td>
+<td>separate (needs IPC, <a class="xref" href="/python/17-concurrency-multitasking-threads-and-processes/#s17-4">17.4</a>)</td>
+<td>shared (it's all one thread)</td>
+</tr>
+<tr>
+<td>Overhead per task</td>
+<td>moderate (an OS thread)</td>
+<td>high (a whole process)</td>
+<td>very low (just a coroutine object)</td>
+</tr>
+<tr>
+<td>Requires "async-aware" code?</td>
+<td>no</td>
+<td>no</td>
+<td>yes — every blocking call needs an <code>await</code>-compatible version</td>
+</tr>
+</tbody>
+</table></div>
+<pre class="fence" data-lang="text"><code>                     Is the task CPU-bound (computing) or I/O-bound (waiting)?
+                                        |
+                +----------- CPU-bound -+- I/O-bound -----------+
+                |                                                 |
+        multiprocessing (17.4)                     how MANY tasks at once?
+     (only real way around the GIL)                              |
+                                        +---- a few ----+---- very many -----+
+                                        |                                      |
+                              threading (17.2)                     asyncio (17.6)
+                       (simplest; works with existing        (lowest overhead per task,
+                        blocking libraries as-is)              but needs async-aware code)
+</code></pre>
+<p>None of these is "the" right answer — a program can mix them (e.g. <code>asyncio</code> for
+thousands of open network connections, handing CPU-heavy parsing off to a
+<code>multiprocessing</code> pool).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cpu_heavy</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">total</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_mixed</span><span class="p">():</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="c1"># hands CPU-bound work off to a separate process, without blocking the event loop</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">cpu_heavy</span><span class="p">,</span> <span class="mi">5_000_000</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_mixed</span><span class="p">()))</span>   <span class="c1"># 41666654166667500000 -&gt; asyncio + multiprocessing, mixed</span>
+</code></pre><div class="outs"><pre class="out-text">41666654166667500000</pre></div></div>
+<div class="md"><h3 id="s17-9">17.9 Thread Synchronization: Race Conditions and Locks</h3>
+<p>A <strong>race condition</strong> happens when multiple threads read and write <strong>shared, mutable
+state</strong> without coordinating, so the final result depends on the unpredictable order
+their operations happen to interleave in. <code>counter += 1</code> looks like one indivisible
+step, but it's really three: <em>read</em> <code>counter</code>, <em>compute</em> <code>counter + 1</code>, <em>write</em> the
+result back — and another thread can run in between any of those steps. Forcing a
+visible gap between the read and the write makes the corruption reliable to observe:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">shared_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">increment_unsafe</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">shared_counter</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">shared_counter</span>    <span class="c1"># read</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>             <span class="c1"># a deliberate window another thread can interleave into</span>
+        <span class="n">shared_counter</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">+</span> <span class="mi">1</span>   <span class="c1"># write - based on a possibly-now-stale &quot;temp&quot;</span>
+
+<span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">increment_unsafe</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">shared_counter</span><span class="p">)</span>                <span class="c1"># expected 20 (4 threads x 5 increments); usually LESS</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shared_counter</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">)</span>          <span class="c1"># True -&gt; some increments were silently lost</span>
+</code></pre><div class="outs"><pre class="out-text">5
+True</pre></div></div>
+<div class="md"><p>Real code never sleeps in the middle of an operation like this — the interleaving that
+actually causes a race condition is driven by unpredictable OS thread scheduling, which
+can switch threads at any point regardless. The <code>time.sleep(0.001)</code> above only widens
+that window artificially, so the corruption reproduces reliably on every run of this
+demo instead of only occasionally.</p></div>
+<div class="md callout practice"><p><strong>In practice — a real production bug class.</strong> This is precisely how a <strong>race
+condition</strong> shows up in production checkout or inventory code: two concurrent requests
+both read "5 items in stock" before either writes back the decremented count, letting
+a product oversell — or two concurrent "charge card" requests both pass a stale balance
+check and double-charge a customer. It's why payment and inventory code paths almost
+never trust a read-check-write sequence to be atomic on its own, reaching instead for a
+lock (in-process, as below) or a database transaction/row lock (<a class="xref" href="/python/18-database-connectivity-pdbc/#s18-5">18.5</a>).</p></div>
+<div class="md"><p><strong><code>threading.Lock</code></strong> fixes this — only one thread at a time can be inside a locked
+block (via <code>.acquire()</code>/<code>.release()</code>, or a <code>with lock:</code> context manager, <a class="xref" href="/python/16-file-handling/#s16-6">16.6</a>), so the
+read-sleep-write sequence can no longer be interrupted midway:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">safe_counter</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">increment_safe</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">safe_counter</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lock</span><span class="p">:</span>   <span class="c1"># only one thread at a time can be inside this block</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">safe_counter</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+            <span class="n">safe_counter</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">increment_safe</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">safe_counter</span><span class="p">)</span>               <span class="c1"># 20, every time</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">safe_counter</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span>   <span class="c1"># True -&gt; the Lock forces the increments to happen one at a time</span>
+</code></pre><div class="outs"><pre class="out-text">20
+True</pre></div></div>
+<div class="md"><p>A few related <code>threading</code> synchronization primitives, each solving a variant of the
+same coordination problem:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>One-liner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Lock</code></td>
+<td>one thread inside a block at a time (above)</td>
+</tr>
+<tr>
+<td><code>RLock</code></td>
+<td>a "reentrant" lock — the <em>same</em> thread may re-acquire it without deadlocking itself</td>
+</tr>
+<tr>
+<td><code>Semaphore(n)</code></td>
+<td>up to <code>n</code> threads inside a block at once, instead of just one</td>
+</tr>
+<tr>
+<td><code>Event</code></td>
+<td>one thread signals (<code>.set()</code>), others wait for it (<code>.wait()</code>)</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><p><strong><code>RLock</code></strong> — a "reentrant" lock: the <em>same</em> thread that already holds it can acquire it
+again without blocking, as long as it releases it the same number of times it acquired
+it. A plain <code>Lock</code> doesn't allow this — a thread trying to re-acquire a <code>Lock</code> it
+already holds blocks forever, waiting for itself to release it, which is exactly the
+situation a method that calls another locking method (on the same object, same thread)
+runs into:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Counter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>              <span class="c1"># first acquire</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>                    <span class="c1"># calls another method that ALSO acquires the same lock</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>              <span class="c1"># re-acquires the SAME lock, on the SAME thread - fine with RLock</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;value is now </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">increment</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="c1"># value is now 1</span>
+<span class="c1"># a plain Lock would DEADLOCK here: increment() holds it, then log() tries to acquire</span>
+<span class="c1"># the SAME Lock on the SAME thread and blocks forever waiting for itself to release it</span>
+</code></pre><div class="outs"><pre class="out-text">value is now 1</pre></div></div>
+<div class="md"><p><strong><code>Semaphore(n)</code></strong> generalizes <code>Lock</code> from "one thread at a time" to "up to <code>n</code> threads
+at a time" — useful for capping concurrent access to a limited resource (a connection
+pool, a rate-limited API) among more threads than there are slots:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">sem</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>   <span class="c1"># only 2 threads allowed inside at once</span>
+<span class="n">running</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">limited_worker</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">sem</span><span class="p">:</span>
+        <span class="n">running</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;worker </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> running, concurrent: </span><span class="si">{</span><span class="n">running</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">running</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">limited_worker</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="c1"># 5 threads total, but the printed &quot;concurrent&quot; list never shows more than 2 names at once -</span>
+<span class="c1"># Semaphore(2) only ever lets 2 of them past &quot;.acquire()&quot; (the &quot;with sem:&quot;) at the same time</span>
+</code></pre><div class="outs"><pre class="out-text">worker 0 running, concurrent: [0]
+worker 1 running, concurrent: [0, 1]
+worker 2 running, concurrent: [2]
+worker 3 running, concurrent: [2, 3]
+worker 4 running, concurrent: [4]</pre></div></div>
+<div class="md"><p><strong><code>Event</code></strong> is a simple flag one thread can wait on and another can set — <code>.wait()</code>
+blocks until <code>.set()</code> is called elsewhere (or an optional timeout passes), a common
+pattern for "wait for a start signal" or "wait until setup is complete":</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">waiter</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;waiter: waiting for the signal&quot;</span><span class="p">)</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>   <span class="c1"># blocks here until another thread calls event.set()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;waiter: got the signal, proceeding&quot;</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">waiter</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>   <span class="c1"># give the waiter time to reach event.wait() first</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;main: sending the signal&quot;</span><span class="p">)</span>
+<span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>   <span class="c1"># unblocks the waiting thread</span>
+<span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="c1"># waiter: waiting for the signal</span>
+<span class="c1"># main: sending the signal</span>
+<span class="c1"># waiter: got the signal, proceeding</span>
+</code></pre><div class="outs"><pre class="out-text">waiter: waiting for the signal
+main: sending the signal
+waiter: got the signal, proceeding</pre></div></div></article>
+<nav class="spn"><a href="/python/16-file-handling/">← File Handling</a><a href="/python/18-database-connectivity-pdbc/">Database Connectivity (PDBC) →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

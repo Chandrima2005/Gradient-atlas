@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Python Machine Learning Stack – Machine Learning Chapter 3 | Gradient Atlas</title>
+<meta name="description" content="The four libraries every later chapter imports, and the scikit-learn API contract that every estimator in this material obeys.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/03-the-python-machine-learning-stack/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="The Python Machine Learning Stack – Machine Learning Chapter 3 | Gradient Atlas">
+<meta property="og:description" content="The four libraries every later chapter imports, and the scikit-learn API contract that every estimator in this material obeys.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/03-the-python-machine-learning-stack/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "The Python Machine Learning Stack", "headline": "The Python Machine Learning Stack", "description": "The four libraries every later chapter imports, and the scikit-learn API contract that every estimator in this material obeys.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/03-the-python-machine-learning-stack/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT46M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "The Python Machine Learning Stack", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/03-the-python-machine-learning-stack/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 3</p>
+<h1><small>Machine Learning · Chapter 3</small>The Python Machine Learning Stack</h1>
+<p class="lead">The four libraries every later chapter imports, and the scikit-learn API contract that every estimator in this material obeys.</p>
+<p class="cta"><a class="sbtn" href="/#ch3">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s3-1">3.1 NumPy: the ndarray</a></li><li class="l3"><a href="#s3-2">3.2 NumPy for Machine Learning: axes, aggregation and randomness</a></li><li class="l3"><a href="#s3-3">3.3 pandas: Series and DataFrame</a></li><li class="l3"><a href="#s3-4">3.4 pandas: selection, filtering and transformation</a></li><li class="l3"><a href="#s3-5">3.5 pandas: grouping, joining and reshaping</a></li><li class="l3"><a href="#s3-6">3.6 Visualization with matplotlib and seaborn</a></li><li class="l3"><a href="#s3-7">3.7 The scikit-learn Estimator API</a></li><li class="l3"><a href="#s3-8">3.8 Reproducibility: random_state, seeds and determinism</a></li><li class="l3"><a href="#s3-9">3.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Four libraries carry almost all the code in this material, and they divide the work cleanly:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Owns</th>
+<th>Data structure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NumPy</strong></td>
+<td>Numerical arrays and the arithmetic on them</td>
+<td><code>ndarray</code> — one dtype, n-dimensional</td>
+</tr>
+<tr>
+<td><strong>pandas</strong></td>
+<td>Labelled, mixed-type tabular data; cleaning and reshaping</td>
+<td><code>DataFrame</code> — named columns, each its own dtype</td>
+</tr>
+<tr>
+<td><strong>matplotlib</strong> / <strong>seaborn</strong></td>
+<td>Looking at the data</td>
+<td>Figures and axes</td>
+</tr>
+<tr>
+<td><strong>scikit-learn</strong></td>
+<td>Models, transformers, evaluation, and the API that unifies them</td>
+<td>Estimators consuming NumPy arrays or DataFrames</td>
+</tr>
+</tbody>
+</table></div>
+<p>The usual flow is pandas for loading and cleaning, NumPy underneath everything, matplotlib to see what you
+have, and scikit-learn to model it. This chapter covers the parts of each that the rest of the material
+actually uses — not a full tour.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numpy &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pandas&quot;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">numpy  2.5.2
+pandas 3.0.5</pre></div></div>
+<div class="md"><h3 id="s3-1">3.1 NumPy: the ndarray</h3>
+<p>A Python list holds pointers to arbitrary objects scattered through memory. A NumPy <strong>ndarray</strong> holds raw
+values of one type in one contiguous block. That single difference is what makes array arithmetic fast, and
+it is why every ML library uses arrays rather than lists underneath.</p>
+<h4 id="s3-1-1">3.1.1 Creation, dtype and shape</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.shape</code></td>
+<td>Size along each dimension, as a tuple</td>
+</tr>
+<tr>
+<td><code>.ndim</code></td>
+<td>Number of dimensions (<code>len(shape)</code>)</td>
+</tr>
+<tr>
+<td><code>.dtype</code></td>
+<td>The single type every element has</td>
+</tr>
+<tr>
+<td><code>.size</code></td>
+<td>Total number of elements</td>
+</tr>
+<tr>
+<td><code>.nbytes</code></td>
+<td>Memory used by the data itself</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shape &quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>     <span class="c1"># (2, 3)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ndim  &quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>      <span class="c1"># 2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dtype &quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>     <span class="c1"># int64</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;size  &quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>      <span class="c1"># 6</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nbytes&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">nbytes</span><span class="p">)</span>    <span class="c1"># 48 -&gt; 6 elements x 8 bytes</span>
+</code></pre><div class="outs"><pre class="out-text">shape  (2, 3)
+ndim   2
+dtype  int64
+size   6
+nbytes 48</pre></div></div>
+<div class="md"><p>The constructors used throughout this material:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;zeros    &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>                        <span class="c1"># [0. 0. 0.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ones     &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>                  <span class="c1"># [1. 1.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;arange   &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>                <span class="c1"># [0 3 6 9] - stop is EXCLUSIVE</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;linspace &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>               <span class="c1"># [0. 0.25 0.5 0.75 1.] - stop is INCLUSIVE</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;eye      &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>                        <span class="c1"># [1. 0.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;full     &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">))</span>                    <span class="c1"># [7. 7. 7.]</span>
+</code></pre><div class="outs"><pre class="out-text">zeros     [0. 0. 0.]
+ones      [1. 1.]
+arange    [0 3 6 9]
+linspace  [0.   0.25 0.5  0.75 1.  ]
+eye       [1. 0.]
+full      [7. 7. 7.]</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — an unintended integer dtype.</strong> An array built from integer literals gets an integer
+dtype, and integer division and assignment then silently truncate. This bites when a feature column is read
+as <code>int64</code> and a scaling step quietly floors everything to zero.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.7</span>        <span class="c1"># no error, no warning</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ints</span><span class="p">,</span> <span class="n">ints</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>          <span class="c1"># [2 2 3] int64 -&gt; 2.7 was truncated to 2</span>
+
+<span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.7</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">floats</span><span class="p">,</span> <span class="n">floats</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>      <span class="c1"># [2.7 2.  3. ] float64 -&gt; preserved</span>
+</code></pre><div class="outs"><pre class="out-text">[2 2 3] int64
+[2.7 2.  3. ] float64</pre></div></div>
+<div class="md"><h4 id="s3-1-2">3.1.2 Indexing, slicing, and the view/copy distinction</h4>
+<p>Indexing follows Python's conventions per dimension, separated by commas.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;M[1, 2]   &quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>       <span class="c1"># 6    - single element</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;M[0]      &quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>           <span class="c1"># [0 1 2 3] - a whole row</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;M[:, 1]   &quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>       <span class="c1"># [1 5 9]    - a whole column</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;M[0:2, 1:3]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>   <span class="c1"># a sub-block</span>
+</code></pre><div class="outs"><pre class="out-text">[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+M[1, 2]    6
+M[0]       [0 1 2 3]
+M[:, 1]    [1 5 9]
+M[0:2, 1:3]
+ [[1 2]
+ [5 6]]</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — a slice is a view, not a copy.</strong> This is the NumPy behaviour that surprises people
+coming from lists. Slicing does not copy data; it returns a window onto the same memory, so writing through
+the slice modifies the original. It is a deliberate performance decision — copying every slice of a large
+array would be ruinous — but it means an innocuous-looking preprocessing step can mutate the caller's data.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">original</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">window</span> <span class="o">=</span> <span class="n">original</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>     <span class="c1"># a VIEW - shares memory with `original`</span>
+<span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">999</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;original:&quot;</span><span class="p">,</span> <span class="n">original</span><span class="p">)</span>   <span class="c1"># [  0 999   2   3   4   5] - modified through the slice!</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shares memory:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">window</span><span class="p">))</span>   <span class="c1"># True</span>
+
+<span class="n">safe</span> <span class="o">=</span> <span class="n">original</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>   <span class="c1"># an explicit copy breaks the link</span>
+<span class="n">safe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;original after copy edit:&quot;</span><span class="p">,</span> <span class="n">original</span><span class="p">)</span>   <span class="c1"># unchanged this time</span>
+</code></pre><div class="outs"><pre class="out-text">original: [  0 999   2   3   4   5]
+shares memory: True
+original after copy edit: [  0 999   2   3   4   5]</pre></div></div>
+<div class="md"><p>Boolean masks and integer arrays ("fancy indexing") do the filtering work in every later chapter. Unlike
+slices, both return <strong>copies</strong>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+<span class="n">mask</span> <span class="o">=</span> <span class="n">values</span> <span class="o">&gt;</span> <span class="mi">4</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mask       &quot;</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>             <span class="c1"># [False  True False  True False]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;filtered   &quot;</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>     <span class="c1"># [8 9]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fancy      &quot;</span><span class="p">,</span> <span class="n">values</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>   <span class="c1"># [3 1 4] - selected by position</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mask is a copy:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">mask</span><span class="p">]))</span>   <span class="c1"># False</span>
+</code></pre><div class="outs"><pre class="out-text">mask        [False  True False  True False]
+filtered    [8 9]
+fancy       [3 1 4]
+mask is a copy: False</pre></div></div>
+<div class="md"><h4 id="s3-1-3">3.1.3 Broadcasting</h4>
+<p><strong>Broadcasting</strong> lets NumPy combine arrays of different shapes by stretching size-1 dimensions, without
+copying anything. Two shapes are compared right to left; each pair of dimensions must be equal, or one of
+them must be 1.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Shape A</th>
+<th>Shape B</th>
+<th>Result</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>(3, 4)</code></td>
+<td><code>(4,)</code></td>
+<td><code>(3, 4)</code></td>
+<td>B is applied to every row</td>
+</tr>
+<tr>
+<td><code>(3, 4)</code></td>
+<td><code>(3, 1)</code></td>
+<td><code>(3, 4)</code></td>
+<td>B is applied to every column</td>
+</tr>
+<tr>
+<td><code>(3, 4)</code></td>
+<td><code>(3,)</code></td>
+<td><strong>Error</strong></td>
+<td>4 and 3 do not match and neither is 1</td>
+</tr>
+<tr>
+<td><code>(3, 1)</code></td>
+<td><code>(1, 4)</code></td>
+<td><code>(3, 4)</code></td>
+<td>Both stretch — an outer product shape</td>
+</tr>
+</tbody>
+</table></div>
+<p>This is exactly how per-feature standardization (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-5">5.5</a>) is written: subtract a length-\(p\) vector of means from
+an \((n, p)\) matrix.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mf">20.0</span><span class="p">,</span> <span class="mf">200.0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mf">30.0</span><span class="p">,</span> <span class="mf">300.0</span><span class="p">]])</span>
+
+<span class="n">col_means</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># shape (2,) - one mean per COLUMN</span>
+<span class="n">centred</span> <span class="o">=</span> <span class="n">data</span> <span class="o">-</span> <span class="n">col_means</span>      <span class="c1"># (3, 2) - (2,) broadcasts across every row</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;means   &quot;</span><span class="p">,</span> <span class="n">col_means</span><span class="p">)</span>          <span class="c1"># [ 20. 200.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;centred</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">centred</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;new means:&quot;</span><span class="p">,</span> <span class="n">centred</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>   <span class="c1"># [0. 0.] - by construction</span>
+</code></pre><div class="outs"><pre class="out-text">means    [ 20. 200.]
+centred
+ [[ -10. -100.]
+ [   0.    0.]
+ [  10.  100.]]
+new means: [0. 0.]</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># The error case, and the fix.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>       <span class="c1"># (3, 2) against (3,) -&gt; no</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError:&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="mi">60</span><span class="p">])</span>
+
+<span class="n">per_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">]])</span>   <span class="c1"># (3, 1) - explicitly a column</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;per-row subtraction works:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">-</span> <span class="n">per_row</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">ValueError: operands could not be broadcast together with shapes (3,2) (
+per-row subtraction works:
+ [[  9.  99.]
+ [ 18. 198.]
+ [ 27. 297.]]</pre></div></div>
+<div class="md"><h4 id="s3-1-4">3.1.4 Vectorization</h4>
+<p>A vectorized expression pushes the loop into compiled code. The speed difference is not marginal, and it is
+the reason every from-scratch implementation in <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–20 is written with array expressions rather
+than Python loops.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="n">big</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">loop_result</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">big</span><span class="p">)</span>
+<span class="n">loop_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">vector_result</span> <span class="o">=</span> <span class="p">(</span><span class="n">big</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">vector_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;python loop : </span><span class="si">{</span><span class="n">loop_time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;8.1f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vectorized  : </span><span class="si">{</span><span class="n">vector_time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;8.1f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;speedup     : </span><span class="si">{</span><span class="n">loop_time</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">vector_time</span><span class="si">:</span><span class="s2">&gt;8.0f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;same answer :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">loop_result</span><span class="p">,</span> <span class="n">vector_result</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">python loop :    134.9 ms
+vectorized  :      4.1 ms
+speedup     :       33x
+same answer : True</pre></div></div>
+<div class="md"><h3 id="s3-2">3.2 NumPy for Machine Learning: axes, aggregation and randomness</h3>
+<h4 id="s3-2-1">3.2.1 The axis argument</h4>
+<p><code>axis</code> is the single most misread argument in NumPy. The rule: <strong><code>axis=k</code> is the axis that gets collapsed.</strong>
+For a 2-D <code>(n_samples, n_features)</code> array that means:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Collapses</th>
+<th>Result shape</th>
+<th>Reads as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X.mean(axis=0)</code></td>
+<td>Rows</td>
+<td><code>(n_features,)</code></td>
+<td>One value <strong>per feature</strong></td>
+</tr>
+<tr>
+<td><code>X.mean(axis=1)</code></td>
+<td>Columns</td>
+<td><code>(n_samples,)</code></td>
+<td>One value <strong>per sample</strong></td>
+</tr>
+<tr>
+<td><code>X.mean()</code></td>
+<td>Everything</td>
+<td>scalar</td>
+<td>One value overall</td>
+</tr>
+</tbody>
+</table></div>
+<p>Per-feature statistics — which is what scalers, imputers and PCA all need — are <code>axis=0</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mf">300.0</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;axis=0 (per feature):&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>   <span class="c1"># [  2.  20. 200.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;axis=1 (per sample) :&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>   <span class="c1"># [ 37. 111.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no axis (overall)   :&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>          <span class="c1"># 74.0</span>
+</code></pre><div class="outs"><pre class="out-text">axis=0 (per feature): [  2.  20. 200.]
+axis=1 (per sample) : [ 37. 111.]
+no axis (overall)   : 74.0</pre></div></div>
+<div class="md"><p><code>keepdims=True</code> preserves the collapsed dimension as size 1, which is what makes the result broadcast back
+against the original array without a manual <code>reshape</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">row_means</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                    <span class="c1"># (2,)</span>
+<span class="n">row_means_kept</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># (2, 1)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">row_means</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">row_means_kept</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># (2,) (2, 1)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;centred by row:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">X</span> <span class="o">-</span> <span class="n">row_means_kept</span><span class="p">)</span>   <span class="c1"># works; X - row_means would fail</span>
+</code></pre><div class="outs"><pre class="out-text">(2,) (2, 1)
+centred by row:
+ [[ -36.  -27.   63.]
+ [-108.  -81.  189.]]</pre></div></div>
+<div class="md"><h4 id="s3-2-2">3.2.2 Random number generation</h4>
+<p>NumPy has two APIs. The legacy one (<code>np.random.seed</code>, <code>np.random.rand</code>) uses a single hidden global state;
+the modern one (<code>np.random.default_rng</code>) gives you an explicit <code>Generator</code> object. <strong>Prefer the
+<code>Generator</code></strong>: global state is invisible, so a library call that draws a random number silently changes
+every subsequent result in your notebook.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">gen_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">gen_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;same seed, same stream:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">gen_a</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">gen_b</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)))</span>   <span class="c1"># True</span>
+
+<span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;normal   &quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;uniform  &quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;integers &quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;choice   &quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shuffled &quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span>
+</code></pre><div class="outs"><pre class="out-text">same seed, same stream: True
+normal    [ 0.126 -0.132  0.64 ]
+uniform   [0.165 8.133 9.128]
+integers  [50 60 97]
+choice    [&#x27;c&#x27; &#x27;b&#x27; &#x27;b&#x27; &#x27;b&#x27;]
+shuffled  [3 2 0 1 4]</pre></div></div>
+<div class="md"><p>scikit-learn's <code>random_state</code> accepts either an integer or a <code>Generator</code>, and the difference matters: an
+integer reseeds identically on every call, while a <code>Generator</code> advances. 3.8 covers the consequences.</p></div>
+<div class="md"><h3 id="s3-3">3.3 pandas: Series and DataFrame</h3>
+<p>NumPy arrays are one dtype and positional. Real tabular data is neither: a table has named columns of
+different types, some of them text, some with missing values. That is what pandas adds.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>Series</code></th>
+<th><code>DataFrame</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dimensions</td>
+<td>1-D</td>
+<td>2-D</td>
+</tr>
+<tr>
+<td>Analogy</td>
+<td>One labelled column</td>
+<td>A dict of <code>Series</code> sharing one index</td>
+</tr>
+<tr>
+<td>dtype</td>
+<td>One per Series</td>
+<td>One per column</td>
+</tr>
+<tr>
+<td>Has an index</td>
+<td>Yes</td>
+<td>Yes, plus column labels</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;scores&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">by label   :&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">])</span>     <span class="c1"># 20</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;by position:&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>   <span class="c1"># 20 - same value, different addressing</span>
+</code></pre><div class="outs"><pre class="out-text">a    10
+b    20
+c    30
+Name: scores, dtype: int64
+
+by label   : 20
+by position: 20</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Kolkata&quot;</span><span class="p">,</span> <span class="s2">&quot;Pune&quot;</span><span class="p">,</span> <span class="s2">&quot;Kolkata&quot;</span><span class="p">,</span> <span class="s2">&quot;Delhi&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;plan&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Basic&quot;</span><span class="p">,</span> <span class="s2">&quot;Premium&quot;</span><span class="p">,</span> <span class="s2">&quot;Premium&quot;</span><span class="p">,</span> <span class="s2">&quot;Basic&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;charges&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">30.5</span><span class="p">,</span> <span class="mf">78.0</span><span class="p">,</span> <span class="mf">65.25</span><span class="p">,</span> <span class="mf">28.0</span><span class="p">],</span>
+    <span class="s2">&quot;churned&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">dtypes:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">      city     plan  charges  churned
+0  Kolkata    Basic    30.50        0
+1     Pune  Premium    78.00        1
+2  Kolkata  Premium    65.25        0
+3    Delhi    Basic    28.00        1
+
+dtypes:
+city           str
+plan           str
+charges    float64
+churned      int64
+dtype: object</pre></div></div>
+<div class="md"><p>Note the <code>str</code> dtype on the text columns: from pandas 3.0 a dedicated string dtype is the default, rather
+than the catch-all <code>object</code> dtype that earlier versions used. Numeric columns are still NumPy dtypes
+underneath, which is why <code>.to_numpy()</code> is free for them and not for mixed frames.</p>
+<h4 id="s3-3-1">3.3.1 The triage that starts every dataset</h4>
+<p>Four calls, always in this order, before anything else happens. <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapter 4</a> builds on them.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">customers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shape:&quot;</span><span class="p">,</span> <span class="n">customers</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>          <span class="c1"># (1012, 14)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">first rows:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">shape: (1012, 14)
+
+first rows:
+  customer_id signup_date   age  gender     city      plan  tenure_months  monthly_charges  \
+0      C00632  2020-10-12  69.0  Female  Chennai   Premium             58            77.93   
+1      C00635  2023-06-09  34.0       M     Pune  Standard              5            50.99   
+2      C00964  2021-03-04  37.0       M   Mumbai   Premium              8            73.85   
+
+  total_charges  support_tickets  last_login_days  satisfaction_score  churned cancellation_reason  
+0       4519.94                2                8                 8.0        0                 NaN  
+1        254.95                1               26                 9.0        0                 NaN  
+2        590.80                0                1                 8.0        0                 NaN  </pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">customers</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;pandas.DataFrame&#x27;&gt;
+RangeIndex: 1012 entries, 0 to 1011
+Data columns (total 14 columns):
+ #   Column               Non-Null Count  Dtype  
+---  ------               --------------  -----  
+ 0   customer_id          1012 non-null   str    
+ 1   signup_date          1012 non-null   str    
+ 2   age                  953 non-null    float64
+ 3   gender               965 non-null    str    
+ 4   city                 1012 non-null   str    
+ 5   plan                 1012 non-null   str    
+ 6   tenure_months        1012 non-null   int64  
+ 7   monthly_charges      982 non-null    float64
+ 8   total_charges        1012 non-null   str    
+ 9   support_tickets      1012 non-null   int64  
+ 10  last_login_days      1012 non-null   int64  
+ 11  satisfaction_score   912 non-null    float64
+ 12  churned              1012 non-null   int64  
+ 13  cancellation_reason  142 non-null    str    
+dtypes: float64(3), int64(4), str(7)
+memory usage: 110.8 KB</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">          age  tenure_months  monthly_charges  support_tickets  last_login_days  \
+count  953.00        1012.00           982.00          1012.00          1012.00   
+mean    38.04          36.43            40.48             1.26            12.40   
+std     13.04          20.81            17.13             1.12             8.49   
+min      0.00           1.00            15.00             0.00             0.00   
+25%     30.00          18.00            25.92             0.00             6.00   
+50%     38.00          35.00            38.47             1.00            10.00   
+75%     45.00          55.00            52.92             2.00            17.00   
+max    199.00          72.00            89.71             6.00            51.00   
+
+       satisfaction_score  churned  
+count              912.00  1012.00  
+mean                 7.32     0.14  
+std                  1.69     0.35  
+min                  1.00     0.00  
+25%                  6.00     0.00  
+50%                  7.00     0.00  
+75%                  9.00     0.00  
+max                 10.00     1.00  </pre></div></div>
+<div class="md"><p><code>info()</code> is where the problems surface. Read it for two things: a <strong>non-null count below the row count</strong>
+(missing data, <a class="xref" href="/machine-learning/05-data-preprocessing/#s5-2">5.2</a>) and a <strong>dtype that is wrong for the content</strong> — here <code>total_charges</code> is text because
+some rows hold a blank string instead of a number, which is <a class="xref" href="/machine-learning/05-data-preprocessing/#s5-4">5.4</a>'s structural repair.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;total_charges dtype:&quot;</span><span class="p">,</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>   <span class="c1"># str - should be numeric</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;blank entries      :&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>   <span class="c1"># 9</span>
+
+<span class="c1"># to_numeric with errors=&quot;coerce&quot; turns the unparseable entries into NaN rather than raising.</span>
+<span class="n">charges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;after coercion     :&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;| NaN count:&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">total_charges dtype: str
+blank entries      : 9
+after coercion     : float64 | NaN count: 9</pre></div></div>
+<div class="md"><h3 id="s3-4">3.4 pandas: selection, filtering and transformation</h3>
+<h4 id="s3-4-1">3.4.1 <code>loc</code> versus <code>iloc</code></h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Accessor</th>
+<th>Addresses by</th>
+<th>Slice endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.loc[rows, cols]</code></td>
+<td><strong>Labels</strong> (index values, column names)</td>
+<td><strong>Inclusive</strong></td>
+</tr>
+<tr>
+<td><code>.iloc[rows, cols]</code></td>
+<td><strong>Integer positions</strong></td>
+<td>Exclusive, like Python</td>
+</tr>
+</tbody>
+</table></div>
+<p>The inclusive/exclusive difference is a genuine trap: <code>df.loc[0:2]</code> returns three rows, <code>df.iloc[0:2]</code>
+returns two.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loc  [0:2] -&gt;&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;rows&quot;</span><span class="p">)</span>    <span class="c1"># 3 - endpoint INCLUDED</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iloc [0:2] -&gt;&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;rows&quot;</span><span class="p">)</span>   <span class="c1"># 2 - endpoint excluded</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">label-based selection:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;customer_id&quot;</span><span class="p">,</span> <span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="s2">&quot;churned&quot;</span><span class="p">]])</span>
+</code></pre><div class="outs"><pre class="out-text">loc  [0:2] -&gt; 3 rows
+iloc [0:2] -&gt; 2 rows
+
+label-based selection:
+  customer_id     city  churned
+0      C00632  Chennai        0
+1      C00635     Pune        0
+2      C00964   Mumbai        0</pre></div></div>
+<div class="md"><h4 id="s3-4-2">3.4.2 Filtering</h4>
+<p>Boolean masks work as in NumPy (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-1-2">3.1.2</a>), combined with <code>&amp;</code>, <code>|</code> and <code>~</code> — <strong>not</strong> <code>and</code>, <code>or</code>, <code>not</code>, which
+cannot operate element-wise. Each condition needs its own parentheses because <code>&amp;</code> binds tighter than <code>&gt;</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">high_risk</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;support_tickets&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;high-risk customers:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">high_risk</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;their churn rate   :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">high_risk</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;overall churn rate :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">high-risk customers: 53
+their churn rate   : 67.9%
+overall churn rate : 14.0%</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># The same filter, written with .query() - often more readable for long conditions.</span>
+<span class="n">same</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;support_tickets &gt;= 3 and tenure_months &lt; 12&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;query gives the same rows:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">same</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">high_risk</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">query gives the same rows: True</pre></div></div>
+<div class="md"><h4 id="s3-4-3">3.4.3 Creating and transforming columns</h4>
+<p><code>.assign()</code> returns a new frame rather than mutating in place, which keeps a cleaning pipeline readable as
+a chain and avoids the copy-versus-view ambiguity that plagued earlier pandas code.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">enriched</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+    <span class="n">total_charges</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">),</span>
+    <span class="n">tenure_years</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="n">is_new</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">enriched</span><span class="p">[[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_years&quot;</span><span class="p">,</span> <span class="s2">&quot;is_new&quot;</span><span class="p">,</span> <span class="s2">&quot;total_charges&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">original frame untouched:&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_years&quot;</span> <span class="ow">in</span> <span class="n">customers</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>   <span class="c1"># False</span>
+</code></pre><div class="outs"><pre class="out-text">   tenure_months  tenure_years  is_new  total_charges
+0             58          4.83   False        4519.94
+1              5          0.42    True         254.95
+2              8          0.67   False         590.80
+
+original frame untouched: False</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — <code>.apply()</code> where a vectorized operation exists.</strong> <code>.apply()</code> runs a Python function once
+per row, which reintroduces exactly the loop 3.1.4 exists to avoid. Reach for it only when there is no
+vectorized equivalent.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">by_apply</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">apply_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">by_vector</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]</span>
+<span class="n">vector_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;apply(axis=1): </span><span class="si">{</span><span class="n">apply_time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vectorized   : </span><span class="si">{</span><span class="n">vector_time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;speedup      : </span><span class="si">{</span><span class="n">apply_time</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">vector_time</span><span class="si">:</span><span class="s2">&gt;7.0f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;identical    :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">by_apply</span><span class="p">,</span> <span class="n">by_vector</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">apply(axis=1):    5.14 ms
+vectorized   :    0.20 ms
+speedup      :      25x
+identical    : True</pre></div></div>
+<div class="md"><p><code>.map()</code> is the right tool for a lookup, and <a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>'s ordinal encoding is exactly this operation.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">plan_rank</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;plan&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="s2">&quot;Basic&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Standard&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Premium&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">plan_rank</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">plan
+0    461
+1    343
+2    208
+Name: count, dtype: int64</pre></div></div>
+<div class="md"><h4 id="s3-4-4">3.4.4 Missing data</h4>
+<p><code>NaN</code> is not equal to anything, including itself, so missing values must be found with <code>.isna()</code> rather
+than <code>== np.nan</code>. <a class="xref" href="/machine-learning/05-data-preprocessing/">Chapter 5</a>.2 covers what to <em>do</em> about them; this is how to see them.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nulls per column (non-zero only):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">rows with at least one null:&quot;</span><span class="p">,</span> <span class="n">customers</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np.nan == np.nan:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>   <span class="c1"># False - hence .isna()</span>
+</code></pre><div class="outs"><pre class="out-text">nulls per column (non-zero only):
+age                     59
+gender                  47
+monthly_charges         30
+satisfaction_score     100
+cancellation_reason    870
+dtype: int64
+
+rows with at least one null: 896
+np.nan == np.nan: False</pre></div></div>
+<div class="md"><h3 id="s3-5">3.5 pandas: grouping, joining and reshaping</h3>
+<h4 id="s3-5-1">3.5.1 <code>groupby</code>: split, apply, combine</h4>
+<p><code>groupby</code> splits rows into groups, applies an aggregation to each, and combines the results. It is the most
+useful single operation in exploratory work (<a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapter 4</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">by_plan</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;plan&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+    <span class="n">customers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;customer_id&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">),</span>
+    <span class="n">churn_rate</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+    <span class="n">avg_charges</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+    <span class="n">avg_tickets</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">by_plan</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">          customers  churn_rate  avg_charges  avg_tickets
+plan                                                     
+Basic           461       0.132       25.627        1.262
+Premium         208       0.144       65.072        1.188
+Standard        343       0.149       45.799        1.297</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Grouping by more than one key gives a MultiIndex.</span>
+<span class="n">by_plan_city</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="s2">&quot;city&quot;</span><span class="p">])[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">by_plan_city</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">plan   city     
+Basic  Bengaluru    0.120
+       Chennai      0.125
+       Delhi        0.167
+       Hyderabad    0.188
+       Jaipur       0.091
+       Kolkata      0.144
+Name: churned, dtype: float64</pre></div></div>
+<div class="md"><h4 id="s3-5-2">3.5.2 Joining and concatenating</h4>
+<p><code>merge</code> joins on shared keys (a SQL join); <code>concat</code> stacks frames along an axis. The <code>how</code> argument decides
+what happens to non-matching rows.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th><code>how</code></th>
+<th>Keeps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"inner"</code></td>
+<td>Only keys present in both (the default)</td>
+</tr>
+<tr>
+<td><code>"left"</code></td>
+<td>All left rows; missing right values become <code>NaN</code></td>
+</tr>
+<tr>
+<td><code>"right"</code></td>
+<td>All right rows</td>
+</tr>
+<tr>
+<td><code>"outer"</code></td>
+<td>All keys from both sides</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">transactions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/transactions.csv&quot;</span><span class="p">)</span>
+<span class="n">basket_size</span> <span class="o">=</span> <span class="n">transactions</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">transactions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">baskets:&quot;</span><span class="p">,</span> <span class="n">transactions</span><span class="p">[</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span> <span class="s2">&quot;| mean size:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">basket_size</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">  transaction_id       item
+0          T0001    lentils
+1          T0001   tomatoes
+2          T0002  chocolate
+
+baskets: 800 | mean size: 3.28</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">plan_lookup</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;plan&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Basic&quot;</span><span class="p">,</span> <span class="s2">&quot;Standard&quot;</span><span class="p">,</span> <span class="s2">&quot;Premium&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;monthly_quota_gb&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span>
+<span class="p">})</span>
+
+<span class="n">joined</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">plan_lookup</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">joined</span><span class="p">[[</span><span class="s2">&quot;customer_id&quot;</span><span class="p">,</span> <span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_quota_gb&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">unmatched rows (NaN quota):&quot;</span><span class="p">,</span> <span class="n">joined</span><span class="p">[</span><span class="s2">&quot;monthly_quota_gb&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>   <span class="c1"># 0</span>
+</code></pre><div class="outs"><pre class="out-text">  customer_id      plan  monthly_quota_gb
+0      C00632   Premium              1000
+1      C00635  Standard               200
+2      C00964   Premium              1000
+
+unmatched rows (NaN quota): 0</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — a merge that silently changes the row count.</strong> If the right-hand keys are not unique, a
+left join <em>duplicates</em> left rows, one per match. The row count is the check, and it costs one line.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">dupe_lookup</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">plan_lookup</span><span class="p">,</span> <span class="n">plan_lookup</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># &quot;Basic&quot; twice</span>
+
+<span class="n">before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="p">)</span>
+<span class="n">after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dupe_lookup</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rows before </span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">, after </span><span class="si">{</span><span class="n">after</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">after</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">before</span><span class="si">}</span><span class="s2"> rows appeared from nowhere&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">rows before 1012, after 1473 -&gt; 461 rows appeared from nowhere</pre></div></div>
+<div class="md"><h4 id="s3-5-3">3.5.3 Reshaping: pivot and melt</h4>
+<p><code>pivot_table</code> turns long data into a wide grid — the natural shape for a heatmap (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-6">3.6</a>) or a report.
+<code>melt</code> does the reverse.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">grid</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;gender&quot;</span><span class="p">,</span>
+                             <span class="n">aggfunc</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">gender        F  Female      M  Male   female   male
+plan                                                
+Basic     0.095   0.229  0.136  0.088   0.192  0.190
+Premium   0.174   0.214  0.132  0.250   0.000  0.100
+Standard  0.157   0.042  0.151  0.222   0.125  0.143</pre></div></div>
+<div class="md"><p>The <code>gender</code> column has six spellings of two values — <code>M</code>, <code>male</code>, <code>Male</code>, <code>F</code>, <code>female</code>, <code>Female</code> — which
+the pivot faithfully reports as six separate columns. That is the point of doing this early: the pivot did
+not create the problem, it exposed it. 5.4 fixes it.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">gender
+M         341
+F         335
+male       97
+Female     73
+Male       68
+female     51
+NaN        47
+Name: count, dtype: int64</pre></div></div>
+<div class="md"><h3 id="s3-6">3.6 Visualization with matplotlib and seaborn</h3>
+<p>matplotlib has two interfaces. The <code>plt.plot(...)</code> style acts on a hidden "current figure"; the
+object-oriented style creates explicit <code>Figure</code> and <code>Axes</code> objects and calls methods on them. <strong>Use the
+object-oriented style</strong> — it is the only one that composes into subplots without ambiguity, and it is what
+scikit-learn's own plotting utilities expect via their <code>ax=</code> argument.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Is</th>
+<th>Typical call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Figure</code></td>
+<td>The whole canvas</td>
+<td><code>fig, ax = plt.subplots()</code></td>
+</tr>
+<tr>
+<td><code>Axes</code></td>
+<td>One plot within it</td>
+<td><code>ax.scatter(...)</code>, <code>ax.set_title(...)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The four plots that carry most of the exploratory work in <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapter 4</a>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">29 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">))</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:blue&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;histogram: one variable&#39;s distribution&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;tenure (months)&quot;</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">],</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">],</span>
+                   <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:green&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;scatter: two variables&#39; relationship&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;tenure (months)&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;monthly charges&quot;</span><span class="p">)</span>
+
+<span class="n">churned_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">customers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">churned_groups</span><span class="p">,</span> <span class="n">tick_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;stayed&quot;</span><span class="p">,</span> <span class="s2">&quot;churned&quot;</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;boxplot: a distribution across groups&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;support tickets&quot;</span><span class="p">)</span>
+
+<span class="n">numeric</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;last_login_days&quot;</span><span class="p">,</span> <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">]]</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">numeric</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">numeric</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">numeric</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">numeric</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">numeric</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;heatmap: correlation structure&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c03_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p><strong>seaborn</strong> sits on top of matplotlib and understands DataFrames directly: it takes column <em>names</em> and a
+<code>data=</code> frame, handles the grouping, and labels the axes itself. The same boxplot, with the grouping done
+for you:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">customers</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;seaborn: grouping handled automatically&quot;</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">customers</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+             <span class="n">element</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;hue= splits by a category in one call&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c03_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Both panels already say something: churners raise more support tickets, and churn is concentrated among
+short-tenure customers. That is <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapter 4</a>'s job done properly; here it is only evidence that a plot answers
+questions a <code>describe()</code> table does not.</p></div>
+<div class="md"><h3 id="s3-7">3.7 The scikit-learn Estimator API</h3>
+<p>scikit-learn's real contribution is not its algorithms — it is that all of them obey <strong>one interface</strong>. Once
+you know the four methods, every model in <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–21 is already familiar.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Present on</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.fit(X, y)</code></td>
+<td>Everything</td>
+<td>Learns from data. Returns <code>self</code>, so it chains</td>
+</tr>
+<tr>
+<td><code>.predict(X)</code></td>
+<td>Predictors</td>
+<td>Produces a prediction per row</td>
+</tr>
+<tr>
+<td><code>.transform(X)</code></td>
+<td>Transformers</td>
+<td>Produces a modified <code>X</code></td>
+</tr>
+<tr>
+<td><code>.fit_transform(X)</code></td>
+<td>Transformers</td>
+<td><code>fit</code> then <code>transform</code>, usually faster than both</td>
+</tr>
+<tr>
+<td><code>.score(X, y)</code></td>
+<td>Predictors</td>
+<td>A default metric — R² for regressors, accuracy for classifiers</td>
+</tr>
+<tr>
+<td><code>.predict_proba(X)</code></td>
+<td>Most classifiers</td>
+<td>Class probabilities rather than labels (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-6">8.6</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Objects come in three kinds:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Has</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transformer</strong></td>
+<td><code>fit</code>, <code>transform</code></td>
+<td><code>StandardScaler</code>, <code>SimpleImputer</code>, <code>PCA</code></td>
+</tr>
+<tr>
+<td><strong>Predictor</strong></td>
+<td><code>fit</code>, <code>predict</code></td>
+<td><code>LinearRegression</code>, <code>RandomForestClassifier</code></td>
+</tr>
+<tr>
+<td><strong>Meta-estimator</strong></td>
+<td>Wraps others</td>
+<td><code>Pipeline</code>, <code>GridSearchCV</code>, <code>BaggingClassifier</code></td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [36]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">X_bc</span><span class="p">,</span> <span class="n">y_bc</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X_bc</span><span class="p">,</span> <span class="n">y_bc</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y_bc</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span>
+<span class="p">)</span>
+
+<span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">X_train_scaled</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>   <span class="c1"># LEARN the means/stds, then apply</span>
+<span class="n">X_test_scaled</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>          <span class="c1"># APPLY the training statistics - never refit</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train mean ~0:&quot;</span><span class="p">,</span> <span class="n">X_train_scaled</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train std  ~1:&quot;</span><span class="p">,</span> <span class="n">X_train_scaled</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test mean not exactly 0:&quot;</span><span class="p">,</span> <span class="n">X_test_scaled</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># correct, and expected</span>
+</code></pre><div class="outs"><pre class="out-text">train mean ~0: [-0.  0. -0.]
+train std  ~1: [1. 1. 1.]
+test mean not exactly 0: [ 0.059 -0.005  0.062]</pre></div></div>
+<div class="md"><p>The last line is the whole discipline in one number. The test set's scaled mean is <em>not</em> zero, because the
+scaler was fitted on training data only. If it were exactly zero, the test set would have influenced the
+transformation — which is leakage (<a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-7">22.7</a>). 5.1 and <a class="xref" href="/machine-learning/06-feature-engineering/#s6-8">6.8</a> return to this repeatedly.</p>
+<h4 id="s3-7-1">3.7.1 The trailing-underscore convention</h4>
+<p>Anything learned during <code>fit()</code> gets a trailing underscore. This is how you tell an input you supplied from
+an output the fitting produced — the parameter/hyperparameter distinction of 1.4, made visible in the API.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [37]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">learned</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">scaler</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">a</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;learned attributes:&quot;</span><span class="p">,</span> <span class="n">learned</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">mean_ (first 3):&quot;</span><span class="p">,</span> <span class="n">scaler</span><span class="o">.</span><span class="n">mean_</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hyperparameters:&quot;</span><span class="p">,</span> <span class="n">scaler</span><span class="o">.</span><span class="n">get_params</span><span class="p">())</span>   <span class="c1"># what WE set</span>
+</code></pre><div class="outs"><pre class="out-text">learned attributes: [&#x27;mean_&#x27;, &#x27;n_features_in_&#x27;, &#x27;n_samples_seen_&#x27;, &#x27;scale_&#x27;, &#x27;var_&#x27;]
+
+mean_ (first 3): [14.075 19.295 91.593]
+hyperparameters: {&#x27;copy&#x27;: True, &#x27;with_mean&#x27;: True, &#x27;with_std&#x27;: True}</pre></div></div>
+<div class="md"><h4 id="s3-7-2">3.7.2 The interface is the point</h4>
+<p>Because every predictor exposes the same three methods, swapping models is a one-line change. This is what
+makes <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/">Chapter 23</a>'s search over model families possible at all.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [38]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;dummy&quot;</span><span class="p">:</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;logistic&quot;</span><span class="p">:</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">),</span>
+    <span class="s2">&quot;knn&quot;</span><span class="p">:</span> <span class="n">KNeighborsClassifier</span><span class="p">(),</span>
+    <span class="s2">&quot;forest&quot;</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_scaled</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>                       <span class="c1"># identical call</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> test accuracy </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test_scaled</span><span class="p">,</span><span class="w"> </span><span class="n">y_test</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">dummy      test accuracy 0.629
+logistic   test accuracy 0.986
+knn        test accuracy 0.979
+forest     test accuracy 0.958</pre></div></div>
+<div class="md"><p>Four genuinely different algorithms, one loop, no special cases. Note the dummy baseline sitting at the
+bottom — <a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-6">1.6</a>'s argument, now a routine line of code.</p>
+<h4 id="s3-7-3">3.7.3 Pipelines, briefly</h4>
+<p>A <code>Pipeline</code> chains transformers and a final estimator into a single object that itself obeys the estimator
+API. It exists to make the fit-on-train-only rule structural rather than a thing you remember. <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/">Chapter 23</a>
+covers it properly.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [39]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+<span class="p">])</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>   <span class="c1"># raw X: the scaler is fitted inside, on training data only</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pipeline test accuracy:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">pipe</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;steps:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pipe</span><span class="o">.</span><span class="n">named_steps</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">pipeline test accuracy: 0.986
+steps: [&#x27;scale&#x27;, &#x27;model&#x27;]</pre></div></div>
+<div class="md"><h3 id="s3-8">3.8 Reproducibility: <code>random_state</code>, seeds and determinism</h3>
+<p>A result you cannot reproduce is not a result. Every stochastic operation in scikit-learn takes a
+<code>random_state</code>, and this material sets it everywhere (<a class="xref" href="/#s0-7">§0.7</a> of the index).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [40]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span> <span class="o">=</span> <span class="n">X_bc</span><span class="p">[:</span><span class="mi">200</span><span class="p">],</span> <span class="n">y_bc</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span>
+
+<span class="n">unseeded</span> <span class="o">=</span> <span class="p">[</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+<span class="n">seeded</span> <span class="o">=</span> <span class="p">[</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no random_state, run 1:&quot;</span><span class="p">,</span> <span class="n">unseeded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no random_state, run 2:&quot;</span><span class="p">,</span> <span class="n">unseeded</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;  &lt;- different split&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;random_state=0, run 1 :&quot;</span><span class="p">,</span> <span class="n">seeded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;random_state=0, run 2 :&quot;</span><span class="p">,</span> <span class="n">seeded</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;  &lt;- identical&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">no random_state, run 1: [0 1 1 1 0]
+no random_state, run 2: [0 1 1 1 1]   &lt;- different split
+random_state=0, run 1 : [0 1 1 1 0]
+random_state=0, run 2 : [0 1 1 1 0]   &lt;- identical</pre></div></div>
+<div class="md"><p><strong><code>int</code> versus a stateful instance — they behave differently.</strong> An integer is a <em>fixed</em> seed: every call
+that receives it restarts from the same state, so two estimators given <code>random_state=42</code> make correlated
+random choices. A <code>RandomState</code> <strong>instance</strong> carries its state forward, so successive calls consume
+different draws.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Passed to <code>random_state</code></th>
+<th>Behaviour</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code></td>
+<td>Reseeds identically at every call</td>
+<td>You want exact reproducibility across runs — the default here</td>
+</tr>
+<tr>
+<td><code>np.random.RandomState(...)</code></td>
+<td>Advances; each call differs</td>
+<td>You want independent randomness within one reproducible run</td>
+</tr>
+<tr>
+<td><code>None</code></td>
+<td>Fresh entropy every call</td>
+<td>Never, in work you intend to report</td>
+</tr>
+</tbody>
+</table></div>
+<p>Note the asymmetry with 3.2.2: scikit-learn's <code>random_state</code> accepts <code>int</code>, a legacy <code>RandomState</code>
+instance, or <code>None</code> — it does <strong>not</strong> accept NumPy's modern <code>Generator</code>, even though <code>Generator</code> is the
+right choice for your own NumPy code. Mixing the two APIs in one project is normal and slightly annoying.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [41]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">shared_int</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">shared_int</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">shared_int</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;int seed reused        :&quot;</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="s2">&quot;-&gt; identical&quot;</span><span class="p">)</span>
+
+<span class="n">shared_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>   <span class="c1"># legacy object, but the one sklearn accepts</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">shared_state</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">shared_state</span><span class="p">)[</span><span class="mi">3</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RandomState reused     :&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="s2">&quot;-&gt; different, the instance advanced&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">int seed reused        : [0 1 0 0 1] [0 1 0 0 1] -&gt; identical
+RandomState reused     : [0 1 0 0 1] [1 0 1 0 0] -&gt; different, the instance advanced</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [42]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># A modern Generator is rejected outright - worth seeing once so the error is recognizable.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_small</span><span class="p">,</span> <span class="n">y_small</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError:&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="mi">95</span><span class="p">])</span>
+</code></pre><div class="outs"><pre class="out-text">ValueError: The &#x27;random_state&#x27; parameter of train_test_split must be an int in the range [0, 4294967295], a</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — assuming a seed makes everything deterministic.</strong> It fixes the <em>algorithm's</em> randomness
+and nothing else. These remain sources of run-to-run variation:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Why it varies</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-threaded float summation</td>
+<td>Addition is not associative; thread scheduling changes the order</td>
+<td><code>n_jobs=1</code>, or accept last-digit noise</td>
+</tr>
+<tr>
+<td>BLAS thread count</td>
+<td>Different machines parallelize differently</td>
+<td>Pin <code>OMP_NUM_THREADS</code> if bit-exactness is needed</td>
+</tr>
+<tr>
+<td>Library version changes</td>
+<td>Default hyperparameters and algorithms change between releases</td>
+<td>Lock dependencies — <code>uv.lock</code> here</td>
+</tr>
+<tr>
+<td>Hardware (CPU vs GPU, AVX levels)</td>
+<td>Different instruction sets round differently</td>
+<td>Compare with a tolerance, not <code>==</code></td>
+</tr>
+<tr>
+<td>Python <code>hash()</code> randomization</td>
+<td>Set/dict iteration order across processes</td>
+<td><code>PYTHONHASHSEED</code>, or sort explicitly</td>
+</tr>
+</tbody>
+</table></div>
+<p>The practical version of this rule: compare floating-point results with <code>np.allclose</code>, never <code>==</code>, and pin
+your environment if a number has to be identical rather than merely equivalent.</p></div>
+<div class="md"><h3 id="s3-9">3.9 In Practice</h3>
+<h4 id="s3-9-1">3.9.1 A worked case: the churn report nobody can argue with</h4>
+<p>The request: <em>"Which customer segments are we losing, and is it worth acting on?"</em> Someone wants a table
+they can take to a meeting. This is the most common piece of work in a data role, it comes before any
+model, and doing it correctly is entirely a pandas exercise.</p>
+<p>The trap is that <code>data/customers.csv</code> will happily produce a <strong>wrong</strong> table, silently, if loaded and
+grouped naively. Work through it properly.</p>
+<p><strong>Step 1 — load, and repair what <code>info()</code> exposed (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-3-1">3.3.1</a>).</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [43]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loaded:&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="n">clean</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">raw</span>
+    <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>                                    <span class="c1"># 12 exact duplicate rows from a double-run merge</span>
+    <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+        <span class="n">total_charges</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">),</span>
+        <span class="c1"># strip + lower gets &quot;M&quot;/&quot;Male &quot;/&quot;male&quot; down to &quot;m&quot;/&quot;male&quot; - still two labels</span>
+        <span class="c1"># for one value, so map the survivors onto a canonical pair.</span>
+        <span class="n">gender</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                          <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s2">&quot;male&quot;</span><span class="p">:</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;female&quot;</span><span class="p">:</span> <span class="s2">&quot;f&quot;</span><span class="p">})),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;after dedup:&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">clean</span><span class="p">)</span><span class="si">}</span><span class="s2"> duplicate rows removed)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;gender values now:&quot;</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">clean</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>   <span class="c1"># [&#39;f&#39;, &#39;m&#39;] - six spellings -&gt; two</span>
+</code></pre><div class="outs"><pre class="out-text">loaded: (1012, 14)
+after dedup: (1000, 14) (12 duplicate rows removed)
+gender values now: [&#x27;f&#x27;, &#x27;m&#x27;]</pre></div></div>
+<div class="md"><p><strong>Step 2 — deal with the impossible values before they reach a mean.</strong> The <code>age</code> column contains entries
+that are not merely extreme but impossible, and a <code>groupby</code> would fold them straight into the averages.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [44]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">implausible</span> <span class="o">=</span> <span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">|</span> <span class="p">(</span><span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;implausible ages:&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">implausible</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+<span class="n">clean</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">age</span><span class="o">=</span><span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">implausible</span><span class="p">))</span>   <span class="c1"># replace with NaN, do not drop the customer</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;age range now:&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;age nulls    :&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">implausible ages: [199.0, 1.0, 150.0, 0.0]
+age range now: 18.0 - 76.0
+age nulls    : 63</pre></div></div>
+<div class="md"><p>Replacing with <code>NaN</code> rather than dropping the row is deliberate: the customer's <em>other</em> fields are fine, and
+a churn report that quietly discards customers is a biased churn report. 5.3 covers the choice properly.</p>
+<p><strong>Step 3 — the segment table.</strong> A rate alone is not decision-ready. A segment with a 50% churn rate and four
+customers in it is noise, so the count belongs in the table next to the rate.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [45]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">segments</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">clean</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;plan&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="n">customers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;customer_id&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">),</span>
+        <span class="n">churned</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">),</span>
+        <span class="n">churn_rate</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+        <span class="n">avg_monthly</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+        <span class="n">avg_tenure</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">monthly_revenue_at_risk</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;avg_monthly&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;monthly_revenue_at_risk&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">          customers  churned  churn_rate  avg_monthly  avg_tenure  monthly_revenue_at_risk
+plan                                                                                      
+Standard        338       50        0.15        45.72       37.17                  2285.96
+Premium         205       30        0.15        64.89       38.25                  1946.75
+Basic           457       61        0.13        25.64       35.16                  1563.98</pre></div></div>
+<div class="md"><p>The last column is what converts a statistic into a decision. Churn <em>rate</em> ranks the segments one way;
+revenue at risk ranks them by how much money is actually leaving, which is the question the business asked.</p>
+<p><strong>Step 4 — check that a difference is real before reporting it.</strong> <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-3">2.8.3</a>'s warning applies directly: with
+segments this size, an apparent gap may be sampling noise.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [46]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">chi2_contingency</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">clean</span><span class="p">[</span><span class="s2">&quot;plan&quot;</span><span class="p">],</span> <span class="n">clean</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">])</span>
+<span class="n">chi2</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">chi-square p-value: </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;plan and churn are associated&quot;</span> <span class="k">if</span> <span class="n">p_value</span> <span class="o">&lt;</span> <span class="mf">0.05</span>
+      <span class="k">else</span> <span class="s2">&quot;no detectable association - do NOT report a difference&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">churned     0   1
+plan             
+Basic     396  61
+Premium   175  30
+Standard  288  50
+
+chi-square p-value: 0.8205
+-&gt; no detectable association - do NOT report a difference</pre></div></div>
+<div class="md"><p><strong>Step 5 — the deliverable.</strong> Two sentences and the table above:</p>
+<blockquote>
+<p><em>After removing 12 duplicate rows and blanking 4 impossible ages, churn is 14.1% overall. Standard plan
+carries the most revenue at risk (₹2,286/month), but a chi-square test on plan vs. churn gives p = 0.82,
+so the rate differences between plans are indistinguishable from sampling noise — plan is not, on this
+data, a segment worth targeting. Tenure and support tickets do separate churners (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-6">3.6</a>): customers with 3+
+tickets and under a year of tenure churn at 67.9% against a 14.1% base rate. That is where the next hour
+should go.</em></p>
+</blockquote>
+<p>That last sentence is the value of the exercise. The honest finding was <em>negative</em>, and reporting it stops
+a retention campaign from being aimed at the wrong thing.</p>
+<h4 id="s3-9-2">3.9.2 When to reach for which tool</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Tool</th>
+<th>Not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Numerical work on a homogeneous array</td>
+<td>NumPy</td>
+<td>pandas — the per-column overhead buys nothing</td>
+</tr>
+<tr>
+<td>Named columns, mixed types, missing values</td>
+<td>pandas</td>
+<td>NumPy — it has no notion of a column name</td>
+</tr>
+<tr>
+<td>Joining, grouping, reshaping</td>
+<td>pandas</td>
+<td>Hand-written loops</td>
+</tr>
+<tr>
+<td>Element-wise maths over millions of values</td>
+<td>NumPy vectorization</td>
+<td><code>.apply()</code>, <code>.iterrows()</code>, Python loops</td>
+</tr>
+<tr>
+<td>Any <code>fit</code>/<code>transform</code> step</td>
+<td>scikit-learn transformers</td>
+<td>pandas, if the step must be reproduced at inference</td>
+</tr>
+<tr>
+<td>Quick look at a distribution</td>
+<td>matplotlib / seaborn</td>
+<td><code>describe()</code> alone — 2.8.2 showed why</td>
+</tr>
+<tr>
+<td>A transformation that must run identically in production</td>
+<td>A scikit-learn <code>Pipeline</code> (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-7-3">3.7.3</a>)</td>
+<td>Notebook cells that must be re-run in order</td>
+</tr>
+</tbody>
+</table></div>
+<p>The fifth and last rows are the ones that separate exploratory code from production code. A pandas
+expression that cleans training data is fine in a notebook and a liability in a serving path, because
+nothing guarantees the same expression runs the same way on one incoming row. A fitted transformer carries
+its learned state with it; an ad-hoc pandas chain does not.</p>
+<h4 id="s3-9-3">3.9.3 What goes wrong in production</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Where it is handled</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>dtype drift</strong></td>
+<td>A column arrives as text one day because one row had a blank; the model silently sees a different feature</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><strong>Unseen category</strong></td>
+<td>A city not present at training time; a one-hot encoder errors or, worse, silently drops it</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Index misalignment</strong></td>
+<td>Two pandas objects combined by <em>index</em>, not position, producing <code>NaN</code> rows nobody notices</td>
+<td>Below</td>
+</tr>
+<tr>
+<td><strong>Column reordering</strong></td>
+<td>An upstream change reorders columns; a NumPy-array model reads feature 3 as feature 5</td>
+<td>3.7.3 pipelines</td>
+</tr>
+<tr>
+<td><strong>Silent row multiplication</strong></td>
+<td>A join against a non-unique key duplicates rows (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-5-2">3.5.2</a>)</td>
+<td>3.5.2</td>
+</tr>
+<tr>
+<td><strong>Memory blowup</strong></td>
+<td>A merge or a one-hot expansion that fits in a notebook and not in a container</td>
+<td>6.2</td>
+</tr>
+</tbody>
+</table></div>
+<p>Index misalignment deserves a demonstration because it produces wrong numbers with no error at all.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [47]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">left</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">right</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>   <span class="c1"># a filtered frame keeps its ORIGINAL index</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pandas aligns on the INDEX, not position:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span>   <span class="c1"># NaN wherever the indices do not overlap</span>
+</code></pre><div class="outs"><pre class="out-text">pandas aligns on the INDEX, not position:
+0     NaN
+1    12.0
+2    23.0
+3     NaN
+dtype: float64</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [48]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># The fix: align explicitly, or drop to NumPy where positional semantics are what you meant.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;positional (via .to_numpy()):&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;or reset the index first    :&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">positional (via .to_numpy()): [11. 22. 33.]
+or reset the index first    : [11.0, 22.0, 33.0]</pre></div></div>
+<div class="md"><p>This is the single most common way a pandas cleaning step produces silently wrong features: a filtered
+subset keeps its original index, gets combined with a freshly built column that starts at 0, and the
+overlap becomes <code>NaN</code> — which an imputer then cheerfully fills with a median. The model trains on
+fabricated values and nothing anywhere raises an error.</p>
+<p>The defence, and the reason <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/">Chapter 23</a> insists on it: <strong>express every training-time transformation as a
+fitted scikit-learn transformer inside a <code>Pipeline</code></strong>, so the identical, stateful operation runs at
+inference time. Ad-hoc pandas is for exploring; pipelines are for shipping.</p></div></article>
+<nav class="spn"><a href="/machine-learning/02-mathematical-foundations/">← Mathematical Foundations</a><a href="/machine-learning/04-data-and-exploratory-data-analysis/">Data and Exploratory Data Analysis →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

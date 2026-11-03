@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Data and Exploratory Data Analysis – Machine Learning Chapter 4 | Gradient Atlas</title>
+<meta name="description" content="Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Data and Exploratory Data Analysis – Machine Learning Chapter 4 | Gradient Atlas">
+<meta property="og:description" content="Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Data and Exploratory Data Analysis", "headline": "Data and Exploratory Data Analysis", "description": "Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT39M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Data and Exploratory Data Analysis", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 4</p>
+<h1><small>Machine Learning · Chapter 4</small>Data and Exploratory Data Analysis</h1>
+<p class="lead">Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.</p>
+<p class="cta"><a class="sbtn" href="/#ch4">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s4-1">4.1 Kinds of Data and Kinds of Variables</a></li><li class="l3"><a href="#s4-2">4.2 Getting Data: bundled datasets, synthetic generators and files</a></li><li class="l3"><a href="#s4-3">4.3 First Contact: shape, dtypes and the summary triage</a></li><li class="l3"><a href="#s4-4">4.4 Univariate Analysis</a></li><li class="l3"><a href="#s4-5">4.5 Bivariate Analysis</a></li><li class="l3"><a href="#s4-6">4.6 Multivariate Analysis and Correlation Structure</a></li><li class="l3"><a href="#s4-7">4.7 Target Analysis</a></li><li class="l3"><a href="#s4-8">4.8 What EDA Is Really For</a></li><li class="l3"><a href="#s4-9">4.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Exploratory data analysis is the step everyone is tempted to skip and nobody who has been burned skips
+twice. Its purpose is not to produce charts. It is to answer, before any model exists:</p>
+<ul>
+<li>What is actually in this data, as opposed to what the schema claims?</li>
+<li>Which variables plausibly carry signal, and which are noise, identifiers or leakage?</li>
+<li>What will break the moment a model touches it — missing values, impossible values, mixed types?</li>
+<li>Is the question even answerable with these columns?</li>
+</ul>
+<p><a class="xref" href="/machine-learning/05-data-preprocessing/">Chapter 5</a> fixes what this chapter finds. <a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a> builds on what it suggests.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">110</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+
+<span class="n">customers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">(1012, 14)</pre></div></div>
+<div class="md"><h3 id="s4-1">4.1 Kinds of Data and Kinds of Variables</h3>
+<p>Every decision downstream — which plot, which encoding (<a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a>), which distance metric (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-2">14.2</a>), which
+metric (8.4 vs 8.5) — follows from a variable's type. Getting this table right first is not pedantry; it is
+the cheapest way to avoid a whole class of later mistakes.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Sub-type</th>
+<th>Example here</th>
+<th>Encoded how (Ch. 6)</th>
+<th>Plotted how</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Numeric</strong></td>
+<td>Continuous</td>
+<td><code>monthly_charges</code></td>
+<td>Scaled (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-5">5.5</a>)</td>
+<td>Histogram, boxplot</td>
+</tr>
+<tr>
+<td></td>
+<td>Discrete / count</td>
+<td><code>support_tickets</code></td>
+<td>Scaled, or binned (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-3">6.3</a>)</td>
+<td>Bar, histogram</td>
+</tr>
+<tr>
+<td><strong>Categorical</strong></td>
+<td>Nominal (no order)</td>
+<td><code>city</code>, <code>gender</code></td>
+<td>One-hot (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>)</td>
+<td>Bar, count plot</td>
+</tr>
+<tr>
+<td></td>
+<td>Ordinal (ordered)</td>
+<td><code>plan</code></td>
+<td>Ordinal encoding (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>)</td>
+<td>Bar, ordered</td>
+</tr>
+<tr>
+<td></td>
+<td>Binary</td>
+<td><code>churned</code></td>
+<td>As-is, 0/1</td>
+<td>Bar</td>
+</tr>
+<tr>
+<td><strong>Datetime</strong></td>
+<td>—</td>
+<td><code>signup_date</code></td>
+<td>Decomposed (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-5">6.5</a>)</td>
+<td>Line, over time</td>
+</tr>
+<tr>
+<td><strong>Text</strong></td>
+<td>—</td>
+<td><code>cancellation_reason</code></td>
+<td>TF-IDF or category (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-6">6.6</a>)</td>
+<td>Frequency table</td>
+</tr>
+<tr>
+<td><strong>Identifier</strong></td>
+<td>—</td>
+<td><code>customer_id</code></td>
+<td><strong>Dropped</strong></td>
+<td>Not plotted</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row is a rule, not a suggestion. An identifier is unique per row, so it can only ever be
+memorized, never generalized from.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unique values per column:&quot;</span><span class="p">)</span>
+<span class="n">uniq</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">uniq</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">rows: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">unique values per column:
+churned                   2
+plan                      3
+cancellation_reason       5
+gender                    6
+support_tickets           7
+city                      8
+satisfaction_score       10
+last_login_days          48
+age                      58
+tenure_months            72
+signup_date             785
+monthly_charges         868
+total_charges           974
+customer_id            1000
+
+rows: 1012</pre></div></div>
+<div class="md"><p>Reading that list top-down is itself a typing exercise: 2 unique values is binary, a handful is
+categorical, and a count equal to (or near) the row count is an identifier or a continuous measurement.
+<code>customer_id</code> has 1000 unique values in 1012 rows — unique except for the duplicate rows found in <a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-9-1">3.9.1</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="p">)</span>
+<span class="n">kinds</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">customers</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">/</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mf">0.95</span><span class="p">:</span>
+        <span class="n">kinds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;identifier or continuous&quot;</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">kinds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;binary&quot;</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">kinds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;categorical&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kinds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;numeric / high-cardinality&quot;</span>
+
+<span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">kinds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="si">!s:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">customer_id            str        identifier or continuous
+signup_date            str        numeric / high-cardinality
+age                    float64    numeric / high-cardinality
+gender                 str        categorical
+city                   str        categorical
+plan                   str        categorical
+tenure_months          int64      numeric / high-cardinality
+monthly_charges        float64    numeric / high-cardinality
+total_charges          str        identifier or continuous
+support_tickets        int64      categorical
+last_login_days        int64      numeric / high-cardinality
+satisfaction_score     float64    categorical
+churned                int64      binary
+cancellation_reason    str        categorical</pre></div></div>
+<div class="md"><p>That heuristic gets you started and is wrong in four instructive places:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Heuristic says</th>
+<th>Actually is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>signup_date</code></td>
+<td>numeric / high-cardinality</td>
+<td>A <strong>datetime</strong> — must be decomposed, not used raw (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-5">6.5</a>)</td>
+</tr>
+<tr>
+<td><code>total_charges</code></td>
+<td>identifier or continuous</td>
+<td>Continuous, but typed <code>str</code> because of nine blank entries (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-3-1">3.3.1</a>)</td>
+</tr>
+<tr>
+<td><code>support_tickets</code></td>
+<td>categorical (7 levels)</td>
+<td>A <strong>count</strong> — genuinely numeric, and orderable</td>
+</tr>
+<tr>
+<td><code>satisfaction_score</code></td>
+<td>categorical (10 levels)</td>
+<td><strong>Ordinal</strong> — ordered, so 8 really is more than 3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Cardinality is a hint; the schema and the domain decide.</strong> The last two rows are the ones that matter
+most in practice: a low-cardinality integer can be a category (<code>plan</code> encoded 0/1/2) or a count
+(<code>support_tickets</code>), and nothing in the data distinguishes them — only knowing what the column <em>means</em>
+does.</p>
+<p><strong>Common mistake — feeding an encoded category to a model as a number.</strong> If <code>city</code> is stored as 0–7, a
+model reading it numerically concludes that Jaipur (7) is "greater than" Kolkata (0) and that the midpoint
+between them means something. It does not. Only genuinely ordered variables — <code>plan</code>, a rating, a size —
+may be encoded as ordered integers, and <a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a> covers the alternatives for the rest.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># &quot;Ordinal&quot; is a claim about the data, and it has to be true.</span>
+<span class="n">ordered_ok</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Basic&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Standard&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Premium&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>      <span class="c1"># Basic &lt; Standard &lt; Premium: a real order</span>
+<span class="n">ordered_wrong</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;plan  -&gt;&quot;</span><span class="p">,</span> <span class="n">ordered_ok</span><span class="p">)</span>          <span class="c1"># meaningful: 2 really is &quot;more&quot; than 0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;city  -&gt;&quot;</span><span class="p">,</span> <span class="n">ordered_wrong</span><span class="p">)</span>        <span class="c1"># meaningless: Pune is not 6x Bengaluru</span>
+</code></pre><div class="outs"><pre class="out-text">plan  -&gt; {&#x27;Basic&#x27;: 0, &#x27;Standard&#x27;: 1, &#x27;Premium&#x27;: 2}
+city  -&gt; {&#x27;Bengaluru&#x27;: 0, &#x27;Chennai&#x27;: 1, &#x27;Delhi&#x27;: 2, &#x27;Hyderabad&#x27;: 3, &#x27;Jaipur&#x27;: 4, &#x27;Kolkata&#x27;: 5, &#x27;Mumbai&#x27;: 6, &#x27;Pune&#x27;: 7}</pre></div></div>
+<div class="md"><h3 id="s4-2">4.2 Getting Data: bundled datasets, synthetic generators and files</h3>
+<p>Three sources, three purposes. Nothing in this material downloads anything (<a class="xref" href="/#s0-7">§0.7</a>).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Use it for</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sklearn.datasets.load_*</code></td>
+<td>A realistic small problem where the answer is roughly known</td>
+<td>Small, clean, unrepresentatively tidy</td>
+</tr>
+<tr>
+<td><code>sklearn.datasets.make_*</code></td>
+<td>A controlled problem where the <em>truth</em> is known exactly</td>
+<td>Synthetic; only as realistic as you make it</td>
+</tr>
+<tr>
+<td>A file (<code>data/*.csv</code>)</td>
+<td>Real mess: types, missingness, duplicates</td>
+<td>You have to clean it</td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Bundled loader</th>
+<th>Task</th>
+<th>Shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>load_iris</code></td>
+<td>3-class classification</td>
+<td>150 × 4</td>
+</tr>
+<tr>
+<td><code>load_wine</code></td>
+<td>3-class classification</td>
+<td>178 × 13</td>
+</tr>
+<tr>
+<td><code>load_breast_cancer</code></td>
+<td>Binary classification</td>
+<td>569 × 30</td>
+</tr>
+<tr>
+<td><code>load_digits</code></td>
+<td>10-class, image-like</td>
+<td>1797 × 64</td>
+</tr>
+<tr>
+<td><code>load_diabetes</code></td>
+<td>Regression</td>
+<td>442 × 10</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_wine</span>
+
+<span class="n">wine</span> <span class="o">=</span> <span class="n">load_wine</span><span class="p">(</span><span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>      <span class="c1"># as_frame=True returns pandas objects with real column names</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shape :&quot;</span><span class="p">,</span> <span class="n">wine</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;target:&quot;</span><span class="p">,</span> <span class="n">wine</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>   <span class="c1"># {0: 59, 1: 71, 2: 48}</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">first 4 features:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">wine</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[:</span><span class="mi">4</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">wine</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">shape : (178, 13)
+target: {0: 59, 1: 71, 2: 48}
+
+first 4 features: [&#x27;alcohol&#x27;, &#x27;malic_acid&#x27;, &#x27;ash&#x27;, &#x27;alcalinity_of_ash&#x27;]
+   alcohol  malic_acid   ash  alcalinity_of_ash
+0    14.23        1.71  2.43               15.6
+1    13.20        1.78  2.14               11.2
+2    13.16        2.36  2.67               18.6</pre></div></div>
+<div class="md"><p>The <code>make_*</code> generators matter more than they first appear: because you specify the truth, you can check
+whether a method recovers it. That is how <a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-2">7.2</a>'s feature selection and <a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-2">9.2</a>'s bias–variance simulation are
+validated at all.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Generator</th>
+<th>Produces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>make_regression</code></td>
+<td>Linear regression data with a known number of informative features</td>
+</tr>
+<tr>
+<td><code>make_classification</code></td>
+<td>Classification data with controllable informative/redundant/noise features</td>
+</tr>
+<tr>
+<td><code>make_blobs</code></td>
+<td>Isotropic Gaussian clusters — the shape k-means is built for (<a class="xref" href="/machine-learning/20-clustering/#s20-2">20.2</a>)</td>
+</tr>
+<tr>
+<td><code>make_moons</code>, <code>make_circles</code></td>
+<td>Non-linearly separable shapes — where linear models fail (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-5">16.5</a>)</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_classification</span>
+
+<span class="n">X_syn</span><span class="p">,</span> <span class="n">y_syn</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">n_informative</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>     <span class="c1"># only 3 columns actually carry signal...</span>
+    <span class="n">n_redundant</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># ...2 more are linear combinations of those</span>
+    <span class="n">n_repeated</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># The remaining 5 are pure noise - and we know exactly which situation we built.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X:&quot;</span><span class="p">,</span> <span class="n">X_syn</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;| informative 3, redundant 2, noise 5&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;class balance:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">y_syn</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">X: (500, 10) | informative 3, redundant 2, noise 5
+class balance: [249 251]</pre></div></div>
+<div class="md"><h3 id="s4-3">4.3 First Contact: shape, dtypes and the summary triage</h3>
+<p>3.3.1 introduced <code>head</code>/<code>info</code>/<code>describe</code>. The EDA version adds two things: <strong>describe the categoricals
+too</strong>, and <strong>write down what you find</strong>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">[[</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">]])</span>
+</code></pre><div class="outs"><pre class="out-text">                     count   mean    std   min     max
+age                  953.0  38.04  13.04   0.0  199.00
+tenure_months       1012.0  36.43  20.81   1.0   72.00
+monthly_charges      982.0  40.48  17.13  15.0   89.71
+support_tickets     1012.0   1.26   1.12   0.0    6.00
+last_login_days     1012.0  12.40   8.49   0.0   51.00
+satisfaction_score   912.0   7.32   1.69   1.0   10.00
+churned             1012.0   0.14   0.35   0.0    1.00</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                    count unique         top freq
+customer_id          1012   1000      C00077    2
+signup_date          1012    785  2020-02-23    4
+gender                965      6           M  341
+city                 1012      8     Kolkata  228
+plan                 1012      3       Basic  461
+total_charges        1012    974                9
+cancellation_reason   142      5     service   32</pre></div></div>
+<div class="md"><p>The categorical summary earns its place immediately: <code>top</code> and <code>freq</code> show the most common value, and
+<code>unique</code> shows cardinality. <code>gender</code> reporting <strong>6 unique values</strong> for a two-valued concept is the whole
+finding, visible without a single plot.</p>
+<p>Four numbers to read off the numeric summary every time:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">summary</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">checks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">customers</span><span class="p">)</span> <span class="o">-</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;std_is_zero&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">checks</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                    missing   min     max  std_is_zero
+age                    59.0   0.0  199.00        False
+tenure_months           0.0   1.0   72.00        False
+monthly_charges        30.0  15.0   89.71        False
+support_tickets         0.0   0.0    6.00        False
+last_login_days         0.0   0.0   51.00        False
+satisfaction_score    100.0   1.0   10.00        False
+churned                 0.0   0.0    1.00        False</pre></div></div>
+<div class="md"><div class="tbl"><table>
+<thead>
+<tr>
+<th>Read</th>
+<th>Means</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count</code> below the row count</td>
+<td>Missing values</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><code>min</code> or <code>max</code> implausible</td>
+<td>Data-entry error or a sentinel value</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><code>std</code> exactly 0</td>
+<td>A constant column — zero information</td>
+<td>Drop it (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-2">7.2</a>)</td>
+</tr>
+<tr>
+<td><code>mean</code> far from <code>50%</code></td>
+<td>Skew; a long tail on one side</td>
+<td>4.4, 5.6</td>
+</tr>
+</tbody>
+</table></div>
+<p>Here <code>age</code> has 59 missing, a minimum of 0 and a maximum of 199 — both impossible for a subscriber, and
+both would silently corrupt any mean, any scaler and any distance computation.</p>
+<h4 id="s4-3-1">4.3.1 Sentinel values</h4>
+<p>A specific trap the summary catches: some systems encode "missing" as a <em>number</em> — <code>-1</code>, <code>0</code>, <code>999</code>,
+<code>-9999</code>. These are not detected by <code>.isna()</code>, and they are catastrophic because they are arithmetically
+valid. A minimum of exactly <code>-1</code> or <code>0</code> on a quantity that cannot be either is the tell.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># 0 is a legitimate value for some columns and impossible for others - only the domain decides.</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span> <span class="s2">&quot;last_login_days&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">]:</span>
+    <span class="n">zeros</span> <span class="o">=</span> <span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> zeros: </span><span class="si">{</span><span class="n">zeros</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2">   plausible? &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;no  &lt;- investigate&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">col</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;age&#39;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;yes&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">age                  zeros:    1   plausible? no  &lt;- investigate
+support_tickets      zeros:  282   plausible? yes
+last_login_days      zeros:    2   plausible? yes
+monthly_charges      zeros:    0   plausible? yes</pre></div></div>
+<div class="md"><h3 id="s4-4">4.4 Univariate Analysis</h3>
+<p>One variable at a time. The question is always the same: <strong>what shape is this, and is the shape sensible?</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Shape seen</th>
+<th>Usually means</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Roughly symmetric</td>
+<td>Well behaved</td>
+<td>Nothing to do</td>
+</tr>
+<tr>
+<td>Right-skewed (long tail)</td>
+<td>Money, counts, durations</td>
+<td>Consider a log transform (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-6">5.6</a>)</td>
+</tr>
+<tr>
+<td><strong>Bimodal / multimodal</strong></td>
+<td>Two populations mixed together</td>
+<td>Find the variable that separates them</td>
+</tr>
+<tr>
+<td>Spike at one value</td>
+<td>Zero-inflation or a sentinel (<a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-3-1">4.3.1</a>)</td>
+<td>Investigate before imputing</td>
+</tr>
+<tr>
+<td>Heaping at round numbers</td>
+<td>Self-reported or rounded data</td>
+<td>Usually harmless; note it</td>
+</tr>
+<tr>
+<td>Uniform</td>
+<td>Often an artefact or an ID</td>
+<td>Suspicious in a natural measurement</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">numeric_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;last_login_days&quot;</span><span class="p">,</span> <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">numeric_cols</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:blue&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Univariate distributions - one panel per numeric feature&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Four findings from one figure:</p>
+<ol>
+<li><strong><code>age</code></strong> is a normal-looking bump plus a couple of impossible points stretching the axis to 199 — the
+   giveaway is that the bump occupies only the left fifth of the plot.</li>
+<li><strong><code>monthly_charges</code></strong> is clearly <strong>multimodal</strong>. That is not noise: it is three plans at three price
+   points, mixed into one column. 4.5 confirms it.</li>
+<li><strong><code>support_tickets</code></strong> and <strong><code>last_login_days</code></strong> are right-skewed counts, the classic shape for a log or
+   square-root transform (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-6">5.6</a>).</li>
+<li><strong><code>tenure_months</code></strong> is close to uniform, which in real data would be suspicious — here it is an artefact
+   of how <code>data/customers.csv</code> was generated, and worth naming as such rather than over-interpreting.</li>
+</ol>
+<p>Quantify the shape rather than eyeballing it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">shape_stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;skew&quot;</span><span class="p">:</span> <span class="n">customers</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;kurtosis&quot;</span><span class="p">:</span> <span class="n">customers</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">]</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="n">customers</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;median&quot;</span><span class="p">:</span> <span class="n">customers</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+<span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape_stats</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                    skew  kurtosis   mean  median
+age                 2.69     28.90  38.04   38.00
+tenure_months       0.06     -1.22  36.43   35.00
+monthly_charges     0.41     -0.73  40.48   38.47
+support_tickets     0.87      0.49   1.26    1.00
+last_login_days     1.24      1.69  12.40   10.00
+satisfaction_score -0.47      0.08   7.32    7.00</pre></div></div>
+<div class="md"><div class="tbl"><table>
+<thead>
+<tr>
+<th>Skew</th>
+<th>Reading</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≈ 0</td>
+<td>Symmetric</td>
+</tr>
+<tr>
+<td>&gt; +1</td>
+<td>Strongly right-skewed — long tail of large values</td>
+</tr>
+<tr>
+<td>&lt; −1</td>
+<td>Strongly left-skewed</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>age</code>'s skew of 2.69 and kurtosis of 28.9 are caused entirely by four impossible values. Kurtosis is the
+more sensitive alarm of the two — it weights extreme deviations to the fourth power, so a handful of absurd
+rows moves it enormously while the median does not budge. Both are more reliable outlier alarms than a
+histogram, because neither depends on the bin width. Recomputing after excluding the impossible values
+shows how much of the "shape" was four rows:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">plausible_age</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age skew, as loaded : </span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;6.2f</span><span class="si">}</span><span class="s2">   kurtosis </span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age skew, plausible : </span><span class="si">{</span><span class="n">plausible_age</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;6.2f</span><span class="si">}</span><span class="s2">   kurtosis </span><span class="si">{</span><span class="n">plausible_age</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># 2.69 -&gt; 0.20 and 28.90 -&gt; -0.31: the column was well behaved all along, four rows were not</span>
+</code></pre><div class="outs"><pre class="out-text">age skew, as loaded :   2.69   kurtosis   28.90
+age skew, plausible :   0.20   kurtosis   -0.32</pre></div></div>
+<div class="md"><p>For categorical variables the equivalent is <code>value_counts</code>, and the thing to look for is <strong>rare
+categories</strong> — levels with so few rows that any statistic computed on them is noise (and that may not
+appear in the training split at all, <a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="s2">&quot;gender&quot;</span><span class="p">]):</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;missing&quot;</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>   <span class="c1"># NaN needs its own label</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:purple&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">counts</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> levels)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><h3 id="s4-5">4.5 Bivariate Analysis</h3>
+<p>Two variables at a time. The right tool depends on the pair of types:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Tool</th>
+<th>Statistic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Numeric × numeric</td>
+<td>Scatter plot</td>
+<td>Pearson / Spearman (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-2">2.8.2</a>)</td>
+</tr>
+<tr>
+<td>Numeric × categorical</td>
+<td>Boxplot, or grouped histogram</td>
+<td>Group means, ANOVA F</td>
+</tr>
+<tr>
+<td>Categorical × categorical</td>
+<td>Cross-tabulation, stacked bar</td>
+<td>Chi-square (<a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-9-1">3.9.1</a>)</td>
+</tr>
+<tr>
+<td>Anything × the target</td>
+<td>Whatever fits the pair</td>
+<td>4.7</td>
+</tr>
+</tbody>
+</table></div>
+<p>Start with the multimodality found in <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-4">4.4</a> — the hypothesis was that <code>plan</code> explains it.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:gray&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;monthly_charges: three humps, cause unknown&quot;</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">customers</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+             <span class="n">element</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;split by plan: mystery solved&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_03.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>The three modes are the three plans. This matters beyond tidiness: a model given <code>monthly_charges</code> alone
+has to <em>discover</em> that structure, whereas one given <code>plan</code> as well is handed it. It also means the two
+columns are strongly related, which is a multicollinearity risk for linear models (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;plan&quot;</span><span class="p">)[</span><span class="s2">&quot;monthly_charges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">          count   mean   std    min    max
+plan                                      
+Basic       451  25.63  7.21  15.00  47.52
+Premium     201  65.07  8.47  43.37  89.71
+Standard    330  45.80  7.77  27.90  69.48</pre></div></div>
+<div class="md"><p>Numeric × numeric, with the target as colour — a scatter that answers a question rather than decorating:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">customers</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span>
+                <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Churn concentrates at low tenure and high ticket counts&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_04.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Categorical × categorical, as rates rather than counts. Counts are almost always the wrong view: a large
+category will dominate a stacked bar regardless of its rate.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">by_city</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;city&quot;</span><span class="p">],</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">by_city</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;stayed&quot;</span><span class="p">,</span> <span class="s2">&quot;churned&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">by_city</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">city sizes:&quot;</span><span class="p">,</span> <span class="n">customers</span><span class="p">[</span><span class="s1">&#39;city&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">           stayed  churned
+city                      
+Delhi       0.770    0.230
+Kolkata     0.846    0.154
+Chennai     0.847    0.153
+Hyderabad   0.864    0.136
+Bengaluru   0.866    0.134
+Pune        0.882    0.118
+Mumbai      0.888    0.112
+Jaipur      0.909    0.091
+
+city sizes: {&#x27;Kolkata&#x27;: 228, &#x27;Bengaluru&#x27;: 201, &#x27;Pune&#x27;: 144, &#x27;Hyderabad&#x27;: 125, &#x27;Chennai&#x27;: 111, &#x27;Mumbai&#x27;: 98, &#x27;Delhi&#x27;: 61, &#x27;Jaipur&#x27;: 44}</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — reading a rate computed on a tiny group.</strong> Jaipur's churn rate is computed from about 50
+customers, so its standard error is roughly \(\sqrt{p(1-p)/n} \approx 0.05\) — a ±10 percentage-point band at
+two standard errors. Ranking cities by a rate this noisy produces a "worst city" that changes every month.
+Always put the group size next to the rate (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-3">2.8.3</a>, <a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-9-1">3.9.1</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">rates</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">)[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">])</span>
+<span class="n">rates</span><span class="p">[</span><span class="s2">&quot;std_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rates</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">rates</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">])</span>
+<span class="n">rates</span><span class="p">[</span><span class="s2">&quot;ci_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rates</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rates</span><span class="p">[</span><span class="s2">&quot;std_error&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">rates</span><span class="p">[</span><span class="s2">&quot;ci_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rates</span><span class="p">[</span><span class="s2">&quot;std_error&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rates</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">           count   mean  std_error  ci_low  ci_high
+city                                               
+Delhi         61  0.230      0.054   0.122    0.337
+Kolkata      228  0.154      0.024   0.106    0.201
+Chennai      111  0.153      0.034   0.085    0.222
+Hyderabad    125  0.136      0.031   0.075    0.197
+Bengaluru    201  0.134      0.024   0.086    0.182
+Pune         144  0.118      0.027   0.064    0.172
+Mumbai        98  0.112      0.032   0.048    0.176
+Jaipur        44  0.091      0.043   0.004    0.178</pre></div></div>
+<div class="md"><p>Every confidence interval overlaps every other one. There is no evidence here that any city differs from
+any other, and reporting a ranking would be inventing a finding.</p></div>
+<div class="md"><h3 id="s4-6">4.6 Multivariate Analysis and Correlation Structure</h3>
+<p>More than two variables at once. Two standard views:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">corr</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">corr</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.2f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Correlation matrix (Pearson)&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_05.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Read a correlation heatmap for two different things:</p>
+<ul>
+<li><strong>Feature–target correlation</strong> — candidate signal.</li>
+<li><strong>Feature–feature correlation</strong> — redundancy, which hurts linear-model interpretation (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>) and wastes
+  capacity everywhere else (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-2">7.2</a>).</li>
+</ul>
+<p>Here <code>satisfaction_score</code> correlates <strong>−0.70</strong> with <code>support_tickets</code>: unhappy customers file tickets,
+which is sensible and also means the two columns say much the same thing. Everything else is below 0.19 in
+absolute value, so there is no serious redundancy elsewhere.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Pull out the strongly related pairs programmatically rather than squinting at the grid.</span>
+<span class="n">pairs</span> <span class="o">=</span> <span class="p">(</span><span class="n">corr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">corr</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
+             <span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+             <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;correlation&quot;</span><span class="p">)</span>
+             <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+             <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;level_0&quot;</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;level_1&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">}))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pairs</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;correlation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">                  a                   b  correlation
+23  support_tickets  satisfaction_score       -0.696
+9     tenure_months     support_tickets       -0.185
+11    tenure_months  satisfaction_score        0.131
+29  last_login_days  satisfaction_score       -0.114
+2               age     monthly_charges       -0.058</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">subset</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">,</span> <span class="s2">&quot;churned&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;churned&quot;</span><span class="p">,</span> <span class="n">diag_kind</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+                 <span class="n">plot_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span> <span class="n">height</span><span class="o">=</span><span class="mf">1.6</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Pairwise structure, coloured by the target&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c04_06.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><h4 id="s4-6-1">4.6.1 Simpson's paradox</h4>
+<p>The reason multivariate analysis is not optional: <strong>an association can reverse when a third variable is
+taken into account.</strong> This is not a curiosity — it is a live risk whenever groups of different sizes and
+different base rates are pooled.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Two departments. Within EACH, treatment B has the higher success rate.</span>
+<span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">dept</span><span class="p">,</span> <span class="n">n_a</span><span class="p">,</span> <span class="n">rate_a</span><span class="p">,</span> <span class="n">n_b</span><span class="p">,</span> <span class="n">rate_b</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;easy&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mf">0.90</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="s2">&quot;hard&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">)]:</span>
+    <span class="k">for</span> <span class="n">treat</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">n_a</span><span class="p">,</span> <span class="n">rate_a</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">n_b</span><span class="p">,</span> <span class="n">rate_b</span><span class="p">)):</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">rate</span><span class="p">))</span>
+        <span class="n">records</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">&quot;dept&quot;</span><span class="p">:</span> <span class="n">dept</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="n">treat</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}]</span> <span class="o">*</span> <span class="n">successes</span>
+        <span class="n">records</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">&quot;dept&quot;</span><span class="p">:</span> <span class="n">dept</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="n">treat</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">successes</span><span class="p">)</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITHIN each department:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;dept&quot;</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">])[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">POOLED across departments:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;treatment&quot;</span><span class="p">)[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">WITHIN each department:
+dept  treatment
+easy  A            0.90
+      B            0.95
+hard  A            0.20
+      B            0.30
+Name: success, dtype: float64
+
+POOLED across departments:
+treatment
+A    0.76
+B    0.43
+Name: success, dtype: float64</pre></div></div>
+<div class="md"><p>Treatment B wins in the easy department (0.95 vs 0.90) and wins in the hard department (0.30 vs 0.20), and
+<strong>loses overall</strong> (0.43 vs 0.76). Nothing is miscalculated: B was mostly applied in the hard department,
+where everything scores badly, and A was mostly applied in the easy one.</p>
+<p>The lesson for EDA is exact: <strong>a marginal statistic can point the opposite way from every conditional
+one.</strong> Whenever a group-level rate is going to inform a decision, check it within the obvious confounders
+before believing it. This is also the honest limit of model interpretation — 24.4 returns to it.</p></div>
+<div class="md"><h3 id="s4-7">4.7 Target Analysis</h3>
+<p>The target deserves its own pass, because three of its properties dictate the entire rest of the project.</p>
+<p><strong>1. Its balance</strong> decides the metric (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-5">8.5</a>) and whether <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/">Chapter 22</a> applies.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">counts</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;positive rate: </span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;imbalance ratio: 1 : </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">churned
+0    870
+1    142
+Name: count, dtype: int64
+positive rate: 14.0%
+imbalance ratio: 1 : 6.1</pre></div></div>
+<div class="md"><p><strong>2. Its relationship to each feature</strong> gives a first, cheap ranking of what might matter. For a binary
+target, the ROC AUC of <em>each feature used alone</em> is a good single number: 0.5 means no information, and
+distance from 0.5 in either direction means signal.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
+
+<span class="n">single_feature_auc</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_cols</span><span class="p">:</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ok</span><span class="p">,</span> <span class="s2">&quot;churned&quot;</span><span class="p">],</span> <span class="n">customers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ok</span><span class="p">,</span> <span class="n">col</span><span class="p">])</span>
+    <span class="n">single_feature_auc</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span>
+
+<span class="n">ranking</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">single_feature_auc</span><span class="p">)</span>
+             <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;auc&quot;</span><span class="p">)</span>
+             <span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+             <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;auc&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span>
+             <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;signal&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+             <span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ranking</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                      auc  signal
+tenure_months       0.223   0.277
+support_tickets     0.725   0.225
+satisfaction_score  0.281   0.219
+last_login_days     0.539   0.039
+age                 0.470   0.030
+monthly_charges     0.515   0.015</pre></div></div>
+<div class="md"><p><code>tenure_months</code> at 0.24 is as informative as a feature at 0.76 would be — the direction is simply inverted
+(longer tenure, less churn). Ranking by distance from 0.5 rather than by the raw AUC is what makes the
+comparison honest.</p>
+<p><strong>3. Whether anything predicts it too well.</strong> A single feature with an AUC near 1.0 is almost never good
+news; it is <a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-8-1">1.8.1</a>'s leakage arriving as a number.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">has_reason</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;cancellation_reason&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AUC of &#39;cancellation_reason is present&#39;:&quot;</span><span class="p">,</span>
+      <span class="nb">round</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">],</span> <span class="n">has_reason</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>   <span class="c1"># 1.0 -&gt; perfect. Too perfect.</span>
+</code></pre><div class="outs"><pre class="out-text">AUC of &#x27;cancellation_reason is present&#x27;: 1.0</pre></div></div>
+<div class="md"><p>An AUC of exactly <strong>1.000</strong> from a single column means the column <em>is</em> the answer, recorded after the fact.
+The rule of thumb worth carrying: <strong>treat any single feature above about 0.95 AUC as guilty until proven
+innocent</strong>, and ask the 1.8.1 question — would this value exist, in this form, at the moment the prediction
+is needed? For <code>cancellation_reason</code> the answer is no, and it must be dropped before modelling. 22.7 is the
+full taxonomy.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">modelling_frame</span> <span class="o">=</span> <span class="n">customers</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;customer_id&quot;</span><span class="p">,</span> <span class="s2">&quot;cancellation_reason&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dropped: customer_id (identifier, 4.1), cancellation_reason (leakage)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;remaining columns:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">modelling_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">dropped: customer_id (identifier, 4.1), cancellation_reason (leakage)
+remaining columns: [&#x27;signup_date&#x27;, &#x27;age&#x27;, &#x27;gender&#x27;, &#x27;city&#x27;, &#x27;plan&#x27;, &#x27;tenure_months&#x27;, &#x27;monthly_charges&#x27;, &#x27;total_charges&#x27;, &#x27;support_tickets&#x27;, &#x27;last_login_days&#x27;, &#x27;satisfaction_score&#x27;, &#x27;churned&#x27;]</pre></div></div>
+<div class="md"><h3 id="s4-8">4.8 What EDA Is Really For</h3>
+<p>EDA is not a phase that produces a deliverable of charts. It is the process of forming and killing
+hypotheses about the data, and it is finished when you can answer these:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answered by</th>
+<th>Feeds into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What type is each column, really?</td>
+<td>4.1, 4.3</td>
+<td>Encoding choices (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>)</td>
+</tr>
+<tr>
+<td>What is missing, and is the missingness itself informative?</td>
+<td>4.3</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td>Which values are impossible rather than merely extreme?</td>
+<td>4.3, 4.4</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td>Which features are redundant with each other?</td>
+<td>4.6</td>
+<td>7.2, 11.7</td>
+</tr>
+<tr>
+<td>Which features plausibly carry signal?</td>
+<td>4.7</td>
+<td>6.7, 7.2</td>
+</tr>
+<tr>
+<td>Is any feature leaking the target?</td>
+<td>4.7</td>
+<td>22.7</td>
+</tr>
+<tr>
+<td>Is the target balanced?</td>
+<td>4.7</td>
+<td>8.5, Ch. 22</td>
+</tr>
+<tr>
+<td>Is a baseline already good enough?</td>
+<td>1.6, 8.8</td>
+<td>Whether to continue at all</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>When to stop.</strong> When further looking stops changing what you would do next. EDA has strongly diminishing
+returns, and the failure mode of enjoying it is a folder of 60 charts and no decisions.</p>
+<h4 id="s4-8-1">4.8.1 The uncomfortable part: EDA is itself a mild form of leakage</h4>
+<p>Every choice you make after looking at the whole dataset — which features to keep, which outliers to
+remove, which transform to apply — was informed by the test set. The test score afterwards is therefore
+slightly optimistic. This is not hypothetical; it is why 5.1 insists the split comes first.</p>
+<p>In strict practice: <strong>split first, explore the training set only, and touch the test set once.</strong> The
+demonstrations above deliberately used the whole file, because their point was to show what the techniques
+reveal; the worked case in <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-9">4.9</a> does it the right way round so the correct habit is on the page too.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Rigour</th>
+<th>What you do</th>
+<th>When it is appropriate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strict</td>
+<td>Split, then explore train only</td>
+<td>Anything whose score will be reported or acted on</td>
+</tr>
+<tr>
+<td>Pragmatic</td>
+<td>Explore everything, but make <em>decisions</em> only from train</td>
+<td>Common in practice; state it honestly</td>
+</tr>
+<tr>
+<td>Wrong</td>
+<td>Explore everything, tune against the test score</td>
+<td>Produces a number that means nothing</td>
+</tr>
+</tbody>
+</table></div>
+<p>The middle row is what most real projects do, and it is defensible as long as it is disclosed. The bottom
+row is how a model that scored 0.94 in a notebook scores 0.71 in production.</p></div>
+<div class="md"><h3 id="s4-9">4.9 In Practice</h3>
+<h4 id="s4-9-1">4.9.1 A worked case: a 30-minute data-quality review</h4>
+<p>The request: <em>"Here's the customer export. Can we predict churn from it?"</em> The deliverable is not a model.
+It is a short, written answer to three questions — <strong>is the data usable, what has to be fixed, and what
+should the first model use?</strong> — produced in under an hour, before anyone commits to a project.</p>
+<p><strong>Step 0 — split first (<a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-8-1">4.8.1</a>).</strong> Everything below looks at training data only.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+
+<span class="n">train_df</span><span class="p">,</span> <span class="n">test_df</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">],</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train </span><span class="si">{</span><span class="n">train_df</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">   test </span><span class="si">{</span><span class="n">test_df</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;churn rate - train </span><span class="si">{</span><span class="n">train_df</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, test </span><span class="si">{</span><span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">train (800, 14)   test (200, 14)
+churn rate - train 0.141, test 0.140</pre></div></div>
+<div class="md"><p><strong>Step 1 — a data-quality table.</strong> One row per column, mechanically generated, is worth more than any
+number of individual checks because nothing gets skipped.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">quality_report</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;column&quot;</span><span class="p">:</span> <span class="n">col</span><span class="p">,</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span>
+            <span class="s2">&quot;missing_%&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;unique&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span>
+            <span class="s2">&quot;top_share_%&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;column&quot;</span><span class="p">)</span>
+
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">quality_report</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                       dtype  missing_%  unique  top_share_%
+column                                                      
+customer_id              str        0.0     800          0.1
+signup_date              str        0.0     659          0.5
+age                  float64        5.8      57          5.2
+gender                   str        4.5       6         36.1
+city                     str        0.0       8         21.6
+plan                     str        0.0       3         45.4
+tenure_months          int64        0.0      72          2.4
+monthly_charges      float64        3.0     702          5.0
+total_charges            str        0.0     779          1.0
+support_tickets        int64        0.0       7         37.5
+last_login_days        int64        0.0      47          7.5
+satisfaction_score   float64        9.2      10         23.0
+churned                int64        0.0       2         85.9
+cancellation_reason      str       85.9       5         22.1</pre></div></div>
+<div class="md"><p>Three problems are now visible as table rows rather than as things someone had to think to check:</p>
+<ul>
+<li><code>total_charges</code> is <code>str</code> — it should be numeric (blank entries, <a class="xref" href="/machine-learning/03-the-python-machine-learning-stack/#s3-3-1">3.3.1</a>).</li>
+<li><code>satisfaction_score</code> is 9.8% missing, <code>age</code> 5.6%, <code>gender</code> 4.6% — all need a 5.2 decision.</li>
+<li><code>cancellation_reason</code> is 85.9% missing, and <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-7">4.7</a> already established it is leakage.</li>
+</ul>
+<p><strong>Step 2 — impossible values.</strong> Distinguish "extreme but real" from "cannot be true", because they get
+different treatment (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-3">5.3</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">rules</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="s2">&quot;tenure_months&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+    <span class="s2">&quot;monthly_charges&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span>
+    <span class="s2">&quot;support_tickets&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+    <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">bad</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">train_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bad</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">offenders</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">train_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bad</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bad</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> value(s) outside [</span><span class="si">{</span><span class="n">lo</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">hi</span><span class="si">}</span><span class="s2">] -&gt; </span><span class="si">{</span><span class="n">offenders</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">: all values within [</span><span class="si">{</span><span class="n">lo</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">hi</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">age: 4 value(s) outside [16, 100] -&gt; [0.0, 1.0, 150.0, 199.0]
+tenure_months: all values within [0, 120]
+monthly_charges: all values within [0, 500]
+support_tickets: all values within [0, 50]
+satisfaction_score: all values within [1, 10]</pre></div></div>
+<div class="md"><p><strong>Step 3 — a signal shortlist.</strong> Rank features by univariate association with the target, so the first
+model starts from evidence rather than intuition. Mutual information is the right tool here because,
+unlike correlation, it catches non-monotonic relationships (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-2">2.8.2</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.feature_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">mutual_info_classif</span>
+
+<span class="n">feature_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;last_login_days&quot;</span><span class="p">,</span> <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">]</span>
+
+<span class="n">fit_frame</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="n">feature_cols</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">mi</span> <span class="o">=</span> <span class="n">mutual_info_classif</span><span class="p">(</span><span class="n">fit_frame</span><span class="p">[</span><span class="n">feature_cols</span><span class="p">],</span> <span class="n">fit_frame</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">],</span>
+                         <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">shortlist</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">mi</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">feature_cols</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mutual_info&quot;</span><span class="p">)</span>
+               <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+               <span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+               <span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shortlist</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                    mutual_info
+tenure_months            0.0744
+support_tickets          0.0528
+satisfaction_score       0.0409
+monthly_charges          0.0273
+age                      0.0119
+last_login_days          0.0000</pre></div></div>
+<div class="md"><p>Two things to read here. The ranking agrees with <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-7">4.7</a>'s AUC ordering on the top three, which is
+reassurance rather than coincidence. But <code>last_login_days</code> scores an estimated MI of exactly <strong>0.0000</strong>
+while its AUC was 0.539 — mutual information is <em>estimated</em> from nearest-neighbour distances, and a
+genuinely weak relationship rounds to zero. Two weak-signal measures disagreeing is a signal in itself:
+the feature is marginal, and its fate should be decided by a wrapper method on the actual model (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-3">7.3</a>)
+rather than by either univariate score.</p>
+<p><strong>Step 4 — is it worth doing at all?</strong> <a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-6">1.6</a>'s question, answered before the project is staffed. A quick,
+deliberately unpolished model against the dummy baseline.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
+
+<span class="n">train_ok</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="n">feature_cols</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">test_ok</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">[</span><span class="n">feature_cols</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="n">baseline</span> <span class="o">=</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;stratified&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">quick</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;dummy&quot;</span><span class="p">,</span> <span class="n">baseline</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;quick forest&quot;</span><span class="p">,</span> <span class="n">quick</span><span class="p">)):</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_ok</span><span class="p">[</span><span class="n">feature_cols</span><span class="p">],</span> <span class="n">train_ok</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">])</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">test_ok</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">],</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">test_ok</span><span class="p">[</span><span class="n">feature_cols</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;14</span><span class="si">}</span><span class="s2"> test ROC AUC </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">dummy          test ROC AUC 0.468
+quick forest   test ROC AUC 0.786</pre></div></div>
+<div class="md"><p><strong>Step 5 — the written deliverable.</strong> Six lines, and it is the actual output of the exercise:</p>
+<blockquote>
+<p><strong>Is the data usable?</strong> Yes, with fixes. 1000 unique customers after removing 12 duplicate rows; churn
+rate 14.1%, giving roughly a 1:6 imbalance.</p>
+<p><strong>What must be fixed first?</strong> (1) <code>total_charges</code> is stored as text because blank entries exist — coerce
+to numeric. (2) <code>age</code> contains impossible values (0, 1, 150, 199) — blank them, do not drop the rows.
+(3) <code>gender</code> has six spellings of two values. (4) Missingness of 4.5% (<code>gender</code>), 5.8% (<code>age</code>) and 9.2%
+(<code>satisfaction_score</code>) needs an imputation decision.</p>
+<p><strong>What must be excluded?</strong> <code>customer_id</code> (identifier) and <code>cancellation_reason</code> (target leakage — AUC
+1.000 on its own, populated only after a customer has left).</p>
+<p><strong>What should the first model use?</strong> <code>tenure_months</code>, <code>support_tickets</code> and <code>satisfaction_score</code>, which
+carry almost all the univariate signal, plus <code>monthly_charges</code>. Note that <code>support_tickets</code> and
+<code>satisfaction_score</code> correlate at −0.70 and largely duplicate each other, and that <code>monthly_charges</code> is
+essentially a proxy for <code>plan</code>. <code>last_login_days</code> and <code>age</code> look marginal.</p>
+<p><strong>Is it worth doing?</strong> Yes. A five-minute forest on six raw features, with rows containing missing values
+simply dropped, reaches <strong>0.79 test AUC against a 0.47 baseline</strong> — before any cleaning, encoding,
+feature engineering or tuning.</p>
+</blockquote>
+<p>That last line is what secures the project, and it took under an hour. Note also what it is <em>not</em>: 0.79 AUC
+is a floor, not a result. It was produced by dropping rows rather than imputing (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-2">5.2</a>), ignoring every
+categorical column (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-2">6.2</a>), and accepting default hyperparameters (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-5">23.5</a>).</p>
+<h4 id="s4-9-2">4.9.2 Which plot answers which question</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Plot</th>
+<th>Not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What shape is this variable?</td>
+<td>Histogram</td>
+<td>A summary table alone (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-2">2.8.2</a>)</td>
+</tr>
+<tr>
+<td>Are there outliers?</td>
+<td>Boxplot, or skew</td>
+<td>Eyeballing a scatter</td>
+</tr>
+<tr>
+<td>Do two numeric variables move together?</td>
+<td>Scatter</td>
+<td>A correlation coefficient alone</td>
+</tr>
+<tr>
+<td>Does a numeric variable differ across groups?</td>
+<td>Boxplot or grouped histogram</td>
+<td>Bar chart of means — it hides spread</td>
+</tr>
+<tr>
+<td>Which features are redundant?</td>
+<td>Correlation heatmap</td>
+<td>Reading coefficients (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>)</td>
+</tr>
+<tr>
+<td>Is a category associated with the target?</td>
+<td>Rate table <strong>with counts</strong></td>
+<td>Stacked counts — size dominates</td>
+</tr>
+<tr>
+<td>How does the target separate?</td>
+<td>Pairplot coloured by target</td>
+<td>Anything with more than ~6 variables</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two rules that eliminate most misleading charts: <strong>plot rates, not counts, when comparing groups</strong>, and
+<strong>always show the group size next to the rate</strong> (<a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-5">4.5</a>).</p>
+<h4 id="s4-9-3">4.9.3 What goes wrong in production</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Handled in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Schema drift</strong></td>
+<td>A column arrives renamed, reordered or newly nullable; EDA assumptions silently expire</td>
+<td>3.9.3, 23.2</td>
+</tr>
+<tr>
+<td><strong>New categories</strong></td>
+<td>A city that did not exist at training time</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Distribution shift</strong></td>
+<td>Feature distributions move away from the training data; the model degrades quietly</td>
+<td>24.9</td>
+</tr>
+<tr>
+<td><strong>A sentinel becomes real</strong></td>
+<td><code>-1</code> meant "missing" upstream, then genuinely became a valid value</td>
+<td>4.3.1</td>
+</tr>
+<tr>
+<td><strong>EDA never repeated</strong></td>
+<td>The data was explored once, a year ago; nobody has looked since</td>
+<td>24.9</td>
+</tr>
+<tr>
+<td><strong>Leakage found too late</strong></td>
+<td>Discovered after deployment, when offline scores never reproduced</td>
+<td>4.7, 22.7</td>
+</tr>
+</tbody>
+</table></div>
+<p>The mitigation for the first five is the same and is worth stating plainly: <strong>the quality report in step 1
+is not a one-off.</strong> Run it on every batch of incoming data, store the output, and compare it over time. A
+column whose missingness jumps from 5% to 60%, or whose mean moves three standard deviations, is a
+production incident that no model metric will surface until the damage is done. 24.9 turns this into
+monitoring.</p></div></article>
+<nav class="spn"><a href="/machine-learning/03-the-python-machine-learning-stack/">← The Python Machine Learning Stack</a><a href="/machine-learning/05-data-preprocessing/">Data Preprocessing →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

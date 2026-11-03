@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bias, Variance and Regularization – Machine Learning Chapter 9 | Gradient Atlas</title>
+<meta name="description" content="Why models fail in two opposite directions, how to tell which is happening, and the general principle that fixes one of them.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/09-bias-variance-and-regularization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Bias, Variance and Regularization – Machine Learning Chapter 9 | Gradient Atlas">
+<meta property="og:description" content="Why models fail in two opposite directions, how to tell which is happening, and the general principle that fixes one of them.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/09-bias-variance-and-regularization/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Bias, Variance and Regularization", "headline": "Bias, Variance and Regularization", "description": "Why models fail in two opposite directions, how to tell which is happening, and the general principle that fixes one of them.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/09-bias-variance-and-regularization/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT34M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Bias, Variance and Regularization", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/09-bias-variance-and-regularization/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 9</p>
+<h1><small>Machine Learning · Chapter 9</small>Bias, Variance and Regularization</h1>
+<p class="lead">Why models fail in two opposite directions, how to tell which is happening, and the general principle that fixes one of them.</p>
+<p class="cta"><a class="sbtn" href="/#ch9">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s9-1">9.1 Underfitting and Overfitting</a></li><li class="l3"><a href="#s9-2">9.2 The Bias-Variance Decomposition</a></li><li class="l3"><a href="#s9-3">9.3 Model Capacity and Complexity</a></li><li class="l3"><a href="#s9-4">9.4 Learning Curves</a></li><li class="l3"><a href="#s9-5">9.5 Validation Curves</a></li><li class="l3"><a href="#s9-6">9.6 Regularization as a General Principle</a></li><li class="l3"><a href="#s9-7">9.7 Early Stopping</a></li><li class="l3"><a href="#s9-8">9.8 The No-Free-Lunch Theorem</a></li><li class="l3"><a href="#s9-9">9.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Models fail in two opposite directions, and the cures are opposite too. Applying the wrong one makes things
+worse, so telling them apart is the diagnostic skill this chapter teaches.</p>
+<p><a class="xref" href="/machine-learning/08-model-evaluation-and-validation/">Chapter 8</a> gave the measuring instruments. This chapter uses them to answer a single question — <strong>is this
+model too simple or too complex?</strong> — and <a class="xref" href="/machine-learning/12-regularized-linear-models/">Chapters 12</a>, 17 and 19 all reach back to the vocabulary defined
+here.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">KFold</span><span class="p">,</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">cross_validate</span><span class="p">,</span> <span class="n">learning_curve</span><span class="p">,</span>
+                                     <span class="n">train_test_split</span><span class="p">,</span> <span class="n">validation_curve</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span><span class="p">,</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span><span class="p">,</span> <span class="n">Ridge</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_squared_error</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">110</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ready&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">ready</pre></div></div>
+<div class="md"><h3 id="s9-1">9.1 Underfitting and Overfitting</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Underfitting</th>
+<th>Overfitting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The model is</td>
+<td>Too simple for the pattern</td>
+<td>Too flexible for the amount of data</td>
+</tr>
+<tr>
+<td>Training score</td>
+<td><strong>Poor</strong></td>
+<td>Excellent, often perfect</td>
+</tr>
+<tr>
+<td>Validation score</td>
+<td>Poor, and close to the training score</td>
+<td>Much worse than training</td>
+</tr>
+<tr>
+<td>Gap between them</td>
+<td>Small</td>
+<td><strong>Large</strong></td>
+</tr>
+<tr>
+<td>Dominated by</td>
+<td><strong>Bias</strong> (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-2">9.2</a>)</td>
+<td><strong>Variance</strong> (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-2">9.2</a>)</td>
+</tr>
+<tr>
+<td>Fix by</td>
+<td>More capacity, better features, less regularization</td>
+<td>Less capacity, more data, more regularization</td>
+</tr>
+</tbody>
+</table></div>
+<p>The two scores together are the diagnosis. Either one alone is uninformative — 8.1 showed why a training
+score means nothing on its own, and a mediocre validation score is consistent with both failures.</p>
+<p>The cleanest demonstration is polynomial regression, where capacity is a single integer.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">make_curve_data</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A smooth true function plus noise. The true relationship is a cubic.&quot;&quot;&quot;</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="mf">1.2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">y_true</span> <span class="o">+</span> <span class="n">gen</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">y_true</span>
+
+
+<span class="n">X_c</span><span class="p">,</span> <span class="n">y_c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">Xc_tr</span><span class="p">,</span> <span class="n">Xc_te</span><span class="p">,</span> <span class="n">yc_tr</span><span class="p">,</span> <span class="n">yc_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_c</span><span class="p">,</span> <span class="n">y_c</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">,</span> <span class="n">yc_tr</span><span class="p">)</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yc_tr</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">))</span>
+    <span class="n">te</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yc_te</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xc_te</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;degree </span><span class="si">{</span><span class="n">degree</span><span class="si">:</span><span class="s2">&gt;2</span><span class="si">}</span><span class="s2">   train MSE </span><span class="si">{</span><span class="n">tr</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}</span><span class="s2">   test MSE </span><span class="si">{</span><span class="n">te</span><span class="si">:</span><span class="s2">&gt;10.3f</span><span class="si">}</span><span class="s2">   gap </span><span class="si">{</span><span class="n">te</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tr</span><span class="si">:</span><span class="s2">&gt;10.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">degree  1   train MSE    2.772   test MSE      3.726   gap      0.954
+degree  3   train MSE    0.272   test MSE      0.366   gap      0.094
+degree 20   train MSE    0.162   test MSE      0.566   gap      0.404</pre></div></div>
+<div class="md"><p>Degree 1 is underfitting: both errors are large and similar — the model cannot represent a cubic, so more
+data would not help. Degree 20 is overfitting: training error is near zero and test error is far worse.
+Degree 3, the true degree, sits between them.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">degree</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">)):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">,</span> <span class="n">yc_tr</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">,</span> <span class="n">yc_tr</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Xc_te</span><span class="p">,</span> <span class="n">yc_te</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y_c</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">y_c</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;degree </span><span class="si">{</span><span class="n">degree</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Underfit (left), about right (middle), overfit (right)&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — treating a large train/validation gap as the definition of overfitting.</strong> The gap is a
+symptom, not the thing itself. What matters is the <strong>validation score</strong>: a model with a large gap and the
+best validation score available is the model to ship. <a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/">Chapter 19</a>'s boosted trees routinely fit the training
+set almost perfectly and still generalize best.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">,</span> <span class="n">yc_tr</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="n">degree</span><span class="p">,</span>
+        <span class="s2">&quot;train MSE&quot;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yc_tr</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xc_tr</span><span class="p">)),</span>
+        <span class="s2">&quot;test MSE&quot;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yc_te</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xc_te</span><span class="p">)),</span>
+    <span class="p">})</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<span class="n">frame</span><span class="p">[</span><span class="s2">&quot;gap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;test MSE&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;train MSE&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">smallest gap :&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;gap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">(),</span> <span class="s1">&#39;degree&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;best test MSE:&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;test MSE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">(),</span> <span class="s1">&#39;degree&#39;</span><span class="p">],</span> <span class="s2">&quot;  &lt;- the one to choose&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text"> degree  train MSE  test MSE   gap
+      2      2.700     4.208 1.508
+      3      0.348     0.548 0.201
+      5      0.271     0.497 0.226
+      9      0.284     0.555 0.272
+
+smallest gap : 3
+best test MSE: 5   &lt;- the one to choose</pre></div></div>
+<div class="md"><h3 id="s9-2">9.2 The Bias-Variance Decomposition</h3>
+<p>The two failure modes are not merely opposites in practice — they are two additive terms in the expected
+error. For squared-error loss, the expected error at a point \(x\), averaged over all training sets you might
+have drawn, decomposes exactly:</p>
+<p>\[\mathbb{E}\left[(y - \hat{f}(x))^2\right] = \underbrace{\left(\mathbb{E}[\hat{f}(x)] - f(x)\right)^2}_{\text{bias}^2} + \underbrace{\mathbb{E}\left[\left(\hat{f}(x) - \mathbb{E}[\hat{f}(x)]\right)^2\right]}_{\text{variance}} + \underbrace{\sigma^2}_{\text{irreducible}}\]</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Is</th>
+<th>Caused by</th>
+<th>Reduced by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bias²</strong></td>
+<td>How far the <em>average</em> model is from the truth</td>
+<td>The model family being too restrictive</td>
+<td>More capacity</td>
+</tr>
+<tr>
+<td><strong>Variance</strong></td>
+<td>How much the model moves when the training data changes</td>
+<td>The model chasing the sample</td>
+<td>More data, less capacity, regularization</td>
+</tr>
+<tr>
+<td><strong>Irreducible</strong></td>
+<td>Noise in \(y\) itself</td>
+<td>The world</td>
+<td><strong>Nothing</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The expectation is over <em>training sets</em>. That makes it directly simulatable: draw many training sets, fit a
+model on each, and measure how the predictions scatter.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">N_DATASETS</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">N_TRAIN</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">NOISE_SD</span> <span class="o">=</span> <span class="mf">1.2</span>
+
+<span class="n">x_eval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">f_true</span> <span class="o">=</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">x_eval</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="mf">1.2</span> <span class="o">*</span> <span class="n">x_eval</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="n">n_datasets</span><span class="o">=</span><span class="n">N_DATASETS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit `degree` on many independent training sets; return all predictions at x_eval.&quot;&quot;&quot;</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_datasets</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_eval</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_datasets</span><span class="p">):</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1000</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">N_TRAIN</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="mf">1.2</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">gen</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">NOISE_SD</span><span class="p">,</span> <span class="n">N_TRAIN</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span>
+        <span class="n">preds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_eval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">preds</span>
+
+
+<span class="n">preds_1</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;predictions from 200 separate training sets:&quot;</span><span class="p">,</span> <span class="n">preds_1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">predictions from 200 separate training sets: (200, 100)</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">decompose</span><span class="p">(</span><span class="n">preds</span><span class="p">):</span>
+    <span class="n">mean_pred</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">bias_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">mean_pred</span> <span class="o">-</span> <span class="n">f_true</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">bias_sq</span><span class="p">,</span> <span class="n">variance</span>
+
+
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span>
+    <span class="n">bias_sq</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="n">decompose</span><span class="p">(</span><span class="n">simulate</span><span class="p">(</span><span class="n">degree</span><span class="p">))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="n">degree</span><span class="p">,</span>
+        <span class="s2">&quot;bias^2&quot;</span><span class="p">:</span> <span class="n">bias_sq</span><span class="p">,</span>
+        <span class="s2">&quot;variance&quot;</span><span class="p">:</span> <span class="n">variance</span><span class="p">,</span>
+        <span class="s2">&quot;irreducible&quot;</span><span class="p">:</span> <span class="n">NOISE_SD</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="n">bias_sq</span> <span class="o">+</span> <span class="n">variance</span> <span class="o">+</span> <span class="n">NOISE_SD</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text"> degree  bias^2  variance  irreducible   total
+      1   2.838     0.259         1.44   4.537
+      2   2.859     0.548         1.44   4.847
+      3   0.001     0.187         1.44   1.628
+      5   0.002     0.403         1.44   1.845
+      8   0.019     2.337         1.44   3.796
+     12   1.717   881.161         1.44 884.317</pre></div></div>
+<div class="md"><p>Bias² falls sharply from degree 1 to degree 3 — where the model family finally contains the truth — and is
+essentially zero thereafter. Variance rises monotonically with degree, slowly at first and then sharply.
+The total is minimized where their sum is smallest, which is <strong>not</strong> where either one alone is smallest.</p>
+<p>The irreducible column never moves. It is the noise added when the data was generated, and no model can
+touch it: it is the floor on achievable error.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">24 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">degrees</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+<span class="n">curves</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;degree&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curves</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="s2">&quot;bias^2&quot;</span><span class="p">],</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bias$^2$&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curves</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="s2">&quot;variance&quot;</span><span class="p">],</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;variance&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curves</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">],</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total error&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">NOISE_SD</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:gray&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;irreducible&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;polynomial degree&quot;</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;The trade-off, simulated over 200 training sets&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">degree</span><span class="p">,</span> <span class="n">colour</span> <span class="ow">in</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;tab:blue&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;tab:red&quot;</span><span class="p">)):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="n">n_datasets</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_eval</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_eval</span><span class="p">,</span> <span class="n">f_true</span><span class="p">,</span> <span class="s2">&quot;k-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;truth&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">f_true</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">8</span><span class="p">,</span> <span class="n">f_true</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;40 fits each: degree 1 (blue, biased)</span><span class="se">\n</span><span class="s2">vs degree 12 (red, high variance)&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>The right panel is the decomposition made visual. The blue fits sit almost on top of one another — low
+variance — and all miss the curve the same way, which is bias. The red fits scatter wildly; each one is
+wrong in a different direction, and their <em>average</em> is close to the truth. Low bias, high variance.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Model family</th>
+<th>Typically</th>
+<th>Because</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linear regression, Naive Bayes</td>
+<td>High bias, low variance</td>
+<td>Strong assumptions, few parameters</td>
+</tr>
+<tr>
+<td>Regularized linear models (Ch. 12)</td>
+<td>Bias deliberately traded for variance</td>
+<td>The penalty restricts the fit</td>
+</tr>
+<tr>
+<td>Decision trees, unpruned (<a class="xref" href="/machine-learning/17-decision-trees/#s17-9">17.9</a>)</td>
+<td>Low bias, <strong>very</strong> high variance</td>
+<td>They can fit anything, including noise</td>
+</tr>
+<tr>
+<td>k-NN with small \(k\) (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-6">14.6</a>)</td>
+<td>Low bias, high variance</td>
+<td>Each prediction depends on few points</td>
+</tr>
+<tr>
+<td>k-NN with large \(k\)</td>
+<td>Higher bias, low variance</td>
+<td>Averaging over many points</td>
+</tr>
+<tr>
+<td>Random forests (Ch. 18)</td>
+<td>Low bias, <strong>reduced</strong> variance</td>
+<td>Averaging many high-variance trees</td>
+</tr>
+<tr>
+<td>Boosting (Ch. 19)</td>
+<td>Bias reduced sequentially</td>
+<td>Each model corrects its predecessor</td>
+</tr>
+</tbody>
+</table></div>
+<p><a class="xref" href="/machine-learning/18-ensembles-i-bagging-and-random-forests/">Chapter 18</a> exists entirely because of the fourth row: if a model family has low bias and high variance,
+averaging many of them removes the variance and keeps the low bias.</p></div>
+<div class="md"><h3 id="s9-3">9.3 Model Capacity and Complexity</h3>
+<p><strong>Capacity</strong> is how rich a set of functions a model can express. It is not a single number, but every model
+family has knobs that control it.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Increases capacity</th>
+<th>Decreases capacity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Polynomial regression</td>
+<td>Higher degree</td>
+<td>Lower degree</td>
+</tr>
+<tr>
+<td>Ridge / lasso (Ch. 12)</td>
+<td>Smaller <code>alpha</code></td>
+<td>Larger <code>alpha</code></td>
+</tr>
+<tr>
+<td>Logistic regression (<a class="xref" href="/machine-learning/13-logistic-regression/#s13-8">13.8</a>)</td>
+<td>Larger <code>C</code></td>
+<td>Smaller <code>C</code></td>
+</tr>
+<tr>
+<td>Decision tree (<a class="xref" href="/machine-learning/17-decision-trees/#s17-6">17.6</a>)</td>
+<td>Deeper, fewer <code>min_samples_leaf</code></td>
+<td>Shallower, more pruning</td>
+</tr>
+<tr>
+<td>k-NN (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-6">14.6</a>)</td>
+<td>Smaller <code>k</code></td>
+<td>Larger <code>k</code></td>
+</tr>
+<tr>
+<td>SVM with RBF (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-6">16.6</a>)</td>
+<td>Larger <code>C</code>, larger <code>gamma</code></td>
+<td>Smaller <code>C</code>, smaller <code>gamma</code></td>
+</tr>
+<tr>
+<td>Random forest (<a class="xref" href="/machine-learning/18-ensembles-i-bagging-and-random-forests/#s18-6">18.6</a>)</td>
+<td>Deeper trees, more <code>max_features</code></td>
+<td>Shallower, fewer features per split</td>
+</tr>
+<tr>
+<td>Boosting (<a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/#s19-6">19.6</a>)</td>
+<td>More estimators, higher learning rate</td>
+<td>Fewer estimators, early stopping</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two knobs are worth watching because they are backwards from intuition: in scikit-learn, <code>C</code> is an
+<strong>inverse</strong> penalty (larger means <em>less</em> regularization), while <code>alpha</code> is a direct one.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_classification</span>
+
+<span class="n">Xk</span><span class="p">,</span> <span class="n">yk</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                             <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">):</span>
+    <span class="n">lr</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Xk</span><span class="p">),</span> <span class="n">yk</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C = </span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2">   mean |coefficient| = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lr</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;   -&gt; </span><span class="si">{</span><span class="s1">&#39;heavily constrained&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.01</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;nearly unconstrained&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;moderate&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">10000.0</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Xk</span><span class="p">),</span> <span class="n">yk</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha = </span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">   mean |coefficient| = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">C =   0.001   mean |coefficient| = 0.0152   -&gt; heavily constrained
+C =     0.1   mean |coefficient| = 0.2433   -&gt; moderate
+C =   100.0   mean |coefficient| = 0.4349   -&gt; nearly unconstrained
+alpha =      0.01   mean |coefficient| = 0.05185
+alpha =       1.0   mean |coefficient| = 0.05163
+alpha =     100.0   mean |coefficient| = 0.03695
+alpha =   10000.0   mean |coefficient| = 0.00161</pre></div></div>
+<div class="md"><p>Larger <code>C</code> gives larger coefficients (more capacity); larger <code>alpha</code> gives smaller ones (less capacity).
+Getting the direction wrong is a real and common bug, because both parameters "regularize" and only one
+of them increases with regularization strength.</p>
+<p>Note also that <code>alpha = 0.01</code> and <code>alpha = 1.0</code> produce almost identical coefficients here. A penalty only
+bites once \(\lambda \Omega(\mathbf{w})\) is comparable in size to the loss term, so the useful range of
+<code>alpha</code> depends on the scale of the data and the number of rows — which is why 12.7 searches it on a
+logarithmic grid rather than a linear one.</p>
+<p><strong>Capacity is relative to the amount of data.</strong> A degree-12 polynomial is wildly overparameterized for 40
+points and reasonable for 40,000. This is why "is this model too complex?" has no answer independent of \(n\)
+— and why <a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-4">9.4</a>'s learning curves are the right tool.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
+    <span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">Xn_tr</span><span class="p">,</span> <span class="n">Xn_te</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">,</span> <span class="n">yn_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">)</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yn_tr</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">))</span>
+    <span class="n">te</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yn_te</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xn_te</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;degree 12 on n=</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2">   train MSE </span><span class="si">{</span><span class="n">tr</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">   test MSE </span><span class="si">{</span><span class="n">te</span><span class="si">:</span><span class="s2">&gt;9.3f</span><span class="si">}</span><span class="s2">   ratio </span><span class="si">{</span><span class="n">te</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">tr</span><span class="si">:</span><span class="s2">&gt;7.1f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">degree 12 on n=   30   train MSE   0.127   test MSE  5383.792   ratio 42273.4x
+degree 12 on n=  100   train MSE   0.370   test MSE     0.463   ratio     1.3x
+degree 12 on n= 1000   train MSE   0.585   test MSE     0.574   ratio     1.0x</pre></div></div>
+<div class="md"><h3 id="s9-4">9.4 Learning Curves</h3>
+<p>A <strong>learning curve</strong> plots training and validation score against the <em>amount of training data</em>. It answers
+a question no single score can: <strong>would more data help?</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Diagnosis</th>
+<th>Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Both scores poor, curves converged and flat</td>
+<td><strong>Underfitting</strong> (high bias)</td>
+<td>More capacity or better features. <strong>More data will not help</strong></td>
+</tr>
+<tr>
+<td>Training high, validation much lower, still separating</td>
+<td><strong>Overfitting</strong> (high variance)</td>
+<td>More data, more regularization, or less capacity</td>
+</tr>
+<tr>
+<td>Both good and converged</td>
+<td>Well fitted</td>
+<td>Nothing; you are near the ceiling</td>
+</tr>
+<tr>
+<td>Validation still climbing at the right edge</td>
+<td>Data-limited</td>
+<td>Collect more data — it will pay</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">28 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_learning_curve</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <span class="n">sizes</span><span class="p">,</span> <span class="n">train_scores</span><span class="p">,</span> <span class="n">val_scores</span> <span class="o">=</span> <span class="n">learning_curve</span><span class="p">(</span>
+        <span class="n">estimator</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+        <span class="n">train_sizes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">train_mse</span><span class="p">,</span> <span class="n">val_mse</span> <span class="o">=</span> <span class="o">-</span><span class="n">train_scores</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="n">val_scores</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">train_mse</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">val_mse</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="o">-</span><span class="n">train_scores</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="n">train_scores</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="o">-</span><span class="n">val_scores</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="n">val_scores</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;training set size&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;MSE&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sizes</span><span class="p">,</span> <span class="n">train_mse</span><span class="p">,</span> <span class="n">val_mse</span>
+
+
+<span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">plot_learning_curve</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">LinearRegression</span><span class="p">()),</span>
+                    <span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="s2">&quot;degree 1: underfitting</span><span class="se">\n</span><span class="s2">both curves flat and high&quot;</span><span class="p">)</span>
+<span class="n">plot_learning_curve</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">LinearRegression</span><span class="p">()),</span>
+                    <span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="s2">&quot;degree 3: well fitted</span><span class="se">\n</span><span class="s2">converged and low&quot;</span><span class="p">)</span>
+<span class="n">plot_learning_curve</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">()),</span>
+                    <span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="s2">&quot;degree 15: overfitting</span><span class="se">\n</span><span class="s2">gap closes only with data&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_03.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Read the three panels against the table. The left one has converged: the two curves meet at a high error
+and stay there, so <strong>collecting more data would change nothing</strong> — this model cannot represent the
+relationship. That is the most valuable thing a learning curve tells you, because it redirects effort from
+data collection to feature engineering (<a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a>) or a richer model.</p>
+<p>The right panel shows the opposite: the gap is wide at small \(n\) and narrows as data arrives, so more data
+<em>is</em> the fix.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">sizes</span><span class="p">,</span> <span class="n">tr_mse</span><span class="p">,</span> <span class="n">val_mse</span> <span class="o">=</span> <span class="n">learning_curve</span><span class="p">(</span>
+    <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">()),</span>
+    <span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="n">train_sizes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">gap</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">val_mse</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="o">-</span><span class="n">tr_mse</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;n_train&quot;</span><span class="p">:</span> <span class="n">sizes</span><span class="p">,</span> <span class="s2">&quot;gap (val - train MSE)&quot;</span><span class="p">:</span> <span class="n">gap</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)})</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text"> n_train  gap (val - train MSE)
+      24               2765.030
+      74                  1.018
+     125                  0.535
+     176                  0.285
+     226                  0.149
+     277                  0.061
+     328                  0.045
+     378                  0.031
+     429                  0.046
+     480                  0.040</pre></div></div>
+<div class="md"><h3 id="s9-5">9.5 Validation Curves</h3>
+<p>A <strong>validation curve</strong> holds the data fixed and varies a single hyperparameter. Where a learning curve asks
+"would more data help?", a validation curve asks "<strong>which setting is right?</strong>" — and shows the
+bias–variance trade-off directly as a U shape.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">degrees</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">train_scores</span><span class="p">,</span> <span class="n">val_scores</span> <span class="o">=</span> <span class="n">validation_curve</span><span class="p">(</span>
+    <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">()),</span>
+    <span class="n">X_c</span><span class="p">,</span> <span class="n">y_c</span><span class="p">,</span> <span class="n">param_name</span><span class="o">=</span><span class="s2">&quot;polynomialfeatures__degree&quot;</span><span class="p">,</span> <span class="n">param_range</span><span class="o">=</span><span class="n">degrees</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">train_mse</span><span class="p">,</span> <span class="n">val_mse</span> <span class="o">=</span> <span class="o">-</span><span class="n">train_scores</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="n">val_scores</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">best_degree</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">[</span><span class="n">val_mse</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="n">degrees</span><span class="p">,</span> <span class="s2">&quot;train MSE&quot;</span><span class="p">:</span> <span class="n">train_mse</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="s2">&quot;validation MSE&quot;</span><span class="p">:</span> <span class="n">val_mse</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)})</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">literal minimum: degree </span><span class="si">{</span><span class="n">best_degree</span><span class="si">}</span><span class="s2">   (the data was generated from a cubic)&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text"> degree  train MSE  validation MSE
+      1      3.077           3.315
+      2      3.050           3.509
+      3      0.290           0.365
+      4      0.288           0.385
+      5      0.284           0.392
+      6      0.271           0.556
+      7      0.238           0.530
+      8      0.224           0.469
+      9      0.222           0.476
+     10      0.212           0.551
+     11      0.208           0.493
+     12      0.206           0.500
+     13      0.200           2.284
+     14      0.195           0.364
+     15      0.194           0.403
+
+literal minimum: degree 14   (the data was generated from a cubic)</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">degrees</span><span class="p">,</span> <span class="n">train_mse</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">degrees</span><span class="p">,</span> <span class="n">val_mse</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">best_degree</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;best degree = </span><span class="si">{</span><span class="n">best_degree</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;polynomial degree (capacity)&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;MSE&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Validation error is U-shaped; training error only ever falls&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_04.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>The training curve descends more or less monotonically — more capacity fits the training data better, which
+is <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-1">8.1</a>'s point again. The validation curve falls to a minimum around degree 3, rises through the middle
+degrees, and then — awkwardly — dips again at the far end.</p>
+<p><strong>And the literal minimum is degree 14, not 3.</strong> The data was generated from a cubic, so 14 is the wrong
+answer. This is not a flaw in the method; it is what a noisy curve looks like, and taking its <code>argmin</code>
+uncritically is how a reasonable procedure produces an unreasonable model.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Read</th>
+<th>Region</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Both curves high</td>
+<td>Left of the minimum</td>
+<td>Underfitting</td>
+</tr>
+<tr>
+<td>Validation rising, training still falling</td>
+<td>Right of the minimum</td>
+<td>Overfitting</td>
+</tr>
+<tr>
+<td>Validation flat over a wide range</td>
+<td>Anywhere</td>
+<td>The hyperparameter does not matter much — pick the simpler end</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Common mistake — taking the argmin of a validation curve.</strong> The minimum of a noisy curve is itself
+noisy. The standard remedy is the <strong>one-standard-error rule</strong>: among all settings whose score is within one
+standard error of the best, choose the <strong>simplest</strong>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">val_se</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">val_scores</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">val_scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">best_idx</span> <span class="o">=</span> <span class="n">val_mse</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+<span class="n">threshold</span> <span class="o">=</span> <span class="n">val_mse</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">val_se</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+<span class="n">within</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">[</span><span class="n">val_mse</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;literal minimum: degree </span><span class="si">{</span><span class="n">best_degree</span><span class="si">}</span><span class="s2">, validation MSE &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_mse</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">val_se</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (s.e.)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;degrees within one standard error: </span><span class="si">{</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">within</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simplest such degree: </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">within</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="si">}</span><span class="s2">   &lt;- the defensible choice, and the true degree&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">literal minimum: degree 14, validation MSE 0.364 +/- 0.054 (s.e.)
+degrees within one standard error: [3, 4, 5, 14, 15]
+simplest such degree: 3   &lt;- the defensible choice, and the true degree</pre></div></div>
+<div class="md"><p>Degree 3 is within one standard error of degree 14 and is vastly simpler, so the rule selects it — and it
+happens to be the degree the data was generated from. The rule is not magic; it encodes a preference for
+simplicity whenever the evidence cannot distinguish between options, which is exactly the situation
+8.8.2 described.</p>
+<p><code>GridSearchCV</code> exposes this through its <code>refit</code> parameter, which accepts a callable that picks the index to
+refit on — allowing a one-standard-error rule instead of <code>argmax</code> (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-5">23.5</a>).</p></div>
+<div class="md"><h3 id="s9-6">9.6 Regularization as a General Principle</h3>
+<p><strong>Regularization</strong> is any modification that reduces variance at the cost of some bias. For a model fitted by
+minimizing a loss, the standard form adds a penalty on the size of the parameters:</p>
+<p>\[J(\mathbf{w}) = \underbrace{\text{Loss}(\mathbf{w})}_{\text{fit the data}} + \underbrace{\lambda \cdot \Omega(\mathbf{w})}_{\text{stay small}}\]</p>
+<p>\(\lambda\) controls the trade. At \(\lambda = 0\) the penalty vanishes and the model is unconstrained; as
+\(\lambda \to \infty\) every coefficient is driven to zero and the model predicts a constant.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Penalty \(\Omega(\mathbf{w})\)</th>
+<th>Name</th>
+<th>Effect</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(\sum w_j^2\)</td>
+<td>L2 / ridge</td>
+<td>Shrinks all coefficients smoothly</td>
+<td>12.2</td>
+</tr>
+<tr>
+<td>\(\sum \lvert w_j \rvert\)</td>
+<td>L1 / lasso</td>
+<td>Shrinks, and sets some to <strong>exactly zero</strong></td>
+<td>12.3</td>
+</tr>
+<tr>
+<td>Both</td>
+<td>Elastic net</td>
+<td>Shrinks and selects</td>
+<td>12.5</td>
+</tr>
+</tbody>
+</table></div>
+<p>The names are <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-3">2.3</a>'s norms, applied to the coefficient vector rather than to data.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">Xr_tr</span><span class="p">,</span> <span class="n">Xr_te</span><span class="p">,</span> <span class="n">yr_tr</span><span class="p">,</span> <span class="n">yr_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span>
+                                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;alpha&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;train MSE&#39;</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}{</span><span class="s1">&#39;test MSE&#39;</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}{</span><span class="s1">&#39;max |coef|&#39;</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span>
+                          <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span> <span class="k">if</span> <span class="n">alpha</span> <span class="k">else</span> <span class="n">LinearRegression</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xr_tr</span><span class="p">,</span> <span class="n">yr_tr</span><span class="p">)</span>
+    <span class="n">coefs</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;0 (none)&quot;</span> <span class="k">if</span> <span class="n">alpha</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yr_tr</span><span class="p">,</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xr_tr</span><span class="p">))</span><span class="si">:</span><span class="s2">&gt;12.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yr_te</span><span class="p">,</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xr_te</span><span class="p">))</span><span class="si">:</span><span class="s2">&gt;14.4g</span><span class="si">}{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coefs</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;14.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">     alpha   train MSE      test MSE    max |coef|
+  0 (none)       0.858     5.836e+07          9458
+     1e-06       0.922          7155         275.1
+     0.001       1.048          2715         17.24
+       0.1       1.162         105.1         1.803
+        10       1.453          16.3        0.4015
+      1000       3.932         14.49       0.03527</pre></div></div>
+<div class="md"><p>Read the last column alongside the first two. With no penalty, a degree-15 polynomial produces enormous
+coefficients that cancel each other to pass through every training point — the same non-identifiability
+pathology as <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-9">2.9</a>'s duplicated column. Raising <code>alpha</code> shrinks them, training error rises, and test error
+falls until the penalty starts destroying real signal.</p>
+<p><strong>Regularization is not only about penalties.</strong> Anything that restricts what a model can express does the
+same job:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Family</th>
+<th>Section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 / L2 penalty</td>
+<td>Linear models, SVM, boosting</td>
+<td>Ch. 12</td>
+</tr>
+<tr>
+<td>Max depth, min samples per leaf, pruning</td>
+<td>Trees</td>
+<td>17.6</td>
+</tr>
+<tr>
+<td>Averaging many models</td>
+<td>Ensembles</td>
+<td>18.1</td>
+</tr>
+<tr>
+<td>Random feature subsets per split</td>
+<td>Random forests</td>
+<td>18.6</td>
+</tr>
+<tr>
+<td>Early stopping</td>
+<td>Iterative learners</td>
+<td>9.7</td>
+</tr>
+<tr>
+<td>Fewer features</td>
+<td>Everything</td>
+<td>Ch. 7</td>
+</tr>
+<tr>
+<td>More data</td>
+<td>Everything</td>
+<td>9.4</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row is worth stating plainly: <strong>more data is a form of regularization</strong>, and usually the best one,
+because it reduces variance without adding bias.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">600</span><span class="p">):</span>
+    <span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">Xn_tr</span><span class="p">,</span> <span class="n">Xn_te</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">,</span> <span class="n">yn_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+    <span class="n">unpenalized</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span>
+    <span class="n">unpenalized</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;degree 15, no penalty, n=</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2">   test MSE &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yn_te</span><span class="p">,</span><span class="w"> </span><span class="n">unpenalized</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xn_te</span><span class="p">))</span><span class="si">:</span><span class="s2">&gt;10.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">degree 15, no penalty, n=  30   test MSE   3783.045
+degree 15, no penalty, n= 120   test MSE      2.068
+degree 15, no penalty, n= 600   test MSE      1.204</pre></div></div>
+<div class="md"><h3 id="s9-7">9.7 Early Stopping</h3>
+<p>For a model fitted iteratively — gradient descent (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/">Chapter 10</a>), gradient boosting (<a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/#s19-6">19.6</a>) — capacity grows
+with each iteration. <strong>Early stopping</strong> halts training when validation performance stops improving, which
+regularizes without changing the model at all.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+
+<span class="n">Xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_curve_data</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+<span class="n">Xe_tr</span><span class="p">,</span> <span class="n">Xe_val</span><span class="p">,</span> <span class="n">ye_tr</span><span class="p">,</span> <span class="n">ye_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">booster</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                    <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xe_tr</span><span class="p">,</span> <span class="n">ye_tr</span><span class="p">)</span>
+
+<span class="n">train_path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">ye_tr</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">booster</span><span class="o">.</span><span class="n">staged_predict</span><span class="p">(</span><span class="n">Xe_tr</span><span class="p">)])</span>
+<span class="n">val_path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">ye_val</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">booster</span><span class="o">.</span><span class="n">staged_predict</span><span class="p">(</span><span class="n">Xe_val</span><span class="p">)])</span>
+<span class="n">best_iter</span> <span class="o">=</span> <span class="n">val_path</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;iterations run           : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;best validation iteration: </span><span class="si">{</span><span class="n">best_iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation MSE there     : </span><span class="si">{</span><span class="n">val_path</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation MSE at the end: </span><span class="si">{</span><span class="n">val_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;training MSE at the end  : </span><span class="si">{</span><span class="n">train_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   &lt;- still improving, and irrelevant&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">iterations run           : 500
+best validation iteration: 25
+validation MSE there     : 2.4299
+validation MSE at the end: 3.7514
+training MSE at the end  : 0.0467   &lt;- still improving, and irrelevant</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_path</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_path</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">best_iter</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;early stop at </span><span class="si">{</span><span class="n">best_iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;boosting iteration&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;MSE&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Training error falls forever; validation error has a minimum&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_05.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>scikit-learn implements this directly with <code>n_iter_no_change</code>, which carves out its own internal validation
+fraction and stops when improvement stalls.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">auto_stop</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">validation_fraction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">n_iter_no_change</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xe_tr</span><span class="p">,</span> <span class="n">ye_tr</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;n_estimators requested : 500&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;trees actually built   : </span><span class="si">{</span><span class="n">auto_stop</span><span class="o">.</span><span class="n">n_estimators_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation MSE         : </span><span class="si">{</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">ye_val</span><span class="p">,</span><span class="w"> </span><span class="n">auto_stop</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xe_val</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vs the full 500-tree model: </span><span class="si">{</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">ye_val</span><span class="p">,</span><span class="w"> </span><span class="n">booster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xe_val</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">n_estimators requested : 500
+trees actually built   : 49
+validation MSE         : 2.6179
+vs the full 500-tree model: 3.7514</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — early stopping on the test set.</strong> The stopping iteration is a hyperparameter chosen from
+data (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-2">8.2</a>). Choosing it on the test set makes the reported score optimistic. Use a dedicated validation
+split, <code>validation_fraction</code>, or cross-validation.</p></div>
+<div class="md"><h3 id="s9-8">9.8 The No-Free-Lunch Theorem</h3>
+<p>The no-free-lunch theorem states that, <strong>averaged over all possible problems</strong>, every learning algorithm
+performs identically. No algorithm is universally best; superior performance on one class of problems is
+paid for by inferior performance on another.</p>
+<p>What follows from it, and what does not:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Follows</th>
+<th>Does not follow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>There is no "best algorithm" to always reach for</td>
+<td>All algorithms are equally good on <em>your</em> problem</td>
+</tr>
+<tr>
+<td>Model choice must be justified empirically</td>
+<td>Benchmarks are useless</td>
+</tr>
+<tr>
+<td>An algorithm's assumptions are what make it work</td>
+<td>Assumptions are a weakness</td>
+</tr>
+<tr>
+<td>You must actually compare candidates (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-8">8.8</a>)</td>
+<td>Comparison is hopeless</td>
+</tr>
+</tbody>
+</table></div>
+<p>The reason it does not lead to paralysis is that real problems are not drawn uniformly from all possible
+problems. Real data has structure — smoothness, locality, sparsity — and algorithms that assume that
+structure do well on it. The theorem says the assumptions are doing the work, which is true and useful.</p>
+<p>The practical version is easy to demonstrate: pick three datasets with different structure and watch the
+ranking of the same three models change completely.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">32 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_circles</span><span class="p">,</span> <span class="n">make_moons</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.naive_bayes</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianNB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_val_score</span>
+
+<span class="n">problems</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;linear, 50 features&quot;</span><span class="p">:</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                                               <span class="n">n_redundant</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">class_sep</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+                                               <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;concentric circles&quot;</span><span class="p">:</span> <span class="n">make_circles</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                       <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;interleaving moons&quot;</span><span class="p">:</span> <span class="n">make_moons</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">learners</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;logistic&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+    <span class="s2">&quot;k-NN (k=5)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="mi">5</span><span class="p">)),</span>
+    <span class="s2">&quot;naive bayes&quot;</span><span class="p">:</span> <span class="n">GaussianNB</span><span class="p">(),</span>
+<span class="p">}</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">problems</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">table</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">lname</span><span class="p">:</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">Xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                             <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lname</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="n">scoreboard</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scoreboard</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">best learner per problem:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scoreboard</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">worst learner per problem:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scoreboard</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">             linear, 50 features  concentric circles  interleaving moons
+logistic                   0.867               0.452               0.840
+k-NN (k=5)                 0.683               0.995               0.925
+naive bayes                0.867               0.982               0.840
+
+best learner per problem:
+linear, 50 features      logistic
+concentric circles     k-NN (k=5)
+interleaving moons     k-NN (k=5)
+
+worst learner per problem:
+linear, 50 features    k-NN (k=5)
+concentric circles       logistic
+interleaving moons       logistic</pre></div></div>
+<div class="md"><p>The ranking <strong>completely inverts</strong> between the first two columns:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>linear, 50 features</th>
+<th>concentric circles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logistic</td>
+<td>0.867 — <strong>best</strong></td>
+<td>0.453 — <strong>worse than chance</strong></td>
+</tr>
+<tr>
+<td>k-NN</td>
+<td>0.683 — <strong>worst</strong></td>
+<td>0.995 — <strong>best</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Each model's failure is its own assumption applied where it does not hold. Logistic regression assumes a
+linear boundary, which is ideal in 50 sparse dimensions and impossible on concentric circles (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-1">6.1</a>'s XOR
+argument again). k-NN assumes nearby points share labels, which is perfect on the circles and collapses in
+50 dimensions where nothing is near anything (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-1">7.1</a>'s distance-contrast result).</p>
+<p>Neither model is better. Each is better <em>somewhere</em>, and the assumption that helps in one place is the
+same assumption that fails in the other. That is the no-free-lunch theorem in a table.</p>
+<p><strong>The practical rule this licenses:</strong> always try several model families before tuning one. A cheap
+comparison across three or four families costs minutes and is far more likely to help than hours spent
+tuning the wrong one (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-8">23.8</a>).</p></div>
+<div class="md"><h3 id="s9-9">9.9 In Practice</h3>
+<h4 id="s9-9-1">9.9.1 Where this shows up: diagnosing a disappointing model</h4>
+<p>The most common real use of this chapter is not a plot — it is a decision about <strong>what to do next</strong> when a
+model underperforms. The wrong diagnosis wastes weeks: collecting more data for a high-bias model changes
+nothing, and adding features to a high-variance model makes it worse.</p>
+<p>The scenario: a churn model reaches 0.79 validation AUC and someone asks whether to buy more data.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">33 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+
+<span class="n">DOMAIN_RULES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_charges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;total_charges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s2">&quot;male&quot;</span><span class="p">:</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;female&quot;</span><span class="p">:</span> <span class="s2">&quot;f&quot;</span><span class="p">})</span>
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span> <span class="ow">in</span> <span class="n">DOMAIN_RULES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">prepare</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">))</span>
+<span class="n">NUMERIC</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure_months&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly_charges&quot;</span><span class="p">,</span> <span class="s2">&quot;total_charges&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;support_tickets&quot;</span><span class="p">,</span> <span class="s2">&quot;last_login_days&quot;</span><span class="p">,</span> <span class="s2">&quot;satisfaction_score&quot;</span><span class="p">]</span>
+<span class="n">CATEGORICAL</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">,</span> <span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="s2">&quot;plan&quot;</span><span class="p">]</span>
+<span class="n">X_ch</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">NUMERIC</span> <span class="o">+</span> <span class="n">CATEGORICAL</span><span class="p">]</span>
+<span class="n">y_ch</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span>
+
+<span class="n">encoder</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s2">&quot;num&quot;</span><span class="p">,</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">()),</span> <span class="n">NUMERIC</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;cat&quot;</span><span class="p">,</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">),</span>
+                          <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">handle_unknown</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)),</span> <span class="n">CATEGORICAL</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="n">cv5</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rows:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_ch</span><span class="p">),</span> <span class="s2">&quot; churn rate:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">y_ch</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">rows: 1000  churn rate: 0.141</pre></div></div>
+<div class="md"><p><strong>Step 1 — measure the gap.</strong> Train and validation scores together, from one <code>cross_validate</code> call (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-3-2">8.3.2</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">candidates</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;logistic (C=1)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+    <span class="s2">&quot;logistic (C=0.01)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+    <span class="s2">&quot;forest (unlimited depth)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)),</span>
+    <span class="s2">&quot;forest (max_depth=4)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)),</span>
+<span class="p">}</span>
+
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">candidates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_ch</span><span class="p">,</span> <span class="n">y_ch</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span> <span class="n">return_train_score</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                 <span class="s2">&quot;train AUC&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;train_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">&quot;val AUC&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">&quot;gap&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;train_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">                   model  train AUC  val AUC    gap
+          logistic (C=1)     0.8309   0.8049 0.0260
+       logistic (C=0.01)     0.8251   0.8153 0.0098
+forest (unlimited depth)     1.0000   0.7602 0.2398
+    forest (max_depth=4)     0.8910   0.7861 0.1049</pre></div></div>
+<div class="md"><p>The diagnosis is in the <code>gap</code> column. The unlimited forest trains to a <strong>perfect 1.0000 AUC</strong> and validates
+at 0.7602 — a gap of 0.24, textbook high variance. Both logistic regressions have gaps of about 0.01 and
+validate <em>higher</em> than either forest, at around 0.815.</p>
+<p>That is already an informative result: the best model here is the most constrained one, and the flexible
+one is the worst. But the gap alone does not say what to do next, so ask the learning curve.</p>
+<p><strong>Step 2 — ask the learning curve whether more data would help.</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;logistic (C=0.01): converged&quot;</span><span class="p">,</span> <span class="n">candidates</span><span class="p">[</span><span class="s2">&quot;logistic (C=0.01)&quot;</span><span class="p">]),</span>
+                                    <span class="p">(</span><span class="s2">&quot;forest, unlimited: high variance&quot;</span><span class="p">,</span> <span class="n">candidates</span><span class="p">[</span><span class="s2">&quot;forest (unlimited depth)&quot;</span><span class="p">])]):</span>
+    <span class="n">sizes</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="n">va</span> <span class="o">=</span> <span class="n">learning_curve</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_ch</span><span class="p">,</span> <span class="n">y_ch</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                                   <span class="n">train_sizes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+                                   <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">va</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;training rows&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;ROC AUC&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c09_06.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;logistic (C=0.01)&quot;</span><span class="p">,</span> <span class="s2">&quot;forest (unlimited depth)&quot;</span><span class="p">):</span>
+    <span class="n">sizes</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="n">va</span> <span class="o">=</span> <span class="n">learning_curve</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">X_ch</span><span class="p">,</span> <span class="n">y_ch</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                                   <span class="n">train_sizes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+    <span class="n">val_mean</span> <span class="o">=</span> <span class="n">va</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">improvement</span> <span class="o">=</span> <span class="n">val_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">val_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;26</span><span class="si">}</span><span class="s2"> validation AUC over the last 3 sizes: &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">val_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">improvement</span><span class="si">:</span><span class="s2">+.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">logistic (C=0.01)          validation AUC over the last 3 sizes: 0.8164 -&gt; 0.8153  (-0.0012)
+forest (unlimited depth)   validation AUC over the last 3 sizes: 0.7653 -&gt; 0.7602  (-0.0051)</pre></div></div>
+<div class="md"><p>Both curves are flat by the full training size, and the numeric check confirms it: the validation score
+moves by less than 0.006 over the last three training sizes, and in both cases it moves <em>down</em>. <strong>Neither
+model is data-limited.</strong> More rows of the same kind would change nothing.</p>
+<p><strong>Step 3 — act on the diagnosis.</strong> The forest is high-variance, so constrain it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">forest_treatments</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;baseline: unlimited depth&quot;</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;max_depth=5&quot;</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;min_samples_leaf=20&quot;</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                                                  <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;max_depth=4, min_samples_leaf=20&quot;</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">forest_treatments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">model</span><span class="p">),</span> <span class="n">X_ch</span><span class="p">,</span> <span class="n">y_ch</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv5</span><span class="p">,</span>
+                         <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span> <span class="n">return_train_score</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;34</span><span class="si">}</span><span class="s2"> train </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;train_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   val </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;test_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;   gap </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;train_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;test_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">baseline: unlimited depth          train 1.0000   val 0.7602   gap 0.2398
+max_depth=5                        train 0.9247   val 0.7837   gap 0.1410
+min_samples_leaf=20                train 0.8780   val 0.7881   gap 0.0899
+max_depth=4, min_samples_leaf=20   train 0.8560   val 0.7915   gap 0.0645</pre></div></div>
+<div class="md"><p>Constraining works exactly as the theory predicts: training AUC falls, the gap shrinks from 0.24 to a few
+hundredths, and <strong>validation AUC rises</strong>. That is bias traded for variance, profitably.</p>
+<p>Now the logistic regression. Its gap is already tiny, so the textbook move would be to <em>add</em> capacity.
+Sweep <code>C</code> and check.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;C&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">&#39;train AUC&#39;</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}{</span><span class="s1">&#39;val AUC&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;gap&#39;</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">make_pipeline</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+                         <span class="n">X_ch</span><span class="p">,</span> <span class="n">y_ch</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span> <span class="n">return_train_score</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tr_</span><span class="p">,</span> <span class="n">va_</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;train_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="n">tr_</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}{</span><span class="n">va_</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}{</span><span class="n">tr_</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">va_</span><span class="si">:</span><span class="s2">&gt;9.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">       C   train AUC   val AUC      gap
+   0.003      0.8220    0.8144   0.0076
+    0.01      0.8251    0.8153   0.0098
+    0.03      0.8272    0.8151   0.0121
+     0.1      0.8290    0.8117   0.0173
+     0.3      0.8304    0.8077   0.0227
+     1.0      0.8309    0.8049   0.0260
+    10.0      0.8310    0.8031   0.0279</pre></div></div>
+<div class="md"><p><strong>Adding capacity makes it worse.</strong> Validation AUC peaks at <code>C = 0.01</code> and declines monotonically to 0.803
+at <code>C = 10</code>, while training AUC rises by only 0.009 across the entire range. The model is not
+capacity-limited in either direction — it is <strong>feature-limited</strong>.</p>
+<p>That is a third diagnosis, and it is the one this dataset actually has:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large gap, validation improves when constrained</td>
+<td>High variance</td>
+</tr>
+<tr>
+<td>Small gap, validation improves when capacity is added</td>
+<td>High bias</td>
+</tr>
+<tr>
+<td><strong>Small gap, and neither more nor less capacity helps</strong></td>
+<td><strong>Feature-limited or at the noise floor</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The training score is the tell. A high-bias model cannot fit its <em>training</em> data either — degree 1 in <a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-1">9.1</a>
+had a training MSE of 2.77 against 0.27 for degree 3. Here the training AUC is 0.831 at <code>C = 10</code>, barely
+above the 0.822 at <code>C = 0.003</code>: the model is already extracting nearly everything these features contain,
+and the remaining error is not something capacity can reach.</p>
+<p><strong>The answer to the original question — should we buy more data?</strong> No. The learning curves are flat, so
+more rows of the same kind add nothing. The gap on the forest closes with regularization rather than data.
+And the logistic regression's ceiling of about 0.82 does not move with capacity in either direction. The
+binding constraint is what the seven numeric and three categorical columns can express — so the
+highest-value next steps are <strong>better features</strong> (<a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a>), <strong>a different model family</strong> (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-8">9.8</a>), or
+accepting that 0.82 is near this problem's irreducible limit (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-2">9.2</a>).</p>
+<h4 id="s9-9-2">9.9.2 Which diagnosis, and what to do about it</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Diagnosis</th>
+<th>Do</th>
+<th>Do <strong>not</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Train and validation both poor, small gap</td>
+<td>High bias</td>
+<td>Add capacity, add features, reduce regularization</td>
+<td>Collect more data (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-4">9.4</a>)</td>
+</tr>
+<tr>
+<td>Train excellent, validation much worse</td>
+<td>High variance</td>
+<td>Regularize, reduce capacity, collect more data</td>
+<td>Add features</td>
+</tr>
+<tr>
+<td>Small gap, and capacity changes nothing either way</td>
+<td>Feature-limited or at the noise floor</td>
+<td>Better features (Ch. 6), another family (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-8">9.8</a>), or stop</td>
+<td>Keep tuning (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-9-1">9.9.1</a>)</td>
+</tr>
+<tr>
+<td>Validation still rising with \(n\)</td>
+<td>Data-limited</td>
+<td>Collect more data</td>
+<td>Tune hyperparameters first</td>
+</tr>
+<tr>
+<td>Validation curve flat across settings</td>
+<td>The knob does not matter</td>
+<td>Pick the simplest setting</td>
+<td>Search it finely (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-5">9.5</a>)</td>
+</tr>
+<tr>
+<td>Validation score near the noise floor</td>
+<td>At the irreducible limit (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-2">9.2</a>)</td>
+<td>Stop, or change the problem</td>
+<td>Keep tuning</td>
+</tr>
+<tr>
+<td>Several settings within one standard error</td>
+<td>Not resolvable at this \(n\)</td>
+<td>Take the simplest</td>
+<td>Report the maximum as best (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-8-2">8.8.2</a>)</td>
+</tr>
+<tr>
+<td>One model family fails badly</td>
+<td>Wrong assumptions for this structure</td>
+<td>Try other families (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-8">9.8</a>)</td>
+<td>Tune it harder</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="s9-9-3">9.9.3 What goes wrong in production</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capacity tuned for the old data volume</strong></td>
+<td>The model was right for 10k rows and is now underfitting 10M</td>
+<td>9.3</td>
+</tr>
+<tr>
+<td><strong>Regularization strength never revisited</strong></td>
+<td><code>alpha</code> was chosen once, two years ago</td>
+<td>9.6</td>
+</tr>
+<tr>
+<td><strong>Early stopping iteration frozen</strong></td>
+<td>Retraining on more data stops at the old iteration count</td>
+<td>9.7</td>
+</tr>
+<tr>
+<td><strong>Overfitting to the validation set</strong></td>
+<td>Hundreds of experiments against one split; the split is now training data</td>
+<td>8.2, 23.8</td>
+</tr>
+<tr>
+<td><strong>A model that was never compared</strong></td>
+<td>The first family tried became the permanent choice</td>
+<td>9.8</td>
+</tr>
+<tr>
+<td><strong>Irreducible error mistaken for a model problem</strong></td>
+<td>Months spent chasing error that is noise in the label</td>
+<td>9.2</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row deserves the closing word. The irreducible term is real and often large: labels are noisy,
+outcomes are partly random, and the same input genuinely produces different outputs. A team that does not
+estimate that floor cannot tell "the model is bad" from "the problem is hard", and will keep spending on
+the wrong one.</p>
+<p>The cheapest estimate of the floor is the <strong>disagreement rate between two human labellers</strong>, or the
+variation in the outcome for rows with identical features. If two experts disagree 12% of the time, a
+model achieving 88% accuracy has reached the ceiling, and every further point of tuning is chasing noise.</p></div></article>
+<nav class="spn"><a href="/machine-learning/08-model-evaluation-and-validation/">← Model Evaluation and Validation</a><a href="/machine-learning/10-optimization-and-gradient-descent/">Optimization and Gradient Descent →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

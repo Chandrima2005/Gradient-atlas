@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Machine Learning Fundamentals – Machine Learning Chapter 1 | Gradient Atlas</title>
+<meta name="description" content="What machine learning is, how it differs from ordinary programming, and the vocabulary and workflow every later chapter assumes.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/01-machine-learning-fundamentals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Machine Learning Fundamentals – Machine Learning Chapter 1 | Gradient Atlas">
+<meta property="og:description" content="What machine learning is, how it differs from ordinary programming, and the vocabulary and workflow every later chapter assumes.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/01-machine-learning-fundamentals/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Machine Learning Fundamentals", "headline": "Machine Learning Fundamentals", "description": "What machine learning is, how it differs from ordinary programming, and the vocabulary and workflow every later chapter assumes.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/01-machine-learning-fundamentals/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT30M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Machine Learning Fundamentals", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/01-machine-learning-fundamentals/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 1</p>
+<h1><small>Machine Learning · Chapter 1</small>Machine Learning Fundamentals</h1>
+<p class="lead">What machine learning is, how it differs from ordinary programming, and the vocabulary and workflow every later chapter assumes.</p>
+<p class="cta"><a class="sbtn" href="/#ch1">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s1-1">1.1 What Machine Learning Is</a></li><li class="l3"><a href="#s1-2">1.2 Machine Learning versus Rule-Based Programming</a></li><li class="l3"><a href="#s1-3">1.3 Types of Machine Learning</a></li><li class="l3"><a href="#s1-4">1.4 Core Terminology</a></li><li class="l3"><a href="#s1-5">1.5 The End-to-End Machine Learning Workflow</a></li><li class="l3"><a href="#s1-6">1.6 When Machine Learning Is the Wrong Tool</a></li><li class="l3"><a href="#s1-7">1.7 Classical Machine Learning and the Deep Learning Boundary</a></li><li class="l3"><a href="#s1-8">1.8 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><h3 id="s1-1">1.1 What Machine Learning Is</h3>
+<p>Ordinary programming is the business of writing down a rule. You know the rule — <em>charge 18% tax</em>, <em>reject a
+password under 8 characters</em> — and your job is to express it precisely enough for a machine to follow.</p>
+<p>Machine learning starts from the opposite position: <strong>the rule exists but nobody can write it down.</strong> No one
+can articulate the exact function that turns a photograph into "cat", or a customer's account history into
+"will cancel next month". What we <em>can</em> produce is examples of the function's behaviour — thousands of
+photographs already labelled, thousands of customers who already did or didn't cancel. Machine learning is
+the set of techniques for recovering the rule from those examples.</p>
+<p>Tom Mitchell's 1997 definition is still the most precise one, and it is worth memorizing because it forces
+three separate questions to be answered before any code is written:</p>
+<blockquote>
+<p>A computer program is said to learn from experience <strong>E</strong> with respect to some class of tasks <strong>T</strong> and
+performance measure <strong>P</strong>, if its performance at tasks in T, as measured by P, improves with experience E.</p>
+</blockquote>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Task (T)</th>
+<th>Experience (E)</th>
+<th>Performance (P)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spam filtering</td>
+<td>Label an email spam or not</td>
+<td>A corpus of emails already marked by users</td>
+<td>Fraction correctly labelled, weighted by the cost of a false positive</td>
+</tr>
+<tr>
+<td>House pricing</td>
+<td>Predict a sale price</td>
+<td>Historical sales with their attributes</td>
+<td>Average error in currency units</td>
+</tr>
+<tr>
+<td>Customer churn</td>
+<td>Predict who cancels next month</td>
+<td>Past customers and whether they left</td>
+<td>Recall on the customers who actually left</td>
+</tr>
+</tbody>
+</table></div>
+<p>A project that cannot answer all three has not yet been specified. "Use ML on our data" names E and nothing
+else, which is why it never converges.</p></div>
+<div class="md"><p>The shift is easiest to see in code. Below, nobody writes down the relationship between <code>x</code> and <code>y</code> — the
+data is generated from a rule the model is never shown, and the model recovers it anyway.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="c1"># The &quot;rule&quot; - known to us, never shown to the model.</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">7.0</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>   <span class="c1"># true slope 3.0, true intercept 7.0</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;learned slope     </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># 3.005 -&gt; recovered from data alone</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;learned intercept </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">intercept_</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 7.008</span>
+</code></pre><div class="outs"><pre class="out-text">learned slope     3.005
+learned intercept 7.008</pre></div></div>
+<div class="md"><p><code>3.0</code> and <code>7.0</code> appear nowhere in the call to <code>fit()</code>. They were <em>inferred</em>. That inference is the whole
+subject — everything in the remaining 23 chapters is about doing it for rules more complicated than a
+straight line, and about knowing whether the recovered rule is any good.</p>
+<p><strong>The catch that defines the entire field.</strong> A rule inferred from examples is only useful if it also holds
+for examples it has never seen. Recovering a rule that fits the training data perfectly is trivial —
+memorize it. The hard part, called <strong>generalization</strong>, is recovering one that works on new data. <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/">Chapter 8</a>
+is about measuring generalization and <a class="xref" href="/machine-learning/09-bias-variance-and-regularization/">Chapter 9</a> is about what goes wrong with it; nearly every technique in
+this material exists because of it.</p></div>
+<div class="md"><h3 id="s1-2">1.2 Machine Learning versus Rule-Based Programming</h3>
+<p>Both approaches produce a function from input to output. They differ in who writes it.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Rule-based program</th>
+<th>Machine learning model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logic comes from</td>
+<td>A human, stated explicitly</td>
+<td>Data, inferred by an algorithm</td>
+</tr>
+<tr>
+<td>To change behaviour</td>
+<td>Edit the code</td>
+<td>Retrain on different data</td>
+</tr>
+<tr>
+<td>Behaviour on unforeseen input</td>
+<td>Undefined, or falls through to a default</td>
+<td>Produces <em>something</em> — plausible or not</td>
+</tr>
+<tr>
+<td>Correctness</td>
+<td>Provable by reading the code</td>
+<td>Estimated statistically, never proven</td>
+</tr>
+<tr>
+<td>Debugging</td>
+<td>Read the failing branch</td>
+<td>Inspect data, features and metrics (<a class="xref" href="/machine-learning/24-interpretability-and-deployment/">Chapter 24</a>)</td>
+</tr>
+<tr>
+<td>Cost of a new edge case</td>
+<td>One more <code>if</code></td>
+<td>Usually nothing — if similar examples exist</td>
+</tr>
+<tr>
+<td>Needs data</td>
+<td>No</td>
+<td>Yes, and its quality caps everything</td>
+</tr>
+</tbody>
+</table></div>
+<p>The trade is explicitness for coverage. A rule-based filter does exactly what it says and nothing else; a
+learned filter covers cases nobody enumerated, and occasionally does something inexplicable.</p></div>
+<div class="md"><p>The failure mode of rules is not that they are wrong — it is that they are <em>incomplete</em>. Below, a keyword
+rule catches the spam it was designed for and misses a message that no one thought to enumerate.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">rule_based_is_spam</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hand-written rule: three keywords a human thought of.&quot;&quot;&quot;</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;free&quot;</span><span class="p">,</span> <span class="s2">&quot;winner&quot;</span><span class="p">,</span> <span class="s2">&quot;prize&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">word</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">)</span>
+
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;You are a WINNER! Claim your prize&quot;</span><span class="p">,</span>       <span class="c1"># spam, and covered by the rule</span>
+    <span class="s2">&quot;Free trial, click here&quot;</span><span class="p">,</span>                     <span class="c1"># spam, and covered by the rule</span>
+    <span class="s2">&quot;Urgent: verify your account immediately&quot;</span><span class="p">,</span>  <span class="c1"># spam, but nobody listed these words</span>
+    <span class="s2">&quot;Are you free for a call tomorrow?&quot;</span><span class="p">,</span>         <span class="c1"># legitimate - but contains &quot;free&quot;</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rule_based_is_spam</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="si">!s:</span><span class="s2">&lt;6</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">True   You are a WINNER! Claim your prize
+True   Free trial, click here
+False  Urgent: verify your account immediately
+True   Are you free for a call tomorrow?</pre></div></div>
+<div class="md"><p>Two distinct failures in four messages: a miss (no listed keyword) and a false alarm (a listed keyword used
+innocently). Patching both means adding rules, which adds new edge cases, which adds more rules. A learned
+classifier is fitted on labelled examples instead, so "urgent + verify + account" becomes evidence without
+anyone deciding it should be — that is <a class="xref" href="/machine-learning/15-naive-bayes/">Chapter 15</a>'s text-classification example.</p>
+<p><strong>Common mistake — reaching for a model where a rule is correct and cheaper.</strong> If the logic is known,
+stable, and expressible in a few lines, write the few lines. A model trained to reproduce <code>age &gt;= 18</code> will
+be slower, occasionally wrong, and impossible to audit — and it will need a data pipeline, a training job
+and monitoring to keep doing something an <code>if</code> statement does exactly. Machine learning earns its
+complexity when the rule is unknown or too intricate to state, not merely when data happens to be
+available.</p></div>
+<div class="md"><h3 id="s1-3">1.3 Types of Machine Learning</h3>
+<p>The taxonomy is organized around one question: <strong>what does the training data contain besides the inputs?</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Training data</th>
+<th>What is learned</th>
+<th>Typical problems</th>
+<th>Covered in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Supervised</strong></td>
+<td>Inputs <code>X</code> <strong>and</strong> targets <code>y</code></td>
+<td>A mapping <code>X → y</code></td>
+<td>Price prediction, churn, spam, diagnosis</td>
+<td><a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–19</td>
+</tr>
+<tr>
+<td><strong>Unsupervised</strong></td>
+<td>Inputs <code>X</code> only</td>
+<td>Structure within <code>X</code></td>
+<td>Segmentation, anomaly detection, basket analysis</td>
+<td><a class="xref" href="/machine-learning/20-clustering/">Chapters 20</a>–21</td>
+</tr>
+<tr>
+<td><strong>Semi-supervised</strong></td>
+<td>A little labelled <code>X, y</code> plus a lot of unlabelled <code>X</code></td>
+<td>A mapping, using the unlabelled data to shape it</td>
+<td>Anything where labelling is expensive</td>
+<td>1.3.3</td>
+</tr>
+<tr>
+<td><strong>Self-supervised</strong></td>
+<td>Inputs only, with targets <em>derived</em> from them</td>
+<td>Representations, by predicting part of the input from the rest</td>
+<td>Language and vision pre-training</td>
+<td>Out of scope (<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-7">1.7</a>)</td>
+</tr>
+<tr>
+<td><strong>Reinforcement</strong></td>
+<td>No fixed dataset — an environment returning rewards</td>
+<td>A policy: which action to take in which state</td>
+<td>Game playing, control, robotics</td>
+<td>Out of scope (<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-3-4">1.3.4</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The boundary that matters most in practice is the first one, because it decides whether you can even measure
+success. With labels there is a right answer to score against (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/">Chapter 8</a>). Without them, evaluation is a
+genuinely open question — 20.8 covers why cluster quality metrics are so much weaker than a test-set score.</p></div>
+<div class="md"><h4 id="s1-3-1">1.3.1 Supervised learning: regression and classification</h4>
+<p>Supervised learning splits again on the <em>type of the target</em>, and this split decides the model, the loss
+function and every metric downstream.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Regression</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Target <code>y</code></td>
+<td>Continuous number</td>
+<td>One of a finite set of classes</td>
+</tr>
+<tr>
+<td>"How wrong" means</td>
+<td>A distance (<a class="xref" href="/machine-learning/11-linear-regression/">Chapter 11</a>)</td>
+<td>A mistake, possibly with unequal costs (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-5">8.5</a>)</td>
+</tr>
+<tr>
+<td>Example question</td>
+<td><em>How much</em> will this house sell for?</td>
+<td><em>Will</em> this customer cancel?</td>
+</tr>
+<tr>
+<td>Chapters</td>
+<td>11, 12</td>
+<td>13–16</td>
+</tr>
+</tbody>
+</table></div>
+<p>The distinction lives entirely in <code>y</code> — the same feature matrix <code>X</code> can serve either.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_regression</span><span class="p">,</span> <span class="n">make_classification</span>
+
+<span class="n">X_reg</span><span class="p">,</span> <span class="n">y_reg</span> <span class="o">=</span> <span class="n">make_regression</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+                               <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">X_clf</span><span class="p">,</span> <span class="n">y_clf</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                   <span class="n">n_redundant</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;regression     y dtype:&quot;</span><span class="p">,</span> <span class="n">y_reg</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;| first 3:&quot;</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;classification y dtype:&quot;</span><span class="p">,</span> <span class="n">y_clf</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;| unique:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_clf</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;both X shapes:&quot;</span><span class="p">,</span> <span class="n">X_reg</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">X_clf</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># identical - only y differs</span>
+</code></pre><div class="outs"><pre class="out-text">regression     y dtype: float64 | first 3: [ 12.8 -21.9  91.1]
+classification y dtype: int64 | unique: [0 1]
+both X shapes: (100, 3) (100, 3)</pre></div></div>
+<div class="md"><h4 id="s1-3-2">1.3.2 Unsupervised learning</h4>
+<p>There is no <code>y</code> at all. The algorithm is asked to describe the structure it finds, and there is no answer
+key to check it against.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+
+<span class="n">X_blob</span><span class="p">,</span> <span class="n">y_true</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">cluster_std</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                            <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="c1"># y_true exists only so we can check the result here; the model never receives it.</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X_blob</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;labels found:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>          <span class="c1"># [0 1 2]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;group sizes: &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>         <span class="c1"># ~50 each - the three real groups</span>
+</code></pre><div class="outs"><pre class="out-text">labels found: [0 1 2]
+group sizes:  [50 50 50]</pre></div></div>
+<div class="md"><p>Note what <code>fit_predict</code> returned: group <em>numbers</em>, not names. Cluster 0 is not "the high-value segment" —
+it is simply the first group the algorithm happened to number. Interpreting clusters is human work done
+after the fact, and cluster identities are not stable across runs unless the seed is fixed. 20.8 covers how
+to evaluate a clustering when there is nothing to compare it to.</p>
+<h4 id="s1-3-3">1.3.3 Semi-supervised learning</h4>
+<p>Labels are usually the expensive part: unlabelled data accumulates for free, while labelling it requires a
+person. Semi-supervised methods use a small labelled set together with a large unlabelled one — the
+unlabelled points reveal where the data is dense, which constrains where a sensible boundary can run.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.semi_supervised</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelfTrainingClassifier</span>
+
+<span class="n">y_semi</span> <span class="o">=</span> <span class="n">y_clf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">y_semi</span><span class="p">[</span><span class="mi">20</span><span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c1"># -1 is scikit-learn&#39;s marker for &quot;unlabelled&quot;: only 20 of 100 labels survive</span>
+
+<span class="n">supervised</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_clf</span><span class="p">[:</span><span class="mi">20</span><span class="p">],</span> <span class="n">y_clf</span><span class="p">[:</span><span class="mi">20</span><span class="p">])</span>       <span class="c1"># the 20 labels alone</span>
+<span class="n">semi</span> <span class="o">=</span> <span class="n">SelfTrainingClassifier</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">())</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_clf</span><span class="p">,</span> <span class="n">y_semi</span><span class="p">)</span>   <span class="c1"># 20 labels + 80 unlabelled</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;20 labels, supervised only : </span><span class="si">{</span><span class="n">supervised</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_clf</span><span class="p">,</span><span class="w"> </span><span class="n">y_clf</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;20 labels + 80 unlabelled  : </span><span class="si">{</span><span class="n">semi</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_clf</span><span class="p">,</span><span class="w"> </span><span class="n">y_clf</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">20 labels, supervised only : 0.870
+20 labels + 80 unlabelled  : 0.890</pre></div></div>
+<div class="md"><h4 id="s1-3-4">1.3.4 Reinforcement learning</h4>
+<p>An agent takes actions in an environment and receives rewards; it learns a <strong>policy</strong> — a mapping from
+state to action — that maximizes reward accumulated over time. There is no dataset in the sense used
+everywhere else in this material: the agent's own actions determine which data it ever sees, which is what
+makes the problem so different.</p>
+<p>It is named here for completeness and does not appear again. This material is about learning from a fixed
+dataset.</p></div>
+<div class="md"><h3 id="s1-4">1.4 Core Terminology</h3>
+<p>The same object goes by several names depending on which textbook, library or team is talking. This table
+is the vocabulary used consistently for the rest of the material; the notation table in <a class="xref" href="/#s25-3">§25.3</a> of the index
+gives the mathematical symbols.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Also called</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instance</strong></td>
+<td>sample, observation, record, row, example</td>
+<td>One thing being predicted about — one customer, one email</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>attribute, predictor, independent variable, column, covariate</td>
+<td>One measured property of an instance</td>
+</tr>
+<tr>
+<td><strong>Feature matrix <code>X</code></strong></td>
+<td>design matrix</td>
+<td>All instances × all features, shape <code>(n_samples, n_features)</code></td>
+</tr>
+<tr>
+<td><strong>Target <code>y</code></strong></td>
+<td>label, response, dependent variable, ground truth, outcome</td>
+<td>What the model predicts, shape <code>(n_samples,)</code></td>
+</tr>
+<tr>
+<td><strong>Prediction <code>ŷ</code></strong></td>
+<td>fitted value, output</td>
+<td>What the model actually produced for an instance</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td>estimator, hypothesis, learner</td>
+<td>The object that maps <code>X</code> to <code>ŷ</code> after fitting</td>
+</tr>
+<tr>
+<td><strong>Parameter</strong></td>
+<td>weight, coefficient</td>
+<td>A value <strong>learned</strong> from data during <code>fit()</code></td>
+</tr>
+<tr>
+<td><strong>Hyperparameter</strong></td>
+<td>setting, knob</td>
+<td>A value <strong>chosen</strong> before <code>fit()</code>, never learned from the training data</td>
+</tr>
+<tr>
+<td><strong>Training set</strong></td>
+<td>—</td>
+<td>The data the model fits on</td>
+</tr>
+<tr>
+<td><strong>Test set</strong></td>
+<td>hold-out set</td>
+<td>Data withheld entirely, used once to estimate real-world performance (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-2">8.2</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>scikit-learn enforces the <code>X</code> / <code>y</code> shape convention everywhere: <code>X</code> is always 2-D, <code>y</code> is always 1-D.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_iris</span>
+
+<span class="n">iris</span> <span class="o">=</span> <span class="n">load_iris</span><span class="p">()</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X shape:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># (150, 4) -&gt; 150 instances, 4 features</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;y shape:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># (150,)   -&gt; one target per instance</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;features:&quot;</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;classes: &quot;</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">target_names</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">X shape: (150, 4)
+y shape: (150,)
+features: [&#x27;sepal length (cm)&#x27;, &#x27;sepal width (cm)&#x27;, &#x27;petal length (cm)&#x27;, &#x27;petal width (cm)&#x27;]
+classes:  [&#x27;setosa&#x27; &#x27;versicolor&#x27; &#x27;virginica&#x27;]</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — confusing parameters with hyperparameters.</strong> Both are numbers attached to a model, and
+the words get used interchangeably in conversation, but they come from opposite directions: a
+hyperparameter is an input you supply, a parameter is an output the fitting produces. In scikit-learn the
+distinction is visible in the naming — attributes you set have plain names, and attributes learned during
+<code>fit()</code> end with a trailing underscore.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ridge</span>
+
+<span class="n">ridge</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>                        <span class="c1"># alpha: HYPERparameter, chosen by us</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;before fit, alpha =&quot;</span><span class="p">,</span> <span class="n">ridge</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;before fit, has coef_?&quot;</span><span class="p">,</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ridge</span><span class="p">,</span> <span class="s2">&quot;coef_&quot;</span><span class="p">))</span>   <span class="c1"># False - nothing learned yet</span>
+
+<span class="n">ridge</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;after fit, coef_ =&quot;</span><span class="p">,</span> <span class="n">ridge</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>   <span class="c1"># parameters, LEARNED from the data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;alpha is unchanged:&quot;</span><span class="p">,</span> <span class="n">ridge</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>             <span class="c1"># 2.5 - fitting never touches it</span>
+</code></pre><div class="outs"><pre class="out-text">before fit, alpha = 2.5
+before fit, has coef_? False
+after fit, coef_ = [27.   72.32 18.03]
+alpha is unchanged: 2.5</pre></div></div>
+<div class="md"><p>The practical consequence: parameters are found by fitting, hyperparameters are found by <em>searching</em> —
+fitting the model repeatedly under different settings and comparing validation scores. That search is
+<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/">Chapter 23</a>, and the reason it needs its own chapter is that doing it naively leaks the test set.</p></div>
+<div class="md"><h3 id="s1-5">1.5 The End-to-End Machine Learning Workflow</h3>
+<p>Every project traverses the same stages. The arrows point forward, but real projects loop backwards
+constantly — a disappointing evaluation usually sends you back to features or data, not to a different
+algorithm.</p>
+<pre class="fence" data-lang="text"><code>    business question
+            |
+            v
+   [1] frame the problem  -----------------&gt; what is T, E and P? (1.1)
+            |
+            v
+   [2] get and explore data  ---------------&gt; Chapter 4
+            |
+            v
+   [3] SPLIT  ------------------------------&gt; 5.1 - before anything is learned from the data
+            |
+            v
+   [4] clean and preprocess  ---------------&gt; Chapter 5    &lt;--+
+            |                                                  |
+            v                                                  |
+   [5] engineer and select features  -------&gt; Chapters 6, 7    | loop until the
+            |                                                  | evaluation is
+            v                                                  | good enough
+   [6] choose and train a model  -----------&gt; Chapters 11-21   |
+            |                                                  |
+            v                                                  |
+   [7] evaluate and tune  ------------------&gt; Chapters 8, 23 --+
+            |
+            v
+   [8] interpret, deploy, monitor  ---------&gt; Chapter 24
+</code></pre>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>The characteristic failure</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frame</td>
+<td>Optimizing a metric that does not match the business cost</td>
+<td>8.5</td>
+</tr>
+<tr>
+<td>Explore</td>
+<td>Not noticing that a column encodes the answer</td>
+<td>4.8, 22.7</td>
+</tr>
+<tr>
+<td>Split</td>
+<td>Splitting after preprocessing, so the test set influenced training</td>
+<td>5.1, 22.7</td>
+</tr>
+<tr>
+<td>Preprocess</td>
+<td>Fitting a scaler on all the data instead of just the training data</td>
+<td>5.5, 6.8</td>
+</tr>
+<tr>
+<td>Engineer</td>
+<td>Building a feature that would not exist at prediction time</td>
+<td>22.7</td>
+</tr>
+<tr>
+<td>Train</td>
+<td>Choosing the algorithm first and the problem second</td>
+<td>9.8</td>
+</tr>
+<tr>
+<td>Evaluate</td>
+<td>Reporting the best of many scores as if it were an estimate</td>
+<td>8.8, 23.8</td>
+</tr>
+<tr>
+<td>Deploy</td>
+<td>Assuming next year's data looks like last year's</td>
+<td>24.9</td>
+</tr>
+</tbody>
+</table></div>
+<p>Note where the loop does <em>not</em> extend: back to step 3. The test set is touched once, at the end. Every time
+it informs a decision it stops being an estimate of unseen performance.</p></div>
+<div class="md"><p>The whole workflow, at its smallest, is about fifteen lines. Every later chapter is an expansion of one of
+them.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="c1"># [2] get data</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_iris</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># [3] split FIRST - the test set is now untouchable until the last line</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span>
+<span class="p">)</span>
+
+<span class="c1"># [4]+[6] preprocess and train, wired together so the scaler only ever sees training data</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">())</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># [7] evaluate, once</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train accuracy: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="w"> </span><span class="n">y_train</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 0.964</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test  accuracy: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_test</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># 0.921 -&gt; the only number that counts</span>
+</code></pre><div class="outs"><pre class="out-text">train accuracy: 0.964
+test  accuracy: 0.921</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — the stages are nothing like equal in cost.</strong> Steps 2 through 5, the data work, routinely
+consume the large majority of a project's time; step 6, choosing and training the model, is often an
+afternoon. This is the opposite of how the subject is usually taught, where algorithms get the attention and
+data preparation gets a footnote. The chapter allocation here reflects the real ratio: four chapters on data
+(4–7) before a single algorithm is fitted in anger, and three more (22–24) on the things that make a result
+trustworthy afterwards.</p></div>
+<div class="md"><h3 id="s1-6">1.6 When Machine Learning Is the Wrong Tool</h3>
+<p>Machine learning is a poor choice more often than its popularity suggests. The honest checklist:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Why it disqualifies ML</th>
+<th>Do this instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The rule is already known and stable</td>
+<td>A model can only approximate what an <code>if</code> states exactly</td>
+<td>Write the rule</td>
+</tr>
+<tr>
+<td>Too few examples</td>
+<td>Nothing to generalize from; the model fits noise (<a class="xref" href="/machine-learning/09-bias-variance-and-regularization/#s9-1">9.1</a>)</td>
+<td>Collect data, or use a heuristic</td>
+</tr>
+<tr>
+<td>Labels do not exist and cannot be obtained</td>
+<td>No supervised signal</td>
+<td>Unsupervised framing (Ch. 20), or a rule</td>
+</tr>
+<tr>
+<td>Every decision must be explained exactly</td>
+<td>Most accurate models are not fully auditable (<a class="xref" href="/machine-learning/24-interpretability-and-deployment/#s24-1">24.1</a>)</td>
+<td>A linear model, a shallow tree, or rules</td>
+</tr>
+<tr>
+<td>Errors are catastrophic and unrecoverable</td>
+<td>Models are wrong at some rate, always</td>
+<td>Rules, with a human in the loop</td>
+</tr>
+<tr>
+<td>The inputs at prediction time differ from training</td>
+<td>The learned mapping does not apply (<a class="xref" href="/machine-learning/24-interpretability-and-deployment/#s24-9">24.9</a>)</td>
+<td>Fix the data pipeline first</td>
+</tr>
+<tr>
+<td>A constant guess is nearly as good</td>
+<td>The features carry no usable signal</td>
+<td>Ship the constant; revisit the features</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row is the one that catches real projects, and it is cheap to test: fit a model that ignores the
+features entirely and see whether the real model beats it. <code>DummyRegressor</code> and <code>DummyClassifier</code> exist for
+exactly this.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyRegressor</span>
+
+<span class="c1"># 40 samples, 30 features, and NO relationship between them - pure noise.</span>
+<span class="n">noise_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>   <span class="c1"># its own generator, so this cell is self-contained</span>
+<span class="n">X_noise</span> <span class="o">=</span> <span class="n">noise_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
+<span class="n">y_noise</span> <span class="o">=</span> <span class="n">noise_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+
+<span class="n">Xn_tr</span><span class="p">,</span> <span class="n">Xn_te</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">,</span> <span class="n">yn_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_noise</span><span class="p">,</span> <span class="n">y_noise</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">real</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">)</span>
+<span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyRegressor</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">,</span> <span class="n">yn_tr</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;linear regression, TRAIN R^2: </span><span class="si">{</span><span class="n">real</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xn_tr</span><span class="p">,</span><span class="w"> </span><span class="n">yn_tr</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 1.000   - memorized exactly</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;linear regression, TEST  R^2: </span><span class="si">{</span><span class="n">real</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xn_te</span><span class="p">,</span><span class="w"> </span><span class="n">yn_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># -38.284 - catastrophic</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;predict-the-mean,  TEST  R^2: </span><span class="si">{</span><span class="n">dummy</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xn_te</span><span class="p">,</span><span class="w"> </span><span class="n">yn_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># -0.052  - essentially baseline</span>
+</code></pre><div class="outs"><pre class="out-text">linear regression, TRAIN R^2: 1.000
+linear regression, TEST  R^2: -38.284
+predict-the-mean,  TEST  R^2: -0.052</pre></div></div>
+<div class="md"><p>The training score is perfect and the model is worthless: with 30 features and only 28 training rows there
+is more than enough freedom to fit noise exactly. Predicting the mean — a model with no features at all —
+scores <code>-0.05</code> on unseen data against the fitted model's <code>-38.3</code>.</p>
+<p>A negative R² is not a rounding artefact. R² is defined against the constant predictor: 0 means "no better
+than predicting the target's mean", so anything below 0 is <em>worse than a constant</em>. Even the dummy scores
+slightly below 0 here, because it predicts the mean of the <strong>training</strong> set, which is not exactly the mean
+of the test set. <code>-64.7</code> is in a different category entirely.</p>
+<p><strong>This is why 8.8 insists on a baseline.</strong> A score with nothing to compare it to is uninterpretable. "87%
+accuracy" is excellent if the baseline is 50% and embarrassing if 92% of the rows belong to one class —
+which is exactly the situation <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/">Chapter 22</a> is about.</p></div>
+<div class="md"><h3 id="s1-7">1.7 Classical Machine Learning and the Deep Learning Boundary</h3>
+<p>"Classical" (or "traditional", or "shallow") machine learning means everything in this material: linear
+models, distance-based models, probabilistic models, kernel methods, trees and ensembles of trees. Deep
+learning means neural networks with many layers, trained end to end by backpropagation.</p>
+<p>They are not competitors so much as tools for different data shapes:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Classical ML</th>
+<th>Deep learning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data size that works</td>
+<td>Hundreds to a few million rows</td>
+<td>Typically tens of thousands upward, ideally far more</td>
+</tr>
+<tr>
+<td>Features</td>
+<td>Engineered by a human (<a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a>)</td>
+<td>Learned by the network from raw input</td>
+</tr>
+<tr>
+<td>Data it suits</td>
+<td>Tabular, mixed types, structured</td>
+<td>Images, audio, text, video — high-dimensional raw signal</td>
+</tr>
+<tr>
+<td>Compute to train</td>
+<td>Seconds to minutes, on a laptop</td>
+<td>Hours to weeks, usually on GPUs</td>
+</tr>
+<tr>
+<td>Interpretability</td>
+<td>Ranges from complete to workable (<a class="xref" href="/machine-learning/24-interpretability-and-deployment/">Chapter 24</a>)</td>
+<td>Hard, and an active research area</td>
+</tr>
+<tr>
+<td>Small-data behaviour</td>
+<td>Degrades gracefully</td>
+<td>Overfits badly without heavy regularization or pre-training</td>
+</tr>
+<tr>
+<td>Tabular performance</td>
+<td><strong>Usually still the best choice</strong></td>
+<td>Rarely beats gradient boosting on tabular data</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row is the reason this material exists. For the structured, tabular problems that dominate
+commercial data work — churn, credit risk, demand forecasting, fraud, pricing — gradient-boosted trees
+(<a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/">Chapter 19</a>) remain the strongest default, and a well-specified linear model is often close behind at a
+fraction of the complexity. Deep learning's decisive wins are in perception: vision, speech and language,
+where the raw input has no natural tabular form and the useful features are exactly what nobody can specify
+by hand.</p>
+<p><strong>What this material excludes, explicitly:</strong> neural networks and backpropagation, convolutional and
+recurrent architectures, transformers and language models, embeddings, GPU training, and every framework
+built for them. Where a deep-learning method is genuinely the right answer, the text says so and stops
+rather than pretending a classical model is better.</p>
+<p><strong>What transfers if you go on to deep learning:</strong> almost all of <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapters 4</a>–10. Train/test discipline, cross-
+validation, the bias–variance framing, regularization, gradient descent, loss functions, evaluation metrics
+and leakage are not classical-ML concepts — they are machine-learning concepts. The architecture changes;
+the surrounding discipline does not.</p></div>
+<div class="md"><h3 id="s1-8">1.8 In Practice</h3>
+<p>Every chapter ends here: the chapter's material used the way it would be used at work. This chapter has no
+algorithm to apply yet, so the practical skill it teaches is the one that comes before any algorithm —
+<strong>turning a business request into a specified machine learning problem.</strong> Getting this wrong is the most
+expensive mistake in the workflow, because nothing downstream can correct it.</p>
+<h4 id="s1-8-1">1.8.1 Where this shows up: framing a real request</h4>
+<p>The request, as it actually arrives:</p>
+<blockquote>
+<p><em>"Our subscription business is losing customers. Can you use machine learning to fix churn?"</em></p>
+</blockquote>
+<p>That sentence specifies nothing. Work it into <a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-1">1.1</a>'s three answers before writing any code.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">customers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/customers.csv&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>                       <span class="c1"># (1012, 14)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">(1012, 14)
+[&#x27;customer_id&#x27;, &#x27;signup_date&#x27;, &#x27;age&#x27;, &#x27;gender&#x27;, &#x27;city&#x27;, &#x27;plan&#x27;, &#x27;tenure_months&#x27;, &#x27;monthly_charges&#x27;, &#x27;total_charges&#x27;, &#x27;support_tickets&#x27;, &#x27;last_login_days&#x27;, &#x27;satisfaction_score&#x27;, &#x27;churned&#x27;, &#x27;cancellation_reason&#x27;]</pre></div></div>
+<div class="md"><p><strong>Question 1 — what is an instance?</strong> One row here is one customer. That is a choice, not a fact: the same
+business could model one <em>customer-month</em>, which would give far more rows and a "will they leave in the
+next 30 days" target instead of a "have they left" one. Decide it explicitly; the label definition depends
+on it.</p>
+<p><strong>Question 2 — what is the target (T)?</strong> <code>churned</code> already exists, so this is supervised classification
+(<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-3-1">1.3.1</a>). Check its balance immediately, because the balance decides which metric is honest.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">counts</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;churn rate: </span><span class="si">{</span><span class="n">customers</span><span class="p">[</span><span class="s1">&#39;churned&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 14.0% -&gt; imbalanced</span>
+</code></pre><div class="outs"><pre class="out-text">churned
+0    870
+1    142
+Name: count, dtype: int64
+churn rate: 14.0%</pre></div></div>
+<div class="md"><p><strong>Question 3 — what is the performance measure (P)?</strong> Now the imbalance bites. A model that predicts "never
+churns" for every single customer is right 86% of the time and useless — it identifies nobody to intervene
+with. Accuracy is the wrong measure here, which is exactly <a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-6">1.6</a>'s baseline argument arriving in a real
+problem.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">recall_score</span>
+
+<span class="n">y_churn</span> <span class="o">=</span> <span class="n">customers</span><span class="p">[</span><span class="s2">&quot;churned&quot;</span><span class="p">]</span>
+<span class="n">never_churns</span> <span class="o">=</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">customers</span><span class="p">[[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]],</span> <span class="n">y_churn</span><span class="p">)</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">never_churns</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">customers</span><span class="p">[[</span><span class="s2">&quot;tenure_months&quot;</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;accuracy of &#39;nobody ever churns&#39;: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_churn</span><span class="p">,</span><span class="w"> </span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 0.860 - looks fine</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;recall   of &#39;nobody ever churns&#39;: </span><span class="si">{</span><span class="n">recall_score</span><span class="p">(</span><span class="n">y_churn</span><span class="p">,</span><span class="w"> </span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># 0.000 - finds no one</span>
+</code></pre><div class="outs"><pre class="out-text">accuracy of &#x27;nobody ever churns&#x27;: 0.860
+recall   of &#x27;nobody ever churns&#x27;: 0.000</pre></div></div>
+<div class="md"><p>The business cares about the second number: of the customers who were going to leave, how many did we
+identify in time to do something about it? That makes <strong>recall on the churning class</strong> the starting metric,
+traded against how many retention offers the company can afford to send to people who were never going to
+leave. 8.5 makes that trade precise and <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-2">22.2</a> returns to this exact table.</p>
+<p><strong>Question 4 — what is the experience (E), and is any of it cheating?</strong> This is where framing most often
+fails silently. A column can be perfectly predictive and completely useless.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># cancellation_reason is only ever populated for customers who already left.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">customers</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;churned&quot;</span><span class="p">)[</span><span class="s2">&quot;cancellation_reason&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+</code></pre><div class="outs"><pre class="out-text">churned
+0    0.0
+1    1.0
+Name: cancellation_reason, dtype: float64</pre></div></div>
+<div class="md"><p><code>cancellation_reason</code> is filled for 100% of churners and 0% of everyone else. A model given this column
+scores near-perfectly and predicts nothing: the reason a customer cancelled is recorded <em>because</em> they
+cancelled, so at prediction time — when you are trying to find customers who have not left yet — the column
+is empty for everyone. This is <strong>target leakage</strong>, and it is the single most common cause of a model that
+looks excellent in a notebook and does nothing in production. 22.7 is the full taxonomy.</p>
+<p>The same question has to be asked of every column: <em>would this value be known, in this form, at the moment
+the prediction is needed?</em> <code>total_charges</code> is borderline — it accumulates over a customer's life, so using
+its final value for a churned customer bakes in how long they lasted.</p>
+<p><strong>The framing, written down.</strong> All four answers together:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instance</td>
+<td>One customer</td>
+</tr>
+<tr>
+<td>Task (T)</td>
+<td>Binary classification: will this customer churn?</td>
+</tr>
+<tr>
+<td>Experience (E)</td>
+<td>Historical customers, <strong>excluding</strong> <code>cancellation_reason</code> and any column not known at prediction time</td>
+</tr>
+<tr>
+<td>Performance (P)</td>
+<td>Recall on churners, at a false-positive rate the retention budget can absorb</td>
+</tr>
+<tr>
+<td>Baseline to beat</td>
+<td>"Nobody churns" — 86.0% accuracy, 0.0% recall</td>
+</tr>
+</tbody>
+</table></div>
+<p>Five lines, no modelling. A project that starts here converges; one that starts at "which algorithm should
+we use" does not.</p>
+<h4 id="s1-8-2">1.8.2 When to reach for machine learning — and when not to</h4>
+<p>1.6 listed the disqualifying conditions. This is the complementary decision: given that ML <em>is</em>
+appropriate, which framing does the problem take?</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>The situation</th>
+<th>Framing</th>
+<th>Chapters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Labelled examples of the exact outcome exist</td>
+<td>Supervised — classification if the target is a category, regression if it is a number</td>
+<td>11–19</td>
+</tr>
+<tr>
+<td>The outcome is a number but only its <em>rank</em> matters</td>
+<td>Still regression; evaluate on rank, not error</td>
+<td>8.4</td>
+</tr>
+<tr>
+<td>No labels, and the question is "what groups exist?"</td>
+<td>Clustering</td>
+<td>20</td>
+</tr>
+<tr>
+<td>No labels, and the question is "what is unusual?"</td>
+<td>Anomaly detection</td>
+<td>21</td>
+</tr>
+<tr>
+<td>No labels, and the question is "what goes together?"</td>
+<td>Association rules</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Labels exist but are scarce and expensive</td>
+<td>Semi-supervised, or label a stratified sample first</td>
+<td>1.3.3</td>
+</tr>
+<tr>
+<td>Labels exist but are wrong or inconsistent</td>
+<td><strong>Stop.</strong> Fix the labels — no algorithm recovers from a corrupt target</td>
+<td>—</td>
+</tr>
+<tr>
+<td>The outcome depends on actions the system itself takes</td>
+<td>Reinforcement learning — out of scope here</td>
+<td>1.3.4</td>
+</tr>
+<tr>
+<td>The decision must be fully explainable to a regulator</td>
+<td>Supervised, restricted to interpretable models</td>
+<td>24.1–24.2</td>
+</tr>
+</tbody>
+</table></div>
+<p>The seventh row is the one worth internalizing. Every other problem in this table is solvable with the
+material that follows; that one is not solvable at all, and recognizing it early saves months.</p>
+<h4 id="s1-8-3">1.8.3 What goes wrong after deployment</h4>
+<p>The failures that a good notebook does not catch, because they happen later:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Covered in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The metric did not match the business cost</td>
+<td>Excellent scores, no measurable effect on revenue</td>
+<td>8.5, 8.8</td>
+</tr>
+<tr>
+<td>A feature was not available at prediction time</td>
+<td>Great offline scores, the production pipeline cannot even populate the input</td>
+<td>22.7</td>
+</tr>
+<tr>
+<td>The label meant something different than assumed</td>
+<td>"Churn" in the training data meant "closed account"; the business meant "stopped paying"</td>
+<td>1.8.1</td>
+</tr>
+<tr>
+<td>The world moved</td>
+<td>Accuracy decays quietly over months as customer behaviour shifts</td>
+<td>24.9</td>
+</tr>
+<tr>
+<td>The model changed the thing it predicts</td>
+<td>Retention offers sent to predicted churners change who churns; the next training set is contaminated by the model's own effects</td>
+<td>24.9</td>
+</tr>
+<tr>
+<td>Nobody is watching</td>
+<td>The model fails silently and keeps returning confident predictions</td>
+<td>24.9</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last row is the difference between a model that is deployed and a model that is <em>in production</em>. A
+prediction service that has stopped being correct does not raise an exception — it keeps answering. What to
+monitor, and what to do when the monitors fire, is 24.9.</p></div></article>
+<nav class="spn"><span></span><a href="/machine-learning/02-mathematical-foundations/">Mathematical Foundations →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

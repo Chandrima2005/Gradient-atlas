@@ -1,0 +1,36 @@
+/* the static pages written by tools/build_seo.py: roadmap, course and chapter pages */
+.static{min-height:100vh;display:flex;flex-direction:column}
+.sbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:12px 24px;background:var(--panel);border-bottom:1px solid var(--line)}
+.sbrand{display:flex;flex-direction:column;line-height:1.15;color:var(--ink);text-decoration:none;font-family:var(--f-display)}
+.sbrand b{font-size:18px}
+.sbrand small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.sbar nav{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;font-family:var(--f-mono);font-size:13px}
+.sbar nav a{color:var(--ink-2);text-decoration:none}
+.sbar nav a:hover{color:var(--accent)}
+.sdoc{flex:1;width:100%;max-width:860px;margin:0 auto;padding:32px 16px 64px;box-sizing:border-box}
+.sdoc a{color:var(--accent)}
+.sdoc h1{font-family:var(--f-display);font-size:clamp(28px,5vw,42px);line-height:1.15;margin:8px 0 16px}
+.sdoc h1 small{display:block;font-family:var(--f-mono);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.sdoc>h2{font-family:var(--f-display);margin:36px 0 12px}
+.crumb{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.crumb a{color:var(--muted)}
+.lead{font-size:18px;color:var(--ink-2)}
+.cta{margin:20px 0 28px}
+.sbtn{display:inline-block;padding:10px 18px;border-radius:8px;background:var(--accent);color:var(--accent-ink)!important;text-decoration:none;font-family:var(--f-mono);font-size:14px;font-weight:600}
+.stagelist,.chlist{padding-left:22px}
+.stagelist li{margin:0 0 20px}
+.stagelist h2{font-family:var(--f-display);font-size:20px;margin:0 0 4px}
+.stagelist p{margin:4px 0}
+.soon{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.chlist li{margin:0 0 12px}
+.chlist li a{font-weight:600}
+.chlist li span{display:block;color:var(--ink-2);font-size:15px}
+.stoc{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px 20px;margin:0 0 32px}
+.stoc ol{list-style:none;padding:0;margin:0;columns:2 260px;font-size:14px}
+.stoc li{break-inside:avoid;margin:3px 0}
+.stoc a{color:var(--ink-2);text-decoration:none}
+.stoc a:hover{color:var(--accent)}
+.sdoc .body{overflow-wrap:anywhere}
+.sdoc .body pre{overflow-x:auto}
+.spn{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:14px}
+.sfoot{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;padding:20px 24px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}

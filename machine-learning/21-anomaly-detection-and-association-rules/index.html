@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Anomaly Detection and Association Rules – Machine Learning Chapter 21 | Gradient Atlas</title>
+<meta name="description" content="Two unsupervised searches for rare joint events - which rows do not belong, and which items occur together more than chance allows - and the ways both…">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/21-anomaly-detection-and-association-rules/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Anomaly Detection and Association Rules – Machine Learning Chapter 21 | Gradient Atlas">
+<meta property="og:description" content="Two unsupervised searches for rare joint events - which rows do not belong, and which items occur together more than chance allows - and the ways both…">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/21-anomaly-detection-and-association-rules/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Anomaly Detection and Association Rules", "headline": "Anomaly Detection and Association Rules", "description": "Two unsupervised searches for rare joint events - which rows do not belong, and which items occur together more than chance allows - and the ways both…", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/21-anomaly-detection-and-association-rules/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT42M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Anomaly Detection and Association Rules", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/21-anomaly-detection-and-association-rules/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 21</p>
+<h1><small>Machine Learning · Chapter 21</small>Anomaly Detection and Association Rules</h1>
+<p class="lead">Two unsupervised searches for rare joint events - which rows do not belong, and which items occur together more than chance allows - and the ways both mislead.</p>
+<p class="cta"><a class="sbtn" href="/#ch21">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s21-1">21.1 What Counts as an Anomaly</a></li><li class="l3"><a href="#s21-2">21.2 Statistical Detection</a></li><li class="l3"><a href="#s21-3">21.3 Isolation Forest</a></li><li class="l3"><a href="#s21-4">21.4 One-Class SVM and Local Outlier Factor</a></li><li class="l3"><a href="#s21-5">21.5 Evaluating a Detector</a></li><li class="l3"><a href="#s21-6">21.6 Association Rule Mining: the Setup</a></li><li class="l3"><a href="#s21-7">21.7 Support, Confidence, Lift and Conviction</a></li><li class="l3"><a href="#s21-8">21.8 Apriori and FP-Growth</a></li><li class="l3"><a href="#s21-9">21.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Two subjects share this chapter because they share a shape: both look for <strong>rare joint events</strong> in data
+with no labels, and both are unusually easy to fool yourself with.</p>
+<p>Anomaly detection (21.1–21.5) asks <em>which rows do not belong</em>. Association rule mining (21.6–21.8) asks
+<em>which items occur together more than chance allows</em>. In both, the interesting finding is by construction
+rare — and rarity is exactly the condition under which a number computed from a handful of observations
+looks impressive and means nothing.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">23 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">IsolationForest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneClassSVM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalOutlierFactor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.covariance</span><span class="w"> </span><span class="kn">import</span> <span class="n">EllipticEnvelope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">average_precision_score</span><span class="p">,</span>
+                             <span class="n">precision_recall_curve</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">)</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.dpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ready&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">ready</pre></div></div>
+<div class="md"><h3 id="s21-1">21.1 What Counts as an Anomaly</h3>
+<p>"Anomaly" is not one thing, and the three kinds need different detectors.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Definition</th>
+<th>Example</th>
+<th>Detectable by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Point</strong></td>
+<td>A single row is extreme on its own</td>
+<td>A $40,000 grocery transaction</td>
+<td>Everything in this chapter</td>
+</tr>
+<tr>
+<td><strong>Contextual</strong></td>
+<td>Normal in general, abnormal <em>in its context</em></td>
+<td>30 °C — in January, in Oslo</td>
+<td>Models that see the context feature</td>
+</tr>
+<tr>
+<td><strong>Collective</strong></td>
+<td>Each point is fine; the <strong>sequence</strong> is not</td>
+<td>200 small transfers in an hour</td>
+<td>Sequence/aggregate models, not row-wise ones</td>
+</tr>
+</tbody>
+</table></div>
+<p>A second distinction decides which algorithm is even applicable:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Training data</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outlier detection</strong></td>
+<td>Contaminated — anomalies are already in it</td>
+<td>Fit on everything, flag the odd rows (<code>IsolationForest</code>, <code>LocalOutlierFactor</code>)</td>
+</tr>
+<tr>
+<td><strong>Novelty detection</strong></td>
+<td><strong>Clean</strong> — guaranteed normal</td>
+<td>Learn the boundary of normal, flag departures (<code>OneClassSVM</code>, LOF with <code>novelty=True</code>)</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">make_anomaly_data</span><span class="p">(</span><span class="n">n_normal</span><span class="o">=</span><span class="mi">480</span><span class="p">,</span> <span class="n">n_anomalies</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two dense normal clusters plus scattered point anomalies.&quot;&quot;&quot;</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">gen</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.7</span><span class="p">,</span> <span class="p">(</span><span class="n">n_normal</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+                        <span class="n">gen</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">0.7</span><span class="p">,</span> <span class="p">(</span><span class="n">n_normal</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))])</span>
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="p">(</span><span class="n">n_anomalies</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">normal</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_normal</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_anomalies</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># 1 = anomaly</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+
+<span class="n">X_out</span><span class="p">,</span> <span class="n">y_out</span> <span class="o">=</span> <span class="n">make_anomaly_data</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows, </span><span class="si">{</span><span class="n">y_out</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> anomalies (</span><span class="si">{</span><span class="n">y_out</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;that 4</span><span class="si">% r</span><span class="s2">ate is already generous - fraud and equipment failure run far below it (22.1)&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">500 rows, 20 anomalies (4.0%)
+that 4% rate is already generous - fraud and equipment failure run far below it (22.1)</pre></div></div>
+<div class="md"><p><strong>Contextual anomalies are the ones that get missed</strong>, because a row-wise detector that never sees the
+context column cannot possibly find them.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">months</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">seasonal_mean</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">months</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">12</span><span class="p">)</span>     <span class="c1"># summer warm, winter cold</span>
+<span class="n">temps</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">seasonal_mean</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+
+<span class="n">temps</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">months</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="mf">26.0</span><span class="p">,</span> <span class="mi">0</span>          <span class="c1"># 26 C in January: absurd, but not extreme overall</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the planted anomaly: </span><span class="si">{</span><span class="n">temps</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> C in month </span><span class="si">{</span><span class="n">months</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">temps</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">-</span> <span class="n">temps</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">temps</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">global z-score          : </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;6.2f</span><span class="si">}</span><span class="s2">   -&gt; not flagged (|z| &lt; 3)&quot;</span><span class="p">)</span>
+
+<span class="n">in_month</span> <span class="o">=</span> <span class="n">temps</span><span class="p">[</span><span class="n">months</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_ctx</span> <span class="o">=</span> <span class="p">(</span><span class="n">temps</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">-</span> <span class="n">in_month</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">in_month</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;z-score within month 0  : </span><span class="si">{</span><span class="n">z_ctx</span><span class="si">:</span><span class="s2">&gt;6.2f</span><span class="si">}</span><span class="s2">   -&gt; flagged&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">the planted anomaly: 26.0 C in month 0
+
+global z-score          :   1.44   -&gt; not flagged (|z| &lt; 3)
+z-score within month 0  :   4.35   -&gt; flagged</pre></div></div>
+<div class="md"><p>The same value, the same detector, two different answers — the only thing that changed is whether the model
+was allowed to condition on the month. <strong>A contextual anomaly is a modelling decision, not an algorithm
+choice</strong>: either the context is in the features or the anomaly is invisible.</p></div>
+<div class="md"><h3 id="s21-2">21.2 Statistical Detection</h3>
+<p>The oldest methods, and still the right first try when the data is low-dimensional and roughly
+well-behaved. 5.3 introduced the first two as <em>cleaning</em> tools; here they are the detector itself.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Flags</th>
+<th>Assumes</th>
+<th>Breaks when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>z-score</strong></td>
+<td>\(\lvert z \rvert &gt; 3\)</td>
+<td>Roughly normal, one feature at a time</td>
+<td>Skewed data; the outlier inflates \(\sigma\) (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-3">5.3</a>)</td>
+</tr>
+<tr>
+<td><strong>Modified z-score</strong></td>
+<td>\(\lvert 0.6745(x - \tilde{x}) / \text{MAD} \rvert &gt; 3.5\)</td>
+<td>A symmetric distribution</td>
+<td>Heavily skewed data</td>
+</tr>
+<tr>
+<td><strong>IQR</strong></td>
+<td>Outside \(Q_1 - 1.5\,\text{IQR}\), \(Q_3 + 1.5\,\text{IQR}\)</td>
+<td>Nothing much — it is rank-based</td>
+<td>Multimodal data</td>
+</tr>
+<tr>
+<td><strong>Mahalanobis</strong></td>
+<td>\(d_M^2\) above a \(\chi^2\) quantile</td>
+<td><strong>Multivariate</strong> normal</td>
+<td>Non-elliptical clusters; \(p\) near \(n\)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Only the last one looks at features jointly, and that difference is the whole point.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># A point can be unremarkable on EVERY feature and still be a clear joint anomaly.</span>
+<span class="n">mean</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">cov</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>                                   <span class="c1"># strongly correlated</span>
+<span class="n">X_corr</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">X_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">X_corr</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">]])</span>                      <span class="c1"># off the correlation axis</span>
+
+<span class="n">point</span> <span class="o">=</span> <span class="n">X_corr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="s2">&quot;feature 0&quot;</span><span class="p">,</span> <span class="s2">&quot;feature 1&quot;</span><span class="p">)):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">X_corr</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">X_corr</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: value </span><span class="si">{</span><span class="n">point</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;5.1f</span><span class="si">}</span><span class="s2">   z = </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;5.2f</span><span class="si">}</span><span class="s2">   flagged by |z|&gt;3: </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">feature 0: value   2.2   z =  2.10   flagged by |z|&gt;3: False
+feature 1: value  -2.2   z = -2.27   flagged by |z|&gt;3: False</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">mahalanobis_sq</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Squared Mahalanobis distance: (x-mu)^T S^-1 (x-mu) - Euclidean distance</span>
+<span class="sd">    measured in units of the data&#39;s own spread, along each direction.&quot;&quot;&quot;</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">mean</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cov</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">mean</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,jk,ik-&gt;i&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cov</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">chi2</span>
+
+<span class="n">d2</span> <span class="o">=</span> <span class="n">mahalanobis_sq</span><span class="p">(</span><span class="n">X_corr</span><span class="p">)</span>
+<span class="n">threshold</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>                               <span class="c1"># 99th percentile of chi-sq with p dof</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mahalanobis d^2 of the planted point : </span><span class="si">{</span><span class="n">d2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;chi-square threshold (p=0.01, df=2)  : </span><span class="si">{</span><span class="n">threshold</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;flagged: </span><span class="si">{</span><span class="n">d2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">threshold</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">rows flagged in total: </span><span class="si">{</span><span class="p">(</span><span class="n">d2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_corr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">Mahalanobis d^2 of the planted point :  125.48
+chi-square threshold (p=0.01, df=2)  :    9.21
+flagged: True
+
+rows flagged in total: 2 of 401</pre></div></div>
+<div class="md"><p>Both marginal z-scores are around 2 — unremarkable — while the joint distance is enormous. <strong>The anomaly
+is not in either feature; it is in the relationship between them</strong>, and no amount of per-column checking
+will find it.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">flagged</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_corr</span><span class="p">[</span><span class="o">~</span><span class="n">flagged</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_corr</span><span class="p">[</span><span class="o">~</span><span class="n">flagged</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_corr</span><span class="p">[</span><span class="n">flagged</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_corr</span><span class="p">[</span><span class="n">flagged</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;flagged&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">point</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;planted&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;feature 0&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;feature 1&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;The planted point is ordinary on each axis, far off the joint ellipse&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c21_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — computing the mean and covariance from contaminated data.</strong> The anomalies sit in the
+very sample used to define "normal", so they inflate the covariance and, having widened the ellipse, fall
+inside it. This is called <strong>masking</strong>, and it is why robust estimators exist.</p></div>
+<div class="md"><p>One anomaly caught out of sixty, against all sixty for the robust fit — and the reason is in the last two
+lines. The contaminated covariance has a determinant some twenty times larger: the outlier blob stretched
+the estimate of "normal" until it covered the outlier blob. The <strong>minimum covariance determinant</strong>
+estimator behind <code>EllipticEnvelope</code> fits on the tightest subset of the data instead, so the anomalies never
+enter the definition they are being tested against.</p>
+<p>The general principle outlives Mahalanobis distance: <strong>anything that learns "normal" from contaminated data
+learns the contamination as normal.</strong> It returns in <a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-9-3">21.9.3</a> as a production failure, where the contamination
+arrives one retraining cycle at a time.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">N_NORMAL</span><span class="p">,</span> <span class="n">N_BAD</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">60</span>                                      <span class="c1"># 19% contamination</span>
+
+<span class="n">X_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">rng</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">N_NORMAL</span><span class="p">),</span>
+                    <span class="n">rng</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="p">[[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]],</span> <span class="n">N_BAD</span><span class="p">)])</span>
+<span class="n">truth_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_NORMAL</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_BAD</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="n">d2_classic</span> <span class="o">=</span> <span class="n">mahalanobis_sq</span><span class="p">(</span><span class="n">X_mask</span><span class="p">)</span>                            <span class="c1"># mean/cov from EVERYTHING</span>
+
+<span class="c1"># Minimum covariance determinant: fit the mean and covariance on the tightest</span>
+<span class="c1"># subset of the data, so the anomalies never enter the estimate of &quot;normal&quot;.</span>
+<span class="n">robust</span> <span class="o">=</span> <span class="n">EllipticEnvelope</span><span class="p">(</span><span class="n">contamination</span><span class="o">=</span><span class="mf">0.19</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_mask</span><span class="p">)</span>
+<span class="n">d2_robust</span> <span class="o">=</span> <span class="n">robust</span><span class="o">.</span><span class="n">mahalanobis</span><span class="p">(</span><span class="n">X_mask</span><span class="p">)</span>
+
+<span class="n">thr</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;estimator&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;anomalies caught&#39;</span><span class="si">:</span><span class="s2">&gt;22</span><span class="si">}{</span><span class="s1">&#39;AUC&#39;</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;classic&quot;</span><span class="p">,</span> <span class="n">d2_classic</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="n">d2_robust</span><span class="p">)):</span>
+    <span class="n">caught</span> <span class="o">=</span> <span class="p">((</span><span class="n">d</span> <span class="o">&gt;</span> <span class="n">thr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">truth_mask</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="n">caught</span><span class="si">:</span><span class="s2">&gt;15</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">N_BAD</span><span class="si">}{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">truth_mask</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;9.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">the covariance each one learned as &#39;normal&#39;:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  classic determinant : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X_mask</span><span class="p">,</span><span class="w"> </span><span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  robust  determinant : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">robust</span><span class="o">.</span><span class="n">covariance_</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text"> estimator      anomalies caught      AUC
+   classic              1 of 60   0.8991
+    robust             60 of 60   1.0000
+
+the covariance each one learned as &#x27;normal&#x27;:
+  classic determinant : 4.495
+  robust  determinant : 0.222</pre></div></div>
+<div class="md"><h3 id="s21-3">21.3 Isolation Forest</h3>
+<p>Every method so far models what <em>normal</em> looks like and measures distance from it. Isolation Forest inverts
+the question: <strong>anomalies are easy to separate, so isolate points and see which ones give up quickly.</strong></p>
+<p>Build a tree by repeatedly picking a random feature and a random split value. A point in a dense region
+needs many splits before it sits alone; a point out on its own is isolated in a few. The <strong>average path
+length</strong> over many such trees is the anomaly score.</p>
+<p>This inversion buys three things: no distance metric (so <a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-1">7.1</a>'s curse bites less), no distributional
+assumption, and a cost linear in \(n\).</p>
+<p>\[s(x) = 2^{-\,\mathbb{E}[h(x)] \,/\, c(n)}, \qquad c(n) = 2H_{n-1} - \frac{2(n-1)}{n}\]</p>
+<p>\(h(x)\) is the path length, and \(c(n)\) — the average path length of an unsuccessful search in a binary
+search tree — normalizes it so that \(s \to 1\) means anomalous and \(s \approx 0.5\) means average.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">path_length</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">X_sub</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gen</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Isolate x in a random-split tree built on X_sub; return the depth it took.&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_sub</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&gt;=</span> <span class="n">max_depth</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">depth</span> <span class="o">+</span> <span class="n">c_factor</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                             <span class="c1"># + expected depth of the unbuilt subtree</span>
+
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">X_sub</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">X_sub</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">X_sub</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">lo</span> <span class="o">==</span> <span class="n">hi</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">depth</span> <span class="o">+</span> <span class="n">c_factor</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">split</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+    <span class="n">side</span> <span class="o">=</span> <span class="n">X_sub</span><span class="p">[</span><span class="n">X_sub</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">split</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">split</span> \
+        <span class="k">else</span> <span class="n">X_sub</span><span class="p">[</span><span class="n">X_sub</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">split</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">path_length</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">gen</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">c_factor</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Average path length of an unsuccessful search in a binary search tree.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">euler_gamma</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">20 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">isolation_forest_scores</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_trees</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    <span class="n">max_depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">sample_size</span><span class="p">)))</span>             <span class="c1"># the paper&#39;s height limit</span>
+
+    <span class="n">depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">n_trees</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_trees</span><span class="p">):</span>
+        <span class="n">sub</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">gen</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">depths</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_length</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sub</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">gen</span><span class="p">)</span>
+
+    <span class="n">mean_depth</span> <span class="o">=</span> <span class="n">depths</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">mean_depth</span> <span class="o">/</span> <span class="n">c_factor</span><span class="p">(</span><span class="n">sample_size</span><span class="p">))</span>         <span class="c1"># higher = more anomalous</span>
+
+
+<span class="n">scores_mine</span> <span class="o">=</span> <span class="n">isolation_forest_scores</span><span class="p">(</span><span class="n">X_out</span><span class="p">,</span> <span class="n">n_trees</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mean score, normal rows    : </span><span class="si">{</span><span class="n">scores_mine</span><span class="p">[</span><span class="n">y_out</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mean score, planted anomaly: </span><span class="si">{</span><span class="n">scores_mine</span><span class="p">[</span><span class="n">y_out</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ranking quality (ROC-AUC)  : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="n">scores_mine</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">mean score, normal rows    : 0.4562
+mean score, planted anomaly: 0.6419
+
+ranking quality (ROC-AUC)  : 0.9765</pre></div></div>
+<div class="md"><p><strong>Step 4 of the algorithm contract.</strong> scikit-learn's <code>score_samples</code> returns the <em>negated</em> score, so it has
+to be flipped before the two can be compared — and because both are randomized, the right comparison is the
+<strong>ranking</strong>, not the values.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">spearmanr</span>
+
+<span class="n">iso</span> <span class="o">=</span> <span class="n">IsolationForest</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_samples</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">contamination</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span>
+                      <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span>
+<span class="n">scores_sk</span> <span class="o">=</span> <span class="o">-</span><span class="n">iso</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span>                          <span class="c1"># flip: sklearn&#39;s is negated</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from-scratch AUC : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="n">scores_mine</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;scikit-learn AUC : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="n">scores_sk</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">rho</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">scores_mine</span><span class="p">,</span> <span class="n">scores_sk</span><span class="p">)</span><span class="o">.</span><span class="n">statistic</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">rank correlation between the two score vectors: </span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;same top-20 flagged rows: &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">scores_mine</span><span class="p">)[</span><span class="o">-</span><span class="mi">20</span><span class="p">:])</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">scores_sk</span><span class="p">)[</span><span class="o">-</span><span class="mi">20</span><span class="p">:]))</span><span class="si">}</span><span class="s2"> of 20&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">from-scratch AUC : 0.9765
+scikit-learn AUC : 0.9794
+
+rank correlation between the two score vectors: 0.9543
+same top-20 flagged rows: 19 of 20</pre></div></div>
+<div class="md"><p><code>contamination</code> deserves a note of its own: it does <strong>not</strong> change the scores, only where the threshold
+falls when <code>predict</code> converts them to a yes/no. Getting it wrong changes how many rows are flagged and
+nothing about their ranking.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">IsolationForest</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_samples</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">contamination</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+                        <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>                              <span class="c1"># -1 is sklearn&#39;s &quot;outlier&quot;</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="p">((</span><span class="n">pred</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_out</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;contamination=</span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2">  flagged </span><span class="si">{</span><span class="n">pred</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2">   of which real: </span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">&gt;2</span><span class="si">}</span><span class="s2">/20&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;   AUC </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">X_out</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">contamination=0.01   flagged   5   of which real:  5/20   AUC 0.9794
+contamination=0.04   flagged  20   of which real: 15/20   AUC 0.9794
+contamination=0.1    flagged  50   of which real: 18/20   AUC 0.9794</pre></div></div>
+<div class="md"><p>The AUC is identical across all three — the ranking never moved. Only the cut point did. <strong>Set
+<code>contamination</code> from the rate you can actually afford to investigate</strong>, not from a guess about the true
+anomaly rate, which you do not know.</p></div>
+<div class="md"><h3 id="s21-4">21.4 One-Class SVM and Local Outlier Factor</h3>
+<p>Two more detectors with genuinely different assumptions.</p>
+<p><strong>One-Class SVM</strong> (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-4">16.4</a>'s kernel machinery, with no labels) learns a boundary enclosing most of the
+training data. <code>nu</code> bounds the fraction of training points allowed outside it, and with an RBF kernel the
+boundary can be any shape. It is a <strong>novelty</strong> detector by design: it assumes the training data is clean,
+and degrades when it is not.</p>
+<p><strong>Local Outlier Factor</strong> compares a point's local density with the density of its neighbours. That "local"
+is the key word — a point can be dense by global standards and still be an outlier <em>relative to the cluster
+it sits beside</em>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Isolation Forest</th>
+<th>One-Class SVM</th>
+<th>LOF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Idea</td>
+<td>Easy to isolate</td>
+<td>Outside the learned boundary</td>
+<td>Lower density than its neighbours</td>
+</tr>
+<tr>
+<td>Training data</td>
+<td>Contaminated is fine</td>
+<td><strong>Wants clean</strong></td>
+<td>Contaminated is fine</td>
+</tr>
+<tr>
+<td>Scales as</td>
+<td>\(O(n \log n)\)</td>
+<td>\(O(n^2)\)–\(O(n^3)\)</td>
+<td>\(O(n \log n)\) with a tree</td>
+</tr>
+<tr>
+<td>Scaling required</td>
+<td>No</td>
+<td><strong>Yes</strong> (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-7">16.7</a>)</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Key parameter</td>
+<td><code>contamination</code></td>
+<td><code>nu</code>, <code>gamma</code></td>
+<td><code>n_neighbors</code></td>
+</tr>
+<tr>
+<td>Scores new data</td>
+<td>Yes</td>
+<td>Yes</td>
+<td><strong>Only with <code>novelty=True</code></strong></td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X_out_scaled</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_out</span><span class="p">)</span>
+
+<span class="n">detectors</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;IsolationForest&quot;</span><span class="p">:</span> <span class="n">IsolationForest</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+    <span class="s2">&quot;OneClassSVM&quot;</span><span class="p">:</span> <span class="n">OneClassSVM</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="s2">&quot;scale&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;LocalOutlierFactor&quot;</span><span class="p">:</span> <span class="n">LocalOutlierFactor</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;EllipticEnvelope&quot;</span><span class="p">:</span> <span class="n">EllipticEnvelope</span><span class="p">(</span><span class="n">contamination</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;detector&#39;</span><span class="si">:</span><span class="s2">&gt;20</span><span class="si">}{</span><span class="s1">&#39;ROC-AUC&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;PR-AUC&#39;</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">detectors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">LocalOutlierFactor</span><span class="p">):</span>
+        <span class="n">det</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_out_scaled</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="n">det</span><span class="o">.</span><span class="n">negative_outlier_factor_</span>                      <span class="c1"># LOF has no score_samples when fitted this way</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="n">det</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_out_scaled</span><span class="p">)</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">X_out_scaled</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&gt;20</span><span class="si">}{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}{</span><span class="n">average_precision_score</span><span class="p">(</span><span class="n">y_out</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;9.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">            detector   ROC-AUC   PR-AUC
+     IsolationForest    0.9830   0.8415
+         OneClassSVM    0.9872   0.8204
+  LocalOutlierFactor    0.9915   0.9271
+    EllipticEnvelope    0.9912   0.8967</pre></div></div>
+<div class="md"><p><strong>LOF's local view is what the others lack.</strong> Build two clusters of very different density and put an
+outlier beside the tight one. Measured against the whole dataset the planted point is at an ordinary
+distance — the sparse cluster's own members are spread further apart than that. LOF compares it only with
+its twenty nearest neighbours, which are all from the tight cluster, and reaches a different verdict.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">tight</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.25</span><span class="p">,</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>                     <span class="c1"># dense</span>
+<span class="n">loose</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="mf">1.6</span><span class="p">,</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>                      <span class="c1"># sparse</span>
+<span class="n">planted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]])</span>                               <span class="c1"># near the tight cluster, but not in it</span>
+
+<span class="n">X_lof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tight</span><span class="p">,</span> <span class="n">loose</span><span class="p">,</span> <span class="n">planted</span><span class="p">])</span>
+<span class="n">truth_lof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">400</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="n">lof_scores</span> <span class="o">=</span> <span class="o">-</span><span class="n">LocalOutlierFactor</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span><span class="o">.</span><span class="n">negative_outlier_factor_</span>
+<span class="n">iso_scores</span> <span class="o">=</span> <span class="o">-</span><span class="n">IsolationForest</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span>
+<span class="n">env_scores</span> <span class="o">=</span> <span class="n">EllipticEnvelope</span><span class="p">(</span><span class="n">contamination</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span><span class="o">.</span><span class="n">mahalanobis</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;LOF (local)&quot;</span><span class="p">,</span> <span class="n">lof_scores</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;IsolationForest&quot;</span><span class="p">,</span> <span class="n">iso_scores</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;Mahalanobis (global)&quot;</span><span class="p">,</span> <span class="n">env_scores</span><span class="p">)):</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>   <span class="c1"># 1 = most anomalous</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&gt;22</span><span class="si">}</span><span class="s2">: the planted point ranks </span><span class="si">{</span><span class="n">rank</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_lof</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">           LOF (local): the planted point ranks   1 of 401
+       IsolationForest: the planted point ranks  10 of 401
+  Mahalanobis (global): the planted point ranks 201 of 401</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;LOF&quot;</span><span class="p">,</span> <span class="n">lof_scores</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;IsolationForest&quot;</span><span class="p">,</span> <span class="n">iso_scores</span><span class="p">))):</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">s</span><span class="p">)[</span><span class="o">-</span><span class="mi">15</span><span class="p">:]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_lof</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_lof</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_lof</span><span class="p">[</span><span class="n">top</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_lof</span><span class="p">[</span><span class="n">top</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+               <span class="n">label</span><span class="o">=</span><span class="s2">&quot;15 most anomalous&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">planted</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">170</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span>
+               <span class="n">label</span><span class="o">=</span><span class="s2">&quot;planted&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([]);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Two clusters of unequal density: only LOF judges locally&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c21_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>Three methods, three verdicts on the same point, and the ordering is exactly what each one's definition
+predicts. Mahalanobis measures distance from a single global ellipse, so a point at middling distance gets
+a middling rank. Isolation Forest notices that the point sits in a gap and ranks it tenth. Only LOF, which
+compares the point's density with the density of its own neighbours, puts it first.</p>
+<p><strong>In practice</strong> — the four-detector table above is close enough that it should not decide anything on its
+own; on data shaped differently the order changes. As a default first try on tabular data with no strong
+prior, <code>IsolationForest</code> is the safe choice: it needs no scaling, no distance metric and no clean training
+set, and it is the only one of the four that stays cheap as \(n\) grows. Reach for LOF when densities
+genuinely vary across the space, as they did here, and for One-Class SVM when there is a certified-clean
+reference period to learn "normal" from.</p></div>
+<div class="md"><h3 id="s21-5">21.5 Evaluating a Detector</h3>
+<p>The evaluation problem here is <a class="xref" href="/machine-learning/20-clustering/#s20-8">20.8</a>'s, made worse: not only is there usually no ground truth, but when
+there is, it is extremely imbalanced. <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-6">8.6</a>'s warning about ROC-AUC applies with full force.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Use when</th>
+<th>Watch out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ROC-AUC</strong></td>
+<td>Comparing rankings, balanced-ish costs</td>
+<td><strong>Looks good at any imbalance</strong> — the false-positive rate has a huge denominator</td>
+</tr>
+<tr>
+<td><strong>PR-AUC / average precision</strong></td>
+<td>The positive class is rare — the default here</td>
+<td>Baseline is the positive rate, not 0.5</td>
+</tr>
+<tr>
+<td><strong>Precision@k</strong></td>
+<td>You can investigate exactly \(k\) per day</td>
+<td>Directly operational; the metric to report</td>
+</tr>
+<tr>
+<td><strong>Recall at fixed precision</strong></td>
+<td>A false-positive budget is fixed</td>
+<td>Requires labelled anomalies</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Common mistake — reporting ROC-AUC on a 0.5% anomaly rate.</strong> At that imbalance a detector whose flagged
+set is overwhelmingly false positives still scores well, because the false-positive rate is divided by a
+very large number of negatives.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n_rare</span><span class="p">,</span> <span class="n">rate</span> <span class="o">=</span> <span class="mi">20_000</span><span class="p">,</span> <span class="mf">0.005</span>
+<span class="n">y_rare</span> <span class="o">=</span> <span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n_rare</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">rate</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># A mediocre detector: anomalies score slightly higher on average, with heavy overlap.</span>
+<span class="n">s_rare</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_rare</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.6</span> <span class="o">*</span> <span class="n">y_rare</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y_rare</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> anomalies in </span><span class="si">{</span><span class="n">n_rare</span><span class="si">}</span><span class="s2"> rows (</span><span class="si">{</span><span class="n">y_rare</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ROC-AUC          : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_rare</span><span class="p">,</span><span class="w"> </span><span class="n">s_rare</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   &lt;- looks respectable&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PR-AUC (avg prec): </span><span class="si">{</span><span class="n">average_precision_score</span><span class="p">(</span><span class="n">y_rare</span><span class="p">,</span><span class="w"> </span><span class="n">s_rare</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   &lt;- the honest number&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PR-AUC baseline  : </span><span class="si">{</span><span class="n">y_rare</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   (a random scorer)&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">119 anomalies in 20000 rows (0.60%)
+
+ROC-AUC          : 0.8613   &lt;- looks respectable
+PR-AUC (avg prec): 0.0589   &lt;- the honest number
+PR-AUC baseline  : 0.0060   (a random scorer)</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># What an analyst actually experiences: they can work through the top k alerts per day.</span>
+<span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">s_rare</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;k&#39;</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}{</span><span class="s1">&#39;true anomalies&#39;</span><span class="si">:</span><span class="s2">&gt;17</span><span class="si">}{</span><span class="s1">&#39;precision@k&#39;</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}{</span><span class="s1">&#39;recall@k&#39;</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">):</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="n">y_rare</span><span class="p">[</span><span class="n">order</span><span class="p">[:</span><span class="n">k</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}{</span><span class="n">hits</span><span class="si">:</span><span class="s2">&gt;17</span><span class="si">}{</span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">k</span><span class="si">:</span><span class="s2">&gt;14.3f</span><span class="si">}{</span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y_rare</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;11.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">      k   true anomalies   precision@k   recall@k
+     20                3         0.150      0.025
+     50                7         0.140      0.059
+    100               13         0.130      0.109
+    500               35         0.070      0.294</pre></div></div>
+<div class="md"><p>An ROC-AUC of 0.86 next to a precision@50 of 0.14 is the normal state of affairs, not a contradiction: the
+detector really does rank anomalies above normal rows most of the time, and an analyst working the top 50
+alerts still finds that six in seven are false. Both numbers are correct; only one of them describes
+somebody's day.</p>
+<p><strong>Report precision@k</strong>, with \(k\) set to the number of alerts the team can actually work through. Note also
+how recall@k moves: to catch even 30% of the anomalies the team would have to work 500 alerts to find 35.
+That ratio, not the AUC, is what determines whether the detector gets deployed.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span><span class="n">y_rare</span><span class="p">,</span> <span class="n">s_rare</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">recall</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;detector&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_rare</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;random (</span><span class="si">{</span><span class="n">y_rare</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;recall&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;The precision-recall curve keeps the imbalance visible&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c21_03.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><h3 id="s21-6">21.6 Association Rule Mining: the Setup</h3>
+<p>The second half of the chapter. <strong>Market-basket analysis</strong> asks which items co-occur in transactions more
+often than independence would predict — the canonical output being rules of the form
+\(\{\text{bread}\} \Rightarrow \{\text{jam}\}\).</p>
+<p>The vocabulary is small and worth fixing before any arithmetic:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transaction</strong></td>
+<td>One basket — a set of items, with no order and no counts</td>
+</tr>
+<tr>
+<td><strong>Itemset</strong></td>
+<td>Any set of items, e.g. \(\{\text{bread}, \text{jam}\}\)</td>
+</tr>
+<tr>
+<td><strong>\(k\)-itemset</strong></td>
+<td>An itemset of size \(k\)</td>
+</tr>
+<tr>
+<td><strong>Frequent itemset</strong></td>
+<td>One whose support clears a threshold</td>
+</tr>
+<tr>
+<td><strong>Rule</strong> \(A \Rightarrow B\)</td>
+<td>An itemset split into antecedent \(A\) and consequent \(B\), disjoint</td>
+</tr>
+</tbody>
+</table></div>
+<p>The data must first be reshaped from long form into a <strong>one-hot basket matrix</strong>: one row per transaction,
+one boolean column per item.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">tx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/transactions.csv&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows, </span><span class="si">{</span><span class="n">tx</span><span class="p">[</span><span class="s1">&#39;transaction_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> baskets, </span><span class="si">{</span><span class="n">tx</span><span class="p">[</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> distinct items&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">transaction_id      item
+         T0001   lentils
+         T0001  tomatoes
+         T0002 chocolate
+         T0002     sugar
+         T0002       tea
+
+2622 rows, 800 baskets, 20 distinct items</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">baskets</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">)[</span><span class="s2">&quot;item&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;basket size: mean </span><span class="si">{</span><span class="n">baskets</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">len</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;median </span><span class="si">{</span><span class="n">baskets</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">len</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">, max </span><span class="si">{</span><span class="n">baskets</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">len</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">three baskets:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">baskets</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">basket size: mean 3.28, median 3, max 11
+
+three baskets:
+  T0001: [&#x27;lentils&#x27;, &#x27;tomatoes&#x27;]
+  T0002: [&#x27;chocolate&#x27;, &#x27;sugar&#x27;, &#x27;tea&#x27;, &#x27;tomatoes&#x27;, &#x27;yogurt&#x27;]
+  T0003: [&#x27;biscuits&#x27;, &#x27;butter&#x27;, &#x27;cheese&#x27;, &#x27;sugar&#x27;, &#x27;tea&#x27;]</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">mlxtend.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransactionEncoder</span>
+
+<span class="n">te</span> <span class="o">=</span> <span class="n">TransactionEncoder</span><span class="p">()</span>
+<span class="n">basket_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">baskets</span><span class="o">.</span><span class="n">tolist</span><span class="p">()),</span> <span class="n">columns</span><span class="o">=</span><span class="n">te</span><span class="o">.</span><span class="n">columns_</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;basket matrix: </span><span class="si">{</span><span class="n">basket_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> transactions x </span><span class="si">{</span><span class="n">basket_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;density: </span><span class="si">{</span><span class="n">basket_matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2"> of cells are True&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">basket_matrix</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">4</span><span class="p">,</span> <span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">basket matrix: 800 transactions x 20 items
+density: 16.4% of cells are True
+
+   bananas  biscuits  bread  butter  cereal  cheese
+0    False     False  False   False   False   False
+1    False     False  False   False   False   False
+2    False      True  False    True   False    True
+3    False     False  False   False   False   False</pre></div></div>
+<div class="md"><p>That 16% density is the structural fact the algorithms in <a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-8">21.8</a> exploit. Real retail baskets are far
+sparser still — thousands of products, a handful per basket — which is why the naive approach of
+enumerating every itemset is hopeless: 20 items already give \(2^{20}\) subsets.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;items&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">&#39;possible itemsets&#39;</span><span class="si">:</span><span class="s2">&gt;22</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n_items</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1_000</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_items</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="sa">f</span><span class="s1">&#39;2^</span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s1"> ~ 10^</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">n_items</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="si">:</span><span class="s2">&gt;22</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">enumerating all of them is not an option - 21.8 is about avoiding it&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">   items     possible itemsets
+      20           2^20 ~ 10^6
+     100         2^100 ~ 10^30
+    1000       2^1000 ~ 10^301
+   10000     2^10000 ~ 10^3010
+
+enumerating all of them is not an option - 21.8 is about avoiding it</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">item_counts</span> <span class="o">=</span> <span class="n">basket_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">item_counts</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">item_counts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:blue&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;baskets containing the item&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Item frequencies are highly uneven - which lift must correct for&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;most common : </span><span class="si">{</span><span class="n">item_counts</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">item_counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">)</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2"> of baskets&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;least common: </span><span class="si">{</span><span class="n">item_counts</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">item_counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">)</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c21_04.png" alt="Figure produced by the cell above" loading="lazy"></figure><pre class="out-text">most common : milk in 35.2% of baskets
+least common: chocolate in 7.5%</pre></div></div>
+<div class="md"><h3 id="s21-7">21.7 Support, Confidence, Lift and Conviction</h3>
+<p>Four measures of a rule \(A \Rightarrow B\), each answering a different question. All of them are needed;
+none of them is sufficient alone.</p>
+<p>\[\text{support}(A \Rightarrow B) = P(A \cap B) \qquad
+\text{confidence}(A \Rightarrow B) = P(B \mid A) = \frac{P(A \cap B)}{P(A)}\]</p>
+<p>\[\text{lift}(A \Rightarrow B) = \frac{P(B \mid A)}{P(B)} \qquad
+\text{conviction}(A \Rightarrow B) = \frac{1 - P(B)}{1 - P(B \mid A)}\]</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Answers</th>
+<th>Range</th>
+<th>Independence at</th>
+<th>Blind to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Support</strong></td>
+<td>How often does this happen at all?</td>
+<td>\([0, 1]\)</td>
+<td>—</td>
+<td>Whether it is interesting</td>
+</tr>
+<tr>
+<td><strong>Confidence</strong></td>
+<td>Given \(A\), how often \(B\)?</td>
+<td>\([0, 1]\)</td>
+<td>\(P(B)\)</td>
+<td><strong>How common \(B\) is anyway</strong></td>
+</tr>
+<tr>
+<td><strong>Lift</strong></td>
+<td>How much more than chance?</td>
+<td>\([0, \infty)\)</td>
+<td><strong>1</strong></td>
+<td>Direction; small-sample noise</td>
+</tr>
+<tr>
+<td><strong>Conviction</strong></td>
+<td>How often would the rule be wrong if \(A, B\) were independent?</td>
+<td>\([0, \infty)\)</td>
+<td><strong>1</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Lift is symmetric: \(\text{lift}(A \Rightarrow B) = \text{lift}(B \Rightarrow A)\). Confidence and conviction
+are not.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">rule_metrics</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">antecedent</span><span class="p">,</span> <span class="n">consequent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;All four measures for one rule, computed directly from the boolean matrix.&quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">antecedent</span><span class="p">)]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">Bc</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">consequent</span><span class="p">)]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">p_a</span><span class="p">,</span> <span class="n">p_b</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">Bc</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">support</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span> <span class="o">&amp;</span> <span class="n">Bc</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">confidence</span> <span class="o">=</span> <span class="n">support</span> <span class="o">/</span> <span class="n">p_a</span>
+    <span class="n">lift</span> <span class="o">=</span> <span class="n">confidence</span> <span class="o">/</span> <span class="n">p_b</span>
+    <span class="n">conviction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="k">if</span> <span class="n">confidence</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;support&quot;</span><span class="p">:</span> <span class="n">support</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="n">confidence</span><span class="p">,</span> <span class="s2">&quot;lift&quot;</span><span class="p">:</span> <span class="n">lift</span><span class="p">,</span>
+            <span class="s2">&quot;conviction&quot;</span><span class="p">:</span> <span class="n">conviction</span><span class="p">,</span> <span class="s2">&quot;P(B)&quot;</span><span class="p">:</span> <span class="n">p_b</span><span class="p">}</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;onions =&gt; milk&quot;</span><span class="p">:</span> <span class="n">rule_metrics</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;onions&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;milk&quot;</span><span class="p">]),</span>
+    <span class="s2">&quot;cereal =&gt; yogurt&quot;</span><span class="p">:</span> <span class="n">rule_metrics</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;cereal&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;yogurt&quot;</span><span class="p">]),</span>
+<span class="p">})</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">                  support  confidence   lift  conviction   P(B)
+onions =&gt; milk      0.055       0.333  0.946       0.971  0.352
+cereal =&gt; yogurt    0.080       0.356  1.962       1.270  0.181</pre></div></div>
+<div class="md"><p><strong>This is the confidence trap, in two rows.</strong> The two rules have near-identical confidence — 0.33 against
+0.36 — so ranked on confidence alone they look equally useful.</p>
+<p>They are not remotely equal. Milk is in 35% of all baskets, so a rule that predicts milk a third of the
+time has learned nothing: its lift sits just <strong>below</strong> 1, meaning onion buyers are, if anything, very
+slightly <em>less</em> likely to buy milk than a random shopper. Yogurt is in 18% of baskets, so the same
+confidence represents a genuine doubling, and the lift of 1.96 says so.</p>
+<p><strong>Confidence alone will always favour popular consequents.</strong> A rule "\(\Rightarrow\) milk" is close to
+guaranteed high confidence and close to guaranteed worthless.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Taken to its extreme: a rule whose consequent is in nearly every basket.</span>
+<span class="n">synthetic</span> <span class="o">=</span> <span class="n">basket_matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">synthetic</span><span class="p">[</span><span class="s2">&quot;bag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>                                        <span class="c1"># every customer takes a bag</span>
+<span class="n">synthetic</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;bag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;bread =&gt; bag&quot;</span><span class="p">:</span> <span class="n">rule_metrics</span><span class="p">(</span><span class="n">synthetic</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;bread&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;bag&quot;</span><span class="p">]),</span>
+    <span class="s2">&quot;bread =&gt; jam&quot;</span><span class="p">:</span> <span class="n">rule_metrics</span><span class="p">(</span><span class="n">synthetic</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;bread&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;jam&quot;</span><span class="p">]),</span>
+<span class="p">})</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">confidence 1.00, lift 1.01, conviction infinite: perfectly predictable, perfectly useless.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;conviction goes to infinity precisely because confidence hit 1 - a rule that is&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;never wrong looks infinitely strong, even when it is telling you nothing.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">              support  confidence   lift  conviction   P(B)
+bread =&gt; bag    0.230         1.0  1.013         inf  0.988
+bread =&gt; jam    0.115         0.5  3.008       1.668  0.166
+
+confidence 1.00, lift 1.01, conviction infinite: perfectly predictable, perfectly useless.
+conviction goes to infinity precisely because confidence hit 1 - a rule that is
+never wrong looks infinitely strong, even when it is telling you nothing.</pre></div></div>
+<div class="md"><p><strong>The second trap is the opposite one: enormous lift on a handful of baskets.</strong> Lift has no notion of
+sample size, so the rarest itemsets produce the most spectacular numbers.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n_baskets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;rule support&#39;</span><span class="si">:</span><span class="s2">&gt;15</span><span class="si">}{</span><span class="s1">&#39;baskets&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;max possible lift&#39;</span><span class="si">:</span><span class="s2">&gt;20</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0025</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">):</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="n">n_baskets</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">s</span><span class="si">:</span><span class="s2">&gt;15.4f</span><span class="si">}{</span><span class="n">k</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">s</span><span class="si">:</span><span class="s2">&gt;20.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A rule seen in 2 baskets can show a lift in the hundreds. That is arithmetic, not insight.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">   rule support   baskets   max possible lift
+         0.0025         2               400.0
+         0.0100         8               100.0
+         0.0500        40                20.0
+         0.1500       120                 6.7
+
+A rule seen in 2 baskets can show a lift in the hundreds. That is arithmetic, not insight.</pre></div></div>
+<div class="md"><h3 id="s21-8">21.8 Apriori and FP-Growth</h3>
+<p>21.6 showed that enumerating all itemsets is impossible. <strong>Apriori</strong> makes it tractable with one
+observation, the <em>downward closure</em> or <strong>apriori property</strong>:</p>
+<blockquote>
+<p>If an itemset is frequent, every one of its subsets is frequent.
+Equivalently: <strong>if any subset is infrequent, the itemset cannot be frequent.</strong></p>
+</blockquote>
+<p>So the search proceeds level by level — find frequent 1-itemsets, form 2-itemset candidates only from
+those, count, prune, repeat — and entire branches are eliminated without ever being counted.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">33 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">combinations</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">apriori_from_scratch</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Level-wise frequent itemset mining. Returns {itemset: support}.&quot;&quot;&quot;</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">col_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">)}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">support</span><span class="p">(</span><span class="n">itemset</span><span class="p">):</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itemset</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">n</span>
+
+    <span class="n">frequent</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="p">[(</span><span class="n">c</span><span class="p">,)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">support</span><span class="p">((</span><span class="n">c</span><span class="p">,))</span> <span class="o">&gt;=</span> <span class="n">min_support</span><span class="p">]</span>
+    <span class="n">frequent</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="n">support</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">current</span><span class="p">})</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="n">current</span><span class="p">:</span>
+        <span class="c1"># Candidates: unions of size k whose every (k-1)-subset is already frequent.</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">union</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">union</span><span class="p">)</span> <span class="o">==</span> <span class="n">k</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                    <span class="nb">frozenset</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span> <span class="ow">in</span> <span class="n">frequent</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">union</span><span class="p">,</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="n">candidates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>                           <span class="c1"># THE PRUNING STEP</span>
+
+        <span class="n">current</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">candidates</span> <span class="k">if</span> <span class="n">support</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_support</span><span class="p">]</span>
+        <span class="n">frequent</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="n">support</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">current</span><span class="p">})</span>
+        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">frequent</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">MIN_SUPPORT</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">mine</span> <span class="o">=</span> <span class="n">apriori_from_scratch</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">MIN_SUPPORT</span><span class="p">)</span>
+<span class="n">elapsed_mine</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+
+<span class="n">sizes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">mine</span><span class="p">])</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mine</span><span class="p">)</span><span class="si">}</span><span class="s2"> frequent itemsets at min_support=</span><span class="si">{</span><span class="n">MIN_SUPPORT</span><span class="si">}</span><span class="s2">, in </span><span class="si">{</span><span class="n">elapsed_mine</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">by size:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sizes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">-itemsets: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">43 frequent itemsets at min_support=0.05, in 0.003s
+
+by size:
+  1-itemsets: 20
+  2-itemsets: 21
+  3-itemsets: 2</pre></div></div>
+<div class="md"><p><strong>How much did pruning actually save?</strong> Count the candidates Apriori considered against the number it would
+have had to count by brute force.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n_items</span> <span class="o">=</span> <span class="n">basket_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">brute_force</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">n_items</span> <span class="o">-</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;items                                   : </span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;all non-empty itemsets (brute force)    : </span><span class="si">{</span><span class="n">brute_force</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;frequent itemsets actually found        : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mine</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Apriori never counts an itemset whose subsets failed, so the vast majority of&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;those </span><span class="si">{</span><span class="n">brute_force</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> are eliminated without a single pass over the data.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">items                                   : 20
+all non-empty itemsets (brute force)    : 1,048,575
+frequent itemsets actually found        : 43
+
+Apriori never counts an itemset whose subsets failed, so the vast majority of
+those 1,048,575 are eliminated without a single pass over the data.</pre></div></div>
+<div class="md"><p><strong>Step 4 of the contract</strong> — the from-scratch itemsets against <code>mlxtend</code>'s.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">mlxtend.frequent_patterns</span><span class="w"> </span><span class="kn">import</span> <span class="n">apriori</span><span class="p">,</span> <span class="n">fpgrowth</span>
+
+<span class="n">lib</span> <span class="o">=</span> <span class="n">apriori</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="n">MIN_SUPPORT</span><span class="p">,</span> <span class="n">use_colnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">lib_map</span> <span class="o">=</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lib</span><span class="p">[</span><span class="s2">&quot;itemsets&quot;</span><span class="p">],</span> <span class="n">lib</span><span class="p">[</span><span class="s2">&quot;support&quot;</span><span class="p">])}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from scratch : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mine</span><span class="p">)</span><span class="si">}</span><span class="s2"> itemsets&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mlxtend      : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lib_map</span><span class="p">)</span><span class="si">}</span><span class="s2"> itemsets&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">same itemsets : </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">mine</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">lib_map</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;same supports : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">([</span><span class="n">mine</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mine</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="n">lib_map</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mine</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">from scratch : 43 itemsets
+mlxtend      : 43 itemsets
+
+same itemsets : True
+same supports : True</pre></div></div>
+<div class="md"><h4 id="s21-8-1">21.8.1 FP-Growth</h4>
+<p>Apriori's weakness is that it scans the data once per level. <strong>FP-Growth</strong> avoids that by compressing the
+transactions into a prefix tree (the FP-tree) and mining it recursively — two passes over the data,
+regardless of the longest itemset.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Apriori</th>
+<th>FP-Growth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data passes</td>
+<td>One per level</td>
+<td><strong>Two</strong></td>
+</tr>
+<tr>
+<td>Candidate generation</td>
+<td>Explicit, level-wise</td>
+<td><strong>None</strong> — patterns are grown from the tree</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Low</td>
+<td>Holds the tree</td>
+</tr>
+<tr>
+<td>Faster when</td>
+<td>Few levels, high threshold</td>
+<td><strong>Low thresholds, long patterns</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Both return <strong>exactly the same itemsets</strong> — FP-Growth is an optimization, not a different definition.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;apriori&quot;</span><span class="p">,</span> <span class="n">apriori</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;fpgrowth&quot;</span><span class="p">,</span> <span class="n">fpgrowth</span><span class="p">)):</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">use_colnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2"> itemsets in </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+
+<span class="n">a_sets</span> <span class="o">=</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;apriori&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;itemsets&quot;</span><span class="p">]}</span>
+<span class="n">f_sets</span> <span class="o">=</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;fpgrowth&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;itemsets&quot;</span><span class="p">]}</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">identical itemsets: </span><span class="si">{</span><span class="n">a_sets</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f_sets</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">   apriori:  459 itemsets in 0.010s
+  fpgrowth:  459 itemsets in 0.011s
+
+identical itemsets: True</pre></div></div>
+<div class="md"><h4 id="s21-8-2">21.8.2 From itemsets to rules</h4>
+<p>Frequent itemsets are not yet rules. Each frequent itemset of size \(k \geq 2\) is split every possible way
+into antecedent and consequent, and the splits are filtered on a metric.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">mlxtend.frequent_patterns</span><span class="w"> </span><span class="kn">import</span> <span class="n">association_rules</span>
+
+<span class="n">frequent</span> <span class="o">=</span> <span class="n">apriori</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">use_colnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">rules</span> <span class="o">=</span> <span class="n">association_rules</span><span class="p">(</span><span class="n">frequent</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">min_threshold</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+
+<span class="n">rules</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rules</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">rules</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rules</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">top</span> <span class="o">=</span> <span class="n">rules</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span><span class="si">}</span><span class="s2"> rules with lift &gt; 1.2 at support &gt;= 0.05</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">top</span><span class="p">[[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;support&quot;</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">,</span> <span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="s2">&quot;conviction&quot;</span><span class="p">]]</span>
+      <span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">36 rules with lift &gt; 1.2 at support &gt;= 0.05
+
+            A             B  support  confidence  lift  conviction
+      lentils          rice    0.068       0.486 4.324       1.728
+         rice       lentils    0.068       0.600 4.324       2.153
+  butter, jam         bread    0.065       0.881 3.832       6.490
+        bread   butter, jam    0.065       0.283 3.832       1.291
+bread, butter           jam    0.065       0.500 3.008       1.668
+          jam bread, butter    0.065       0.391 3.008       1.429
+        bread           jam    0.115       0.500 3.008       1.668
+          jam         bread    0.115       0.692 3.008       2.498
+ milk, yogurt        cereal    0.076       0.656 2.915       2.252
+       cereal  milk, yogurt    0.076       0.339 2.915       1.337</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — sorting by lift and reading the top of the table.</strong> At a low support threshold that
+table is dominated by rules resting on a handful of baskets, exactly as 21.7 predicted.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">loose_rules</span> <span class="o">=</span> <span class="n">association_rules</span><span class="p">(</span>
+    <span class="n">apriori</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">use_colnames</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">min_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;baskets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">loose_rules</span><span class="p">[</span><span class="s2">&quot;support&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;top of the table, sorted by lift, min_support = 0.01:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">loose_rules</span><span class="p">[[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;baskets&quot;</span><span class="p">,</span> <span class="s2">&quot;support&quot;</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">,</span> <span class="s2">&quot;lift&quot;</span><span class="p">]]</span>
+      <span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">every one of those rests on </span><span class="si">{</span><span class="n">loose_rules</span><span class="p">[</span><span class="s1">&#39;baskets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2"> baskets or fewer,&quot;</span>
+      <span class="sa">f</span><span class="s2">&quot; out of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">top of the table, sorted by lift, min_support = 0.01:
+
+                      A                       B  baskets  support  confidence   lift
+             milk, rice cereal, lentils, yogurt        8     0.01       0.333 26.667
+cereal, lentils, yogurt              milk, rice        8     0.01       0.800 26.667
+    butter, jam, onions         bread, tomatoes        8     0.01       0.889 22.222
+        bread, tomatoes     butter, jam, onions        8     0.01       0.250 22.222
+bread, butter, tomatoes             jam, onions        8     0.01       0.471 19.814
+            jam, onions bread, butter, tomatoes        8     0.01       0.421 19.814
+
+every one of those rests on 8 baskets or fewer, out of 800.</pre></div></div>
+<div class="md"><h3 id="s21-9">21.9 In Practice</h3>
+<h4 id="s21-9-1">21.9.1 A worked case: which rules would you actually act on?</h4>
+<p>The request: <em>"Find product pairings we can use for shelf placement and bundle offers."</em></p>
+<p>A rules table is trivially easy to generate and almost always unusable as produced. The work is in the
+filtering, and every filter below removes rules that a lift-sorted table would have put at the top.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">MIN_BASKETS</span> <span class="o">=</span> <span class="mi">30</span>                                               <span class="c1"># the smallest evidence we will act on</span>
+<span class="n">min_support</span> <span class="o">=</span> <span class="n">MIN_BASKETS</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">)</span>
+
+<span class="n">frequent</span> <span class="o">=</span> <span class="n">fpgrowth</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="n">min_support</span><span class="p">,</span> <span class="n">use_colnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">candidates</span> <span class="o">=</span> <span class="n">association_rules</span><span class="p">(</span><span class="n">frequent</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">min_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;min_support </span><span class="si">{</span><span class="n">min_support</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">MIN_BASKETS</span><span class="si">}</span><span class="s2"> baskets) -&gt; &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frequent</span><span class="p">)</span><span class="si">}</span><span class="s2"> itemsets, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> rules&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">min_support 0.0375 (30 baskets) -&gt; 68 itemsets, 78 rules</pre></div></div>
+<div class="md"><p><strong>Filter 1 — the rule must beat chance by a margin worth acting on</strong>, and it must be <em>reliable</em>, not just
+directionally right.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">kept</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[(</span><span class="n">candidates</span><span class="p">[</span><span class="s2">&quot;lift&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">1.5</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.30</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lift &gt;= 1.5 and confidence &gt;= 0.30: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">kept</span><span class="p">)</span><span class="si">}</span><span class="s2"> rules remain of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">lift &gt;= 1.5 and confidence &gt;= 0.30: 35 rules remain of 78</pre></div></div>
+<div class="md"><p><strong>Filter 2 — drop redundant rules.</strong> If \(\{A\} \Rightarrow \{B\}\) already holds, then
+\(\{A, C\} \Rightarrow \{B\}\) adds nothing unless it is <em>substantially</em> stronger. Left unfiltered, one real
+association generates dozens of near-duplicate rows and swamps the table.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">is_redundant</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if some rule with a SUBSET antecedent and the same consequent is as strong.&quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]</span>
+    <span class="n">simpler</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span>
+        <span class="n">table</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">)</span>            <span class="c1"># strict subset</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">((</span><span class="n">simpler</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">tolerance</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+
+
+<span class="n">kept</span><span class="p">[</span><span class="s2">&quot;redundant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kept</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">is_redundant</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">kept</span><span class="p">)</span>
+<span class="n">final</span> <span class="o">=</span> <span class="n">kept</span><span class="p">[</span><span class="o">~</span><span class="n">kept</span><span class="p">[</span><span class="s2">&quot;redundant&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;redundant rules dropped: </span><span class="si">{</span><span class="n">kept</span><span class="p">[</span><span class="s1">&#39;redundant&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rules remaining        : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">redundant rules dropped: 4
+rules remaining        : 31</pre></div></div>
+<div class="md"><p><strong>Filter 3 — pick a direction.</strong> Lift is symmetric, so every association appears twice, once each way. Only
+one direction is actionable, and which one depends on the decision: for a "customers who bought \(A\) also
+bought \(B\)" prompt, keep the direction with the higher <strong>confidence</strong>, because that is the one whose
+prediction is more often right.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [36]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">final</span><span class="p">[</span><span class="s2">&quot;pair&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Within each item-pair, keep only the higher-confidence direction.</span>
+<span class="n">actionable</span> <span class="o">=</span> <span class="p">(</span><span class="n">final</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;confidence&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                   <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s2">&quot;pair&quot;</span><span class="p">)</span>
+                   <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+<span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;antecedents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;consequents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+<span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;baskets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">actionable</span><span class="p">[</span><span class="s2">&quot;support&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final</span><span class="p">)</span><span class="si">}</span><span class="s2"> rules -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">actionable</span><span class="p">)</span><span class="si">}</span><span class="s2"> after dropping the weaker direction</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">actionable</span><span class="p">[[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;baskets&quot;</span><span class="p">,</span> <span class="s2">&quot;support&quot;</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">,</span> <span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="s2">&quot;conviction&quot;</span><span class="p">]]</span>
+      <span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">31 rules -&gt; 16 after dropping the weaker direction
+
+             A        B  baskets  support  confidence  lift  conviction
+          rice  lentils       54    0.068       0.600 4.324       2.153
+   butter, jam    bread       52    0.065       0.881 3.832       6.490
+           tea biscuits       38    0.048       0.442 3.047       1.532
+           jam    bread       92    0.115       0.692 3.008       2.498
+   milk, sugar   cereal       39    0.049       0.672 2.989       2.366
+milk, tomatoes   cereal       31    0.039       0.660 2.931       2.277
+        coffee    sugar       69    0.086       0.663 2.736       2.251
+        onions tomatoes       77    0.096       0.583 2.729       1.887
+cereal, yogurt     milk       61    0.076       0.953 2.704      13.813
+         bread   butter      104    0.130       0.565 2.367       1.751
+        cereal     milk      141    0.176       0.783 2.222       2.988
+           tea    sugar       45    0.056       0.523 2.158       1.589
+        yogurt   cereal       64    0.080       0.441 1.962       1.387
+           jam   butter       59    0.074       0.444 1.858       1.368
+        yogurt     milk       93    0.116       0.641 1.820       1.806
+      biscuits    sugar       44    0.055       0.379 1.564       1.220</pre></div></div>
+<div class="md"><p><strong>Step 4 — turn a rule into a number someone can decide on.</strong> "Lift 3.0" is not a business case. The
+question a category manager asks is <em>how many extra units would this move</em>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [37]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">uplift_estimate</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">antecedent</span><span class="p">,</span> <span class="n">consequent</span><span class="p">,</span> <span class="n">n_shoppers</span><span class="o">=</span><span class="mi">10_000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;If every buyer of A were exposed to B, how many extra B-purchases over baseline?&quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">rule_metrics</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">antecedent</span><span class="p">,</span> <span class="n">consequent</span><span class="p">)</span>
+    <span class="n">buyers_of_a</span> <span class="o">=</span> <span class="n">n_shoppers</span> <span class="o">*</span> <span class="n">matrix</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">antecedent</span><span class="p">)]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">expected_if_independent</span> <span class="o">=</span> <span class="n">buyers_of_a</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;P(B)&quot;</span><span class="p">]</span>
+    <span class="n">observed</span> <span class="o">=</span> <span class="n">buyers_of_a</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;A buyers&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">buyers_of_a</span><span class="p">),</span>
+            <span class="s2">&quot;B if independent&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">expected_if_independent</span><span class="p">),</span>
+            <span class="s2">&quot;B observed&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">observed</span><span class="p">),</span>
+            <span class="s2">&quot;excess&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">observed</span> <span class="o">-</span> <span class="n">expected_if_independent</span><span class="p">)}</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;bread =&gt; jam&quot;</span><span class="p">:</span> <span class="n">uplift_estimate</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;bread&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;jam&quot;</span><span class="p">]),</span>
+    <span class="s2">&quot;rice =&gt; lentils&quot;</span><span class="p">:</span> <span class="n">uplift_estimate</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;rice&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;lentils&quot;</span><span class="p">]),</span>
+    <span class="s2">&quot;bread =&gt; milk&quot;</span><span class="p">:</span> <span class="n">uplift_estimate</span><span class="p">(</span><span class="n">basket_matrix</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;bread&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;milk&quot;</span><span class="p">]),</span>
+<span class="p">})</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</code></pre><div class="outs"><pre class="out-text">                 A buyers  B if independent  B observed  excess
+bread =&gt; jam         2300               382        1150     768
+rice =&gt; lentils      1125               156         675     519
+bread =&gt; milk        2300               811         562    -248</pre></div></div>
+<div class="md"><p><strong>Step 5 — the finding, and its limits.</strong></p>
+<blockquote>
+<p><strong>What the data supports.</strong> The filters cut 78 candidate rules to a table of durable ones, each resting
+on at least 30 baskets rather than the 8 that the lift-sorted table of 21.8.2 was built on. The
+strongest are <code>rice ⇒ lentils</code> (lift 4.3), the bread–butter–jam group (lift 3.0–3.8), <code>biscuits ⇒ tea</code>
+and the milk–cereal–yogurt group. These are the candidates worth a shelf test.</p>
+<p><strong>What it is worth.</strong> Per 10,000 shoppers the bread–jam association represents roughly 770 jam purchases
+above what independence predicts, and rice–lentils about 520. Those are the numbers to take to a
+category manager. "Lift 3.0" is not a business case; "768 incremental units per 10,000 shoppers" is.</p>
+<p><strong>The rule to reject.</strong> <code>bread ⇒ milk</code> reaches a plausible-looking confidence and an uplift that is
+<strong>negative</strong> — 248 <em>fewer</em> milk purchases than independence predicts, and a lift below 1. Bread buyers
+are slightly less likely to buy milk, not more. A confidence-sorted table would have put this rule in
+contention; lift and the uplift estimate both reject it.</p>
+<p><strong>The critical caveat: this is association, not causation.</strong> Nothing here says moving jam next to bread
+<em>causes</em> jam sales. Customers who buy both may simply be making the same kind of shopping trip. The
+finding identifies a hypothesis worth an <strong>A/B test</strong> (23.7 for how to run the comparison honestly), and
+the test is what would justify the shelf change.</p>
+<p><strong>And the baskets are not a random sample of shoppers</strong> — they are a sample of <em>trips</em>. A customer who
+shops four times a week is in the data four times as often, so these rules describe frequent shoppers
+more than they describe customers.</p>
+</blockquote>
+<h4 id="s21-9-2">21.9.2 When to reach for this — and when not</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Use</th>
+<th>Not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Labelled anomalies exist, enough of them</td>
+<td><strong>A classifier</strong> (Ch. 11–19) with class weights (<a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-4">22.4</a>)</td>
+<td>Unsupervised detection</td>
+</tr>
+<tr>
+<td>No labels, tabular, mixed feature scales</td>
+<td><strong>IsolationForest</strong> (<a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-3">21.3</a>)</td>
+<td>Distance methods without scaling</td>
+</tr>
+<tr>
+<td>Densities vary across the space</td>
+<td><strong>LOF</strong> (<a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-4">21.4</a>)</td>
+<td>Global methods</td>
+</tr>
+<tr>
+<td>A certified-clean training period exists</td>
+<td><strong>OneClassSVM</strong>, LOF <code>novelty=True</code></td>
+<td>Outlier methods that assume contamination</td>
+</tr>
+<tr>
+<td>Roughly elliptical, low-dimensional</td>
+<td><strong>Mahalanobis / EllipticEnvelope</strong> (<a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-2">21.2</a>)</td>
+<td>Isolation Forest — you are discarding known structure</td>
+</tr>
+<tr>
+<td>The anomaly is a <em>sequence</em>, not a row</td>
+<td>Aggregate to the entity, then detect</td>
+<td>Row-wise detectors</td>
+</tr>
+<tr>
+<td>High-dimensional data</td>
+<td>Reduce first (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-5">7.5</a>), or use Isolation Forest</td>
+<td>LOF, One-Class SVM (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-1">7.1</a>)</td>
+</tr>
+<tr>
+<td>Co-occurrence in transactions</td>
+<td><strong>FP-Growth</strong> (<a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-8-1">21.8.1</a>), then filter hard</td>
+<td>A lift-sorted table read from the top</td>
+</tr>
+<tr>
+<td>You want to predict a <em>specific</em> item</td>
+<td>A classifier with that item as target</td>
+<td>Association rules</td>
+</tr>
+<tr>
+<td>Fewer than a few hundred transactions</td>
+<td>Nothing — describe the frequencies</td>
+<td>Rule mining; there is no support to be had</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="s21-9-3">21.9.3 What goes wrong in production</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Alert fatigue</strong></td>
+<td><code>contamination</code> set too high; the team stops reading the alerts</td>
+<td>21.3</td>
+</tr>
+<tr>
+<td><strong>ROC-AUC on the dashboard</strong></td>
+<td>0.94 reported while precision@50 is 0.2</td>
+<td>21.5</td>
+</tr>
+<tr>
+<td><strong>Masking</strong></td>
+<td>Detector retrained on data containing last month's anomalies; they become normal</td>
+<td>21.2</td>
+</tr>
+<tr>
+<td><strong>The threshold drifts</strong></td>
+<td>Score distribution moves; the fixed cut flags 10x more or nothing</td>
+<td>24.9</td>
+</tr>
+<tr>
+<td><strong>Rules never re-mined</strong></td>
+<td>Seasonal pairings mined in December applied all year</td>
+<td>21.9.1</td>
+</tr>
+<tr>
+<td><strong>Rules read as causal</strong></td>
+<td>Shelves rearranged; nothing changes</td>
+<td>21.9.1</td>
+</tr>
+<tr>
+<td><strong>Contamination treated as truth</strong></td>
+<td>The flagged count mistaken for the real anomaly count</td>
+<td>21.3</td>
+</tr>
+</tbody>
+</table></div>
+<p>The fourth row is the most common silent failure, and the reason to monitor the <strong>score distribution</strong>
+rather than only the flag count.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [38]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># A detector trained on last month, scoring this month - after the population shifted.</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">detector</span> <span class="o">=</span> <span class="n">IsolationForest</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">contamination</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                           <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+
+<span class="n">cut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="o">-</span><span class="n">detector</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">train</span><span class="p">),</span> <span class="mi">98</span><span class="p">)</span>        <span class="c1"># the frozen threshold</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;shift&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">&#39;flagged&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;median score&#39;</span><span class="si">:</span><span class="s2">&gt;15</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">):</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="n">detector</span><span class="o">.</span><span class="n">score_samples</span><span class="p">(</span><span class="n">month</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">shift</span><span class="si">:</span><span class="s2">&gt;8.1f</span><span class="si">}{</span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">cut</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;10.2%</span><span class="si">}{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;15.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">   shift   flagged   median score
+     0.0     1.85%         0.4385
+     0.3     3.10%         0.4460
+     0.6     6.20%         0.4682
+     1.0    17.65%         0.5116</pre></div></div>
+<div class="md"><p>Nothing in that table is an error and nothing raises a warning. The population moved, the frozen threshold
+did not, and the flag rate went from the 2% it was tuned for to nearly 18% — which an on-call team
+experiences as a flood.</p>
+<p>The two columns answer different questions, and both belong on the monitor (<a class="xref" href="/machine-learning/24-interpretability-and-deployment/#s24-9">24.9</a>). <strong>The flag rate is the
+alarm</strong>: it moves fastest and it is what the team feels. <strong>The median score is the diagnosis</strong>: it drifts
+steadily upward across the whole population, which is the signature of <em>everything</em> having moved rather
+than of genuine anomalies appearing. If real anomalies were arriving, the flag rate would climb while the
+median stayed put. Distinguishing those two cases is the entire reason to log the score distribution and
+not just the alert count.</p></div></article>
+<nav class="spn"><a href="/machine-learning/20-clustering/">← Clustering</a><a href="/machine-learning/22-imbalanced-data-and-data-leakage/">Imbalanced Data and Data Leakage →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mathematical Foundations – Machine Learning Chapter 2 | Gradient Atlas</title>
+<meta name="description" content="The linear algebra, calculus, probability and statistics the algorithm chapters actually use — every idea computed in NumPy rather than only stated.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/02-mathematical-foundations/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Mathematical Foundations – Machine Learning Chapter 2 | Gradient Atlas">
+<meta property="og:description" content="The linear algebra, calculus, probability and statistics the algorithm chapters actually use — every idea computed in NumPy rather than only stated.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/02-mathematical-foundations/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Mathematical Foundations", "headline": "Mathematical Foundations", "description": "The linear algebra, calculus, probability and statistics the algorithm chapters actually use — every idea computed in NumPy rather than only stated.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/02-mathematical-foundations/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT51M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Mathematical Foundations", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/02-mathematical-foundations/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 2</p>
+<h1><small>Machine Learning · Chapter 2</small>Mathematical Foundations</h1>
+<p class="lead">The linear algebra, calculus, probability and statistics the algorithm chapters actually use — every idea computed in NumPy rather than only stated.</p>
+<p class="cta"><a class="sbtn" href="/#ch2">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s2-1">2.1 Vectors and Vector Operations</a></li><li class="l3"><a href="#s2-2">2.2 Matrices and Matrix Operations</a></li><li class="l3"><a href="#s2-3">2.3 Norms, Distance and Similarity</a></li><li class="l3"><a href="#s2-4">2.4 Linear Systems, Rank and Invertibility</a></li><li class="l3"><a href="#s2-5">2.5 Eigendecomposition and the Singular Value Decomposition</a></li><li class="l3"><a href="#s2-6">2.6 Derivatives, Gradients and the Chain Rule</a></li><li class="l3"><a href="#s2-7">2.7 Probability for Machine Learning</a></li><li class="l3"><a href="#s2-8">2.8 Statistics for Machine Learning</a></li><li class="l3"><a href="#s2-9">2.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Mathematics earns its place in this material only where it changes what you <em>do</em>. Every section below
+answers a question that comes up later: why a linear model is a dot product (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-1">2.1</a>), why the normal equation
+sometimes explodes (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4">2.4</a>), what PCA is actually computing (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5">2.5</a>), where gradient descent's update rule comes
+from (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-6">2.6</a>), and why Naive Bayes works in log space (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-7">2.7</a>).</p>
+<p>Nothing here is proved. Everything here is computed — the point is to make each idea concrete enough to
+recognize when it reappears wearing an algorithm's clothing. The notation table in <a class="xref" href="/#s25-3">§25.3</a> of the index is
+the reference for symbols.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># readable output for the whole chapter</span>
+</code></pre></div>
+<div class="md"><h3 id="s2-1">2.1 Vectors and Vector Operations</h3>
+<p>A <strong>vector</strong> is an ordered list of numbers. In machine learning it is almost always one of two things:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>The vector</th>
+<th>What it holds</th>
+<th>Length</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(\mathbf{x}^{(i)}\) — one row of \(X\)</td>
+<td>One instance's feature values</td>
+<td>\(p\), the number of features</td>
+</tr>
+<tr>
+<td>\(\mathbf{w}\) — the weight vector</td>
+<td>One learned coefficient per feature</td>
+<td>\(p\)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Both live in the same \(p\)-dimensional space, which is what makes the geometry meaningful: a model's weights
+and a data point can be compared directly.</p>
+<p>Addition and scalar multiplication work element-wise, and NumPy writes them exactly as the maths does.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>    <span class="c1"># one instance, 3 features</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>   <span class="c1"># one weight per feature</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x + w      &quot;</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="p">)</span>        <span class="c1"># [ 2.5  2.  7. ]  - element-wise</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;3 * x      &quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>        <span class="c1"># [ 6.  9. 15. ]   - scales every component</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x.shape    &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>      <span class="c1"># (3,) - one dimension, length 3</span>
+</code></pre><div class="outs"><pre class="out-text">x + w       [2.5 2.  7. ]
+3 * x       [ 6.  9. 15.]
+x.shape     (3,)</pre></div></div>
+<div class="md"><h4 id="s2-1-1">2.1.1 The dot product</h4>
+<p>The <strong>dot product</strong> of two vectors multiplies them element-wise and sums the result:</p>
+<p>\[\mathbf{w} \cdot \mathbf{x} = \sum_{j=1}^{p} w_j x_j\]</p>
+<p>This single operation is the arithmetic core of most of <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–13. A linear model's prediction for one
+instance <em>is</em> a dot product plus an intercept:</p>
+<p>\[\hat{y} = \mathbf{w} \cdot \mathbf{x} + b\]</p>
+<p>Written as a loop it is obvious; written as <code>@</code> it is the same thing, faster and closer to the notation.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="n">by_hand</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">+</span> <span class="n">b</span>
+<span class="n">by_numpy</span> <span class="o">=</span> <span class="n">w</span> <span class="o">@</span> <span class="n">x</span> <span class="o">+</span> <span class="n">b</span>        <span class="c1"># &quot;@&quot; is the dot/matrix-multiply operator</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;by hand :&quot;</span><span class="p">,</span> <span class="n">by_hand</span><span class="p">)</span>    <span class="c1"># 9.0  -&gt; (0.5*2) + (-1*3) + (2*5) + 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;by numpy:&quot;</span><span class="p">,</span> <span class="n">by_numpy</span><span class="p">)</span>   <span class="c1"># 9.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np.dot  :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># identical - &quot;@&quot; and np.dot agree for 1-D vectors</span>
+</code></pre><div class="outs"><pre class="out-text">by hand : 9.0
+by numpy: 9.0
+np.dot  : 9.0</pre></div></div>
+<div class="md"><h4 id="s2-1-2">2.1.2 What the dot product means geometrically</h4>
+<p>The dot product also equals</p>
+<p>\[\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \, \|\mathbf{b}\| \cos\theta\]</p>
+<p>where \(\theta\) is the angle between the two vectors. That gives it a directional reading, which is what
+makes it useful far beyond arithmetic:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Dot product</th>
+<th>Angle</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Positive</td>
+<td>Less than 90°</td>
+<td>The vectors point broadly the same way</td>
+</tr>
+<tr>
+<td>Zero</td>
+<td>Exactly 90°</td>
+<td><strong>Orthogonal</strong> — no shared direction at all</td>
+</tr>
+<tr>
+<td>Negative</td>
+<td>More than 90°</td>
+<td>They point broadly opposite ways</td>
+</tr>
+</tbody>
+</table></div>
+<p>Orthogonality is the property PCA is built on (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5">2.5</a>): principal components are chosen to be mutually
+orthogonal, so each one carries information the others do not.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">b_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a . b =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">@</span> <span class="n">b_vec</span><span class="p">)</span>   <span class="c1"># 0.0  -&gt; orthogonal, at right angles</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a . c =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">@</span> <span class="n">c</span><span class="p">)</span>        <span class="c1"># 1.0  -&gt; positive, sharing a direction</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a . -c =&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">@</span> <span class="o">-</span><span class="n">c</span><span class="p">)</span>      <span class="c1"># -1.0 -&gt; negative, opposed</span>
+
+<span class="n">cos_theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;angle a-c:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos_theta</span><span class="p">))</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;degrees&quot;</span><span class="p">)</span>   <span class="c1"># 45.0</span>
+</code></pre><div class="outs"><pre class="out-text">a . b = 0.0
+a . c = 1.0
+a . -c = -1.0
+angle a-c: 45.0 degrees</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — confusing a 1-D vector with a 2-D column.</strong> <code>(3,)</code> and <code>(3, 1)</code> look interchangeable and
+are not. scikit-learn requires <code>X</code> to be 2-D and <code>y</code> to be 1-D (<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-4">1.4</a>), and mixing the two shapes is the most
+common source of a confusing broadcast result — NumPy will not raise an error, it will silently produce a
+matrix where a vector was intended.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">flat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>      <span class="c1"># shape (3,)   - a 1-D vector</span>
+<span class="n">column</span> <span class="o">=</span> <span class="n">flat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>           <span class="c1"># shape (3, 1) - a 2-D column</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">flat</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">column</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>        <span class="c1"># (3,) (3, 1)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;flat - flat:  &quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">flat</span> <span class="o">-</span> <span class="n">flat</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>        <span class="c1"># (3,)   - as expected</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;column - flat:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">column</span> <span class="o">-</span> <span class="n">flat</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>      <span class="c1"># (3, 3) - NOT an error, and almost never what you wanted</span>
+</code></pre><div class="outs"><pre class="out-text">(3,) (3, 1)
+flat - flat:   (3,)
+column - flat: (3, 3)</pre></div></div>
+<div class="md"><h3 id="s2-2">2.2 Matrices and Matrix Operations</h3>
+<p>A <strong>matrix</strong> is a rectangular grid of numbers. The feature matrix \(X\) is the one that matters: \(n\) rows
+(instances) by \(p\) columns (features), exactly the shape scikit-learn expects.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Notation</th>
+<th>NumPy</th>
+<th>Shape rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transpose</td>
+<td>\(X^\top\)</td>
+<td><code>X.T</code></td>
+<td>\((n, p) \to (p, n)\)</td>
+</tr>
+<tr>
+<td>Matrix–vector product</td>
+<td>\(X\mathbf{w}\)</td>
+<td><code>X @ w</code></td>
+<td>\((n, p) \times (p,) \to (n,)\)</td>
+</tr>
+<tr>
+<td>Matrix–matrix product</td>
+<td>\(AB\)</td>
+<td><code>A @ B</code></td>
+<td>\((n, k) \times (k, m) \to (n, m)\)</td>
+</tr>
+<tr>
+<td>Element-wise product</td>
+<td>\(A \odot B\)</td>
+<td><code>A * B</code></td>
+<td>Same shape in, same shape out</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>\(I\)</td>
+<td><code>np.eye(n)</code></td>
+<td>\(AI = A\)</td>
+</tr>
+<tr>
+<td>Inverse</td>
+<td>\(A^{-1}\)</td>
+<td><code>np.linalg.inv(A)</code></td>
+<td>Square, non-singular only (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4">2.4</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The second row is the one worth internalizing: <strong><code>X @ w</code> computes every prediction at once.</strong> The loop over
+instances that a beginner writes is already inside the matrix product.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>     <span class="c1"># instance 0</span>
+              <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span>     <span class="c1"># instance 1</span>
+              <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>    <span class="c1"># instance 2</span>
+
+<span class="n">loop_preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">w</span> <span class="o">@</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+<span class="n">matrix_preds</span> <span class="o">=</span> <span class="n">X</span> <span class="o">@</span> <span class="n">w</span> <span class="o">+</span> <span class="n">b</span>   <span class="c1"># all three predictions in one operation</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loop  :&quot;</span><span class="p">,</span> <span class="n">loop_preds</span><span class="p">)</span>     <span class="c1"># [9.  9.5 1. ]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matrix:&quot;</span><span class="p">,</span> <span class="n">matrix_preds</span><span class="p">)</span>   <span class="c1"># identical</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;equal :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">loop_preds</span><span class="p">,</span> <span class="n">matrix_preds</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">loop  : [9.  9.5 1. ]
+matrix: [9.  9.5 1. ]
+equal : True</pre></div></div>
+<div class="md"><p>The shapes are the contract: <code>X</code> is <code>(3, 3)</code>, <code>w</code> is <code>(3,)</code>, and the product is <code>(3,)</code> — one prediction per
+row. The inner dimensions must match, and NumPy will refuse if they do not.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X.shape&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;@ w.shape&quot;</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">X</span> <span class="o">@</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># (3, 3) @ (3,) -&gt; (3,)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">X</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>   <span class="c1"># length 2 against 3 columns</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError:&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="mi">70</span><span class="p">])</span>
+</code></pre><div class="outs"><pre class="out-text">X.shape (3, 3) @ w.shape (3,) -&gt; (3,)
+ValueError: matmul: Input operand 1 has a mismatch in its core dimension 0, with g</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — using <code>*</code> where <code>@</code> was meant.</strong> In NumPy <code>*</code> is element-wise multiplication, not matrix
+multiplication. For two matrices of the same shape both operations are legal and return different things,
+so there is no error to catch — just a wrong answer. (In MATLAB and in the mathematics, <code>*</code> <em>is</em> matrix
+multiplication, which is where the habit comes from.)</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A * A (element-wise):</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">A</span> <span class="o">*</span> <span class="n">A</span><span class="p">)</span>     <span class="c1"># squares each entry</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A @ A (matrix product):</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">A</span> <span class="o">@</span> <span class="n">A</span><span class="p">)</span>   <span class="c1"># a genuinely different matrix</span>
+</code></pre><div class="outs"><pre class="out-text">A * A (element-wise):
+ [[ 1.  4.]
+ [ 9. 16.]]
+A @ A (matrix product):
+ [[ 7. 10.]
+ [15. 22.]]</pre></div></div>
+<div class="md"><h3 id="s2-3">2.3 Norms, Distance and Similarity</h3>
+<p>A <strong>norm</strong> measures the size of a vector. Different norms measure "size" differently, and the choice is not
+cosmetic — it is what separates ridge from lasso (<a class="xref" href="/machine-learning/12-regularized-linear-models/">Chapter 12</a>) and one k-NN metric from another (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-2">14.2</a>).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Norm</th>
+<th>Formula</th>
+<th>Also called</th>
+<th>Where it appears</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(L_1\)</td>
+<td>\(\sum_j \lvert v_j \rvert\)</td>
+<td>Manhattan, taxicab</td>
+<td>Lasso's penalty (<a class="xref" href="/machine-learning/12-regularized-linear-models/#s12-3">12.3</a>), Manhattan distance</td>
+</tr>
+<tr>
+<td>\(L_2\)</td>
+<td>\(\sqrt{\sum_j v_j^2}\)</td>
+<td>Euclidean</td>
+<td>Ridge's penalty (<a class="xref" href="/machine-learning/12-regularized-linear-models/#s12-2">12.2</a>), ordinary distance</td>
+</tr>
+<tr>
+<td>\(L_\infty\)</td>
+<td>\(\max_j \lvert v_j \rvert\)</td>
+<td>Chebyshev, max</td>
+<td>Rare; worst-case bounds</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>np.linalg.norm</code> computes all of them through its <code>ord</code> argument.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;L1  :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>         <span class="c1"># 7.0  -&gt; 3 + 4</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;L2  :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>         <span class="c1"># 5.0  -&gt; sqrt(9 + 16), the classic 3-4-5 triangle</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Linf:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>   <span class="c1"># 4.0  -&gt; the largest single component</span>
+</code></pre><div class="outs"><pre class="out-text">L1  : 7.0
+L2  : 5.0
+Linf: 4.0</pre></div></div>
+<div class="md"><h4 id="s2-3-1">2.3.1 Distance is the norm of a difference</h4>
+<p>Every distance metric in <a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/">Chapter 14</a> is a norm applied to the difference between two points:</p>
+<p>\[d(\mathbf{a}, \mathbf{b}) = \|\mathbf{a} - \mathbf{b}\|\]</p>
+<p>Change the norm and you change the metric — and, in k-NN, the neighbours it finds.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">p1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="n">diff</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p2</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Euclidean (L2):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span>            <span class="c1"># 5.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Manhattan (L1):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>   <span class="c1"># 7.0 - longer: no diagonal shortcut</span>
+</code></pre><div class="outs"><pre class="out-text">Euclidean (L2): 5.0
+Manhattan (L1): 7.0</pre></div></div>
+<div class="md"><h4 id="s2-3-2">2.3.2 Cosine similarity</h4>
+<p>Distance cares about magnitude; <strong>cosine similarity</strong> cares only about direction. Rearranging the geometric
+dot-product identity from <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-1-2">2.1.2</a>:</p>
+<p>\[\text{cos-sim}(\mathbf{a}, \mathbf{b}) = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{a}\| \|\mathbf{b}\|} \in [-1, 1]\]</p>
+<p>This matters wherever magnitude is an artefact rather than a signal. Two documents represented as word
+counts (<a class="xref" href="/machine-learning/06-feature-engineering/#s6-6">6.6</a>) can be about exactly the same thing while one is ten times longer; Euclidean distance calls
+them far apart, cosine similarity calls them identical.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">cosine_similarity</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+
+
+<span class="n">short_doc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>    <span class="c1"># word counts</span>
+<span class="n">long_doc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">])</span>  <span class="c1"># same proportions, ten times as long</span>
+<span class="n">other_doc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>     <span class="c1"># genuinely different content</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;euclidean short-long:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">short_doc</span> <span class="o">-</span> <span class="n">long_doc</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>   <span class="c1"># 22.05 - &quot;far apart&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cosine    short-long:&quot;</span><span class="p">,</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">short_doc</span><span class="p">,</span> <span class="n">long_doc</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># 1.000 - identical direction</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cosine    short-other:&quot;</span><span class="p">,</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">short_doc</span><span class="p">,</span> <span class="n">other_doc</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>  <span class="c1"># 0.408 - genuinely different</span>
+</code></pre><div class="outs"><pre class="out-text">euclidean short-long: 22.05
+cosine    short-long: 1.0
+cosine    short-other: 0.408</pre></div></div>
+<div class="md"><h3 id="s2-4">2.4 Linear Systems, Rank and Invertibility</h3>
+<p>Fitting a linear model by the normal equation (<a class="xref" href="/machine-learning/11-linear-regression/#s11-3">11.3</a>) means solving a linear system. Understanding when that
+system has no unique solution explains a failure you will otherwise meet as an inexplicable error message.</p>
+<p>A system \(A\mathbf{z} = \mathbf{b}\) asks: which \(\mathbf{z}\), combined through \(A\), produces \(\mathbf{b}\)?</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">A_sys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]])</span>
+<span class="n">b_sys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">])</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A_sys</span><span class="p">,</span> <span class="n">b_sys</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;solution:&quot;</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>                       <span class="c1"># [1. 3.]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;check A @ z:&quot;</span><span class="p">,</span> <span class="n">A_sys</span> <span class="o">@</span> <span class="n">z</span><span class="p">)</span>            <span class="c1"># [ 5. 10.] - recovers b</span>
+</code></pre><div class="outs"><pre class="out-text">solution: [1. 3.]
+check A @ z: [ 5. 10.]</pre></div></div>
+<div class="md"><h4 id="s2-4-1">2.4.1 Rank and singular matrices</h4>
+<p>The <strong>rank</strong> of a matrix is the number of linearly independent columns it has — columns that carry
+genuinely new information rather than being reproducible from the others. A square matrix whose rank is
+less than its size is <strong>singular</strong>: it has no inverse, and the system has either no solution or infinitely
+many.</p>
+<p>This is not an abstract edge case. A singular (or nearly singular) \(X^\top X\) is exactly what
+<strong>multicollinearity</strong> produces — two features that are duplicates, or one that is a sum of others (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Column 2 is exactly 2x column 1: it carries no new information.</span>
+<span class="n">collinear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shape:&quot;</span><span class="p">,</span> <span class="n">collinear</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;-&gt; 2 columns&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rank :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">collinear</span><span class="p">))</span>   <span class="c1"># 1 - only ONE independent column</span>
+
+<span class="n">square</span> <span class="o">=</span> <span class="n">collinear</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">collinear</span>   <span class="c1"># this is the X^T X of the normal equation</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;det(X^T X):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">square</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>   <span class="c1"># 0.0 -&gt; singular, no inverse exists</span>
+</code></pre><div class="outs"><pre class="out-text">shape: (3, 2) -&gt; 2 columns
+rank : 1
+det(X^T X): 0.0</pre></div></div>
+<div class="md"><p>A determinant of exactly zero is the clean case. The dangerous case is a determinant <em>near</em> zero — an
+<strong>ill-conditioned</strong> matrix, which is technically invertible but numerically untrustworthy: tiny changes in
+the data produce huge changes in the solution. The <strong>condition number</strong> quantifies it, and it is the single
+most useful diagnostic when a linear model returns absurd coefficients.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Condition number</th>
+<th>Reading</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>~1</td>
+<td>Well conditioned</td>
+</tr>
+<tr>
+<td>\(10^3\)–\(10^6\)</td>
+<td>Getting fragile; coefficients unstable</td>
+</tr>
+<tr>
+<td>\(&gt; 10^{10}\)</td>
+<td>Effectively singular; the result is numerical noise</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">well</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+<span class="n">nearly_singular</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0000001</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond(identity)       :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">well</span><span class="p">))</span>                   <span class="c1"># 1.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond(nearly singular):&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">nearly_singular</span><span class="p">)</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># ~4e+07 - fragile</span>
+</code></pre><div class="outs"><pre class="out-text">cond(identity)       : 1.0
+cond(nearly singular): 4.000e+07</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — computing an explicit inverse.</strong> <code>np.linalg.inv(A) @ b</code> and <code>np.linalg.solve(A, b)</code>
+answer the same question, but <code>solve</code> is both faster and numerically better behaved: it never forms the
+inverse, so it never amplifies the rounding error that forming one introduces. The rule is simple — if you
+are writing <code>inv</code>, you almost certainly want <code>solve</code>, and if the matrix might be singular you want
+<code>np.linalg.lstsq</code> or <code>np.linalg.pinv</code>, which return the least-squares solution instead of failing.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># The singular system from above - inv() refuses outright.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">square</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;inv  -&gt;&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<span class="c1"># pinv (the pseudo-inverse) returns a sensible answer anyway.</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pinv -&gt;&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">square</span><span class="p">)</span> <span class="o">@</span> <span class="n">target</span><span class="p">)</span>   <span class="c1"># a valid minimum-norm solution</span>
+</code></pre><div class="outs"><pre class="out-text">inv  -&gt; LinAlgError : Singular matrix
+pinv -&gt; [0.014 0.029]</pre></div></div>
+<div class="md"><p>This is precisely why scikit-learn's <code>LinearRegression</code> uses <code>lstsq</code> internally rather than inverting
+\(X^\top X\) — it returns <em>an</em> answer on collinear data instead of crashing. That is a mixed blessing: the
+answer's individual coefficients are then unstable and should not be interpreted (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>, <a class="xref" href="/machine-learning/11-linear-regression/#s11-9">11.9</a>).</p>
+<h4 id="s2-4-2">2.4.2 Why ridge regression is a numerical fix as well as a statistical one</h4>
+<p>Ridge (<a class="xref" href="/machine-learning/12-regularized-linear-models/#s12-2">12.2</a>) adds \(\lambda I\) to \(X^\top X\) before solving. Statistically that shrinks the coefficients;
+numerically it adds a constant to the diagonal, which drags the condition number down and makes a singular
+matrix invertible again.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">lam</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">ridged</span> <span class="o">=</span> <span class="n">square</span> <span class="o">+</span> <span class="n">lam</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">square</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;det before ridge:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">square</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>    <span class="c1"># 0.0 - singular</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;det after  ridge:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">ridged</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>     <span class="c1"># 71.0 - invertible</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond before     :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">square</span><span class="p">)</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># astronomically large</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond after      :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">ridged</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># small and safe</span>
+</code></pre><div class="outs"><pre class="out-text">det before ridge: 0.0
+det after  ridge: 71.0
+cond before     : 1.101e+16
+cond after      : 71.000</pre></div></div>
+<div class="md"><h3 id="s2-5">2.5 Eigendecomposition and the Singular Value Decomposition</h3>
+<p>An <strong>eigenvector</strong> of a square matrix \(A\) is a vector whose <em>direction</em> is unchanged when \(A\) is applied to
+it — only its length changes, by a factor called the <strong>eigenvalue</strong>:</p>
+<p>\[A\mathbf{v} = \lambda \mathbf{v}\]</p>
+<p>Most vectors get rotated by a matrix. Eigenvectors are the special directions that do not, which makes them
+the natural axes to describe what the matrix does.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]])</span>
+
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="c1"># eig() returns a complex dtype for a general matrix, even when every eigenvalue is real.</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">eigenvalues</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">eigenvectors</span><span class="o">.</span><span class="n">real</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;eigenvalues:&quot;</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">)</span>   <span class="c1"># [3. 2.]</span>
+
+<span class="n">v0</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>              <span class="c1"># eigenvectors are the COLUMNS, not the rows</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;M @ v0      :&quot;</span><span class="p">,</span> <span class="n">M</span> <span class="o">@</span> <span class="n">v0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;lambda * v0 :&quot;</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">v0</span><span class="p">)</span>   <span class="c1"># identical - the defining property</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;equal:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">M</span> <span class="o">@</span> <span class="n">v0</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">v0</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">eigenvalues: [3. 2.]
+M @ v0      : [3. 0.]
+lambda * v0 : [3. 0.]
+equal: True</pre></div></div>
+<div class="md"><h4 id="s2-5-1">2.5.1 Why this is PCA</h4>
+<p><a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/">Chapter 7</a>.5 derives PCA properly; the mechanism is already visible here. The <strong>covariance matrix</strong> of a
+dataset (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-2">2.8.2</a>) records how features vary together. Its eigenvectors are the directions along which the
+data varies, and each eigenvalue is <em>how much</em> variance lies along its eigenvector. Sorting eigenvalues
+largest-first and keeping the top few is the whole idea of PCA.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Data stretched along a diagonal: most of its variance is in one direction.</span>
+<span class="n">base</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">base</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]])</span>
+
+<span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>       <span class="c1"># rowvar=False -&gt; columns are the variables</span>
+<span class="n">vals</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>        <span class="c1"># eigh: for symmetric matrices like covariance</span>
+<span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">vals</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>           <span class="c1"># largest eigenvalue first</span>
+<span class="n">vals</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="n">order</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;eigenvalues (variance per direction):&quot;</span><span class="p">,</span> <span class="n">vals</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>     <span class="c1"># [11.524  0.248]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;share of total variance:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">vals</span> <span class="o">/</span> <span class="n">vals</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># [0.979 0.021]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;first principal direction:&quot;</span><span class="p">,</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">eigenvalues (variance per direction): [11.524  0.248]
+share of total variance: [0.979 0.021]
+first principal direction: [-0.879 -0.477]</pre></div></div>
+<div class="md"><p>Almost 98% of the variance lies along a single direction, so projecting this two-dimensional data down to
+one dimension discards about 2% of it. That trade — fewer dimensions, with the information loss quantified
+rather than guessed at — is exactly what 7.5 formalizes.</p>
+<h4 id="s2-5-2">2.5.2 The singular value decomposition</h4>
+<p>Eigendecomposition only applies to square matrices. The <strong>SVD</strong> applies to <em>any</em> matrix, which is why it is
+the workhorse underneath PCA, <code>LinearRegression</code>'s solver, and truncated-SVD text methods:</p>
+<p>\[X = U \Sigma V^\top\]</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Shape</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(U\)</td>
+<td>\((n, k)\)</td>
+<td>How each <strong>instance</strong> relates to each latent direction</td>
+</tr>
+<tr>
+<td>\(\Sigma\)</td>
+<td>\((k,)\) diagonal</td>
+<td>The <strong>singular values</strong> — importance of each direction, largest first</td>
+</tr>
+<tr>
+<td>\(V^\top\)</td>
+<td>\((k, p)\)</td>
+<td>How each <strong>feature</strong> relates to each latent direction</td>
+</tr>
+</tbody>
+</table></div>
+<p>NumPy returns \(\Sigma\) as a 1-D array of singular values rather than a matrix.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Vt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;U:&quot;</span><span class="p">,</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot; S:&quot;</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot; Vt:&quot;</span><span class="p">,</span> <span class="n">Vt</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>   <span class="c1"># (300, 2) (2,) (2, 2)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;singular values:&quot;</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>                      <span class="c1"># largest first, always</span>
+
+<span class="n">reconstructed</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">@</span> <span class="n">Vt</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;exact reconstruction:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">reconstructed</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">U: (300, 2)  S: (2,)  Vt: (2, 2)
+singular values: [58.72  8.61]
+exact reconstruction: True</pre></div></div>
+<div class="md"><p>Keeping only the largest singular values gives the best possible low-rank approximation of the matrix — the
+formal statement is the Eckart–Young theorem, and it is the reason "keep the top \(k\) components" is a
+principled operation rather than a heuristic.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">rank1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Vt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>   <span class="c1"># keep ONE singular value out of two</span>
+
+<span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">rank1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;relative reconstruction error from rank 1: </span><span class="si">{</span><span class="n">error</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 0.145</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;singular value share:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">S</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>     <span class="c1"># [0.979 0.021] - matches 2.5.1</span>
+</code></pre><div class="outs"><pre class="out-text">relative reconstruction error from rank 1: 0.145
+singular value share: [0.979 0.021]</pre></div></div>
+<div class="md"><div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>np.linalg.eig</code> / <code>eigh</code></th>
+<th><code>np.linalg.svd</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Works on</td>
+<td>Square matrices only (<code>eigh</code>: symmetric)</td>
+<td>Any matrix, any shape</td>
+</tr>
+<tr>
+<td>Returns</td>
+<td>Eigenvalues and eigenvectors</td>
+<td>\(U\), singular values, \(V^\top\)</td>
+</tr>
+<tr>
+<td>Can be negative</td>
+<td>Eigenvalues can be</td>
+<td>Singular values never are</td>
+</tr>
+<tr>
+<td>Numerical stability on \(X\)</td>
+<td>Requires forming \(X^\top X\) first, squaring the condition number</td>
+<td>Operates on \(X\) directly — better conditioned</td>
+</tr>
+<tr>
+<td>Used by</td>
+<td>PCA when given a covariance matrix</td>
+<td><code>sklearn.decomposition.PCA</code>, <code>LinearRegression</code>, <code>TruncatedSVD</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The stability row is why scikit-learn's PCA uses the SVD of the centred data rather than eigendecomposing
+the covariance matrix, even though the two are mathematically equivalent.</p>
+<h4 id="s2-5-3">2.5.3 Determinism warning: eigenvector signs</h4>
+<p>An eigenvector multiplied by \(-1\) is still an eigenvector — the definition constrains direction, not sign.
+Different library versions, and even different runs on different hardware, can legitimately return
+different signs. Anything downstream that depends on the sign (a scatter plot's orientation, the sign of a
+PCA loading) can flip without anything being wrong. <code>sklearn.decomposition.PCA</code> applies a deterministic
+sign convention for this reason; hand-rolled eigendecompositions do not.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">v</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;v is an eigenvector :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">cov</span> <span class="o">@</span> <span class="n">v</span><span class="p">,</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">))</span>       <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-v is one too       :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">cov</span> <span class="o">@</span> <span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="n">v</span><span class="p">))</span>   <span class="c1"># True - equally valid</span>
+</code></pre><div class="outs"><pre class="out-text">v is an eigenvector : True
+-v is one too       : True</pre></div></div>
+<div class="md"><h3 id="s2-6">2.6 Derivatives, Gradients and the Chain Rule</h3>
+<p>Training a model means minimizing a loss. Minimizing means moving downhill. Derivatives are how a program
+knows which way is downhill.</p>
+<p>The <strong>derivative</strong> \(f'(x)\) is the slope of \(f\) at \(x\) — how much the output changes per unit change in the
+input. Its sign is the operationally important part: positive means the function is rising, so decreasing
+\(x\) decreases \(f\).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>          <span class="c1"># minimum at x = 0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">f_prime</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span>         <span class="c1"># the derivative, by hand</span>
+
+<span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x=</span><span class="si">{</span><span class="n">point</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2">  f&#39;(x)=</span><span class="si">{</span><span class="n">f_prime</span><span class="p">(</span><span class="n">point</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2">  -&gt; &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;go right&quot;</span> <span class="k">if</span> <span class="n">f_prime</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;go left&quot;</span> <span class="k">if</span> <span class="n">f_prime</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;at the minimum&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">x= -3.0  f&#x27;(x)= -6.0  -&gt; go right
+x=  0.0  f&#x27;(x)=  0.0  -&gt; at the minimum
+x=  3.0  f&#x27;(x)=  6.0  -&gt; go left</pre></div></div>
+<div class="md"><p>Whenever a derivative is derived by hand there is a cheap way to check it: compare against a numerical
+approximation of the same slope, \(\frac{f(x+h) - f(x-h)}{2h}\) for small \(h\). This is worth doing every time
+— a sign error in a gradient is silent, and produces a model that trains steadily in the wrong direction.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">numerical_derivative</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">h</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;analytic :&quot;</span><span class="p">,</span> <span class="n">f_prime</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>                     <span class="c1"># 6.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numerical:&quot;</span><span class="p">,</span> <span class="n">numerical_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">))</span>    <span class="c1"># 6.000000... - agrees</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;match:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">f_prime</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">numerical_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">analytic : 6.0
+numerical: 6.000000000039306
+match: True</pre></div></div>
+<div class="md"><h4 id="s2-6-1">2.6.1 Partial derivatives and the gradient</h4>
+<p>A loss depends on many parameters at once, not one. The <strong>partial derivative</strong> \(\partial f / \partial w_j\)
+is the slope in the direction of \(w_j\) alone, holding every other parameter fixed. Stacking all of them
+into a vector gives the <strong>gradient</strong>:</p>
+<p>\[\nabla f = \left[ \frac{\partial f}{\partial w_1}, \frac{\partial f}{\partial w_2}, \dots, \frac{\partial f}{\partial w_p} \right]\]</p>
+<p>The gradient points in the direction of <strong>steepest increase</strong>. Gradient descent (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/#s10-4">10.4</a>) therefore steps in
+the direction of \(-\nabla f\).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">g</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;f(w1, w2) = w1^2 + 3 * w2^2 - a bowl, steeper along w2.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">grad_g</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+
+<span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;gradient at (1, 1):&quot;</span><span class="p">,</span> <span class="n">grad_g</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>   <span class="c1"># [2. 6.] - steeper in the w2 direction</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;downhill direction:&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">grad_g</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>  <span class="c1"># [-2. -6.]</span>
+</code></pre><div class="outs"><pre class="out-text">gradient at (1, 1): [2. 6.]
+downhill direction: [-2. -6.]</pre></div></div>
+<div class="md"><h4 id="s2-6-2">2.6.2 The gradient of mean squared error</h4>
+<p>This is the one gradient the material actually needs, and <a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/">Chapters 10</a> and 11 both use it. For
+\(\hat{y} = X\mathbf{w}\) and</p>
+<p>\[J(\mathbf{w}) = \frac{1}{n}\sum_{i=1}^{n}\left(\hat{y}^{(i)} - y^{(i)}\right)^2\]</p>
+<p>the gradient is</p>
+<p>\[\nabla J = \frac{2}{n} X^\top (X\mathbf{w} - y)\]</p>
+<p>Deriving that is <a class="xref" href="/machine-learning/11-linear-regression/#s11-2">11.2</a>'s job. Verifying it numerically takes four lines and is the single best habit in this
+whole section.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">24 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X_g</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">w_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">y_g</span> <span class="o">=</span> <span class="n">X_g</span> <span class="o">@</span> <span class="n">w_true</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="n">w_vec</span><span class="p">):</span>
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">X_g</span> <span class="o">@</span> <span class="n">w_vec</span> <span class="o">-</span> <span class="n">y_g</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">residual</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mse_gradient</span><span class="p">(</span><span class="n">w_vec</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_g</span><span class="p">)</span> <span class="o">*</span> <span class="n">X_g</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="n">X_g</span> <span class="o">@</span> <span class="n">w_vec</span> <span class="o">-</span> <span class="n">y_g</span><span class="p">)</span>
+
+
+<span class="n">w_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">analytic</span> <span class="o">=</span> <span class="n">mse_gradient</span><span class="p">(</span><span class="n">w_test</span><span class="p">)</span>
+
+<span class="c1"># Numerical gradient: nudge one component at a time.</span>
+<span class="n">numerical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="n">numerical_derivative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">:</span> <span class="n">mse</span><span class="p">(</span><span class="n">w_test</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)[</span><span class="n">j</span><span class="p">]),</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;analytic :&quot;</span><span class="p">,</span> <span class="n">analytic</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numerical:&quot;</span><span class="p">,</span> <span class="n">numerical</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;match:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">analytic</span><span class="p">,</span> <span class="n">numerical</span><span class="p">))</span>   <span class="c1"># True - the formula is right</span>
+</code></pre><div class="outs"><pre class="out-text">analytic : [-4.072  1.583 -0.857]
+numerical: [-4.072  1.583 -0.857]
+match: True</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — dropping the \(2/n\).</strong> Both the <code>2</code> and the <code>1/n</code> are easy to lose when transcribing the
+formula, and neither loss produces an error: the gradient still points the right <em>direction</em>, so training
+still works, just at a different effective learning rate. It then looks as though the learning rate needs
+tuning when the real problem is a wrong constant. The numerical check above catches this immediately, which
+is exactly why it is worth writing.</p>
+<h4 id="s2-6-3">2.6.3 The chain rule</h4>
+<p>When functions are composed, derivatives multiply:</p>
+<p>\[\frac{d}{dx} f(g(x)) = f'(g(x)) \cdot g'(x)\]</p>
+<p>Every model in <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–13 is a composition — a linear combination, then possibly a squashing function
+(<a class="xref" href="/machine-learning/13-logistic-regression/#s13-2">13.2</a>), then a loss — so the chain rule is how any of their gradients are obtained.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># h(x) = (3x + 1)^2  =  f(g(x))  with  g(x) = 3x + 1,  f(u) = u^2</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">h</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">h_prime</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span>     <span class="c1"># f&#39;(g(x)) * g&#39;(x)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;analytic :&quot;</span><span class="p">,</span> <span class="n">h_prime</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span>                    <span class="c1"># 42.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numerical:&quot;</span><span class="p">,</span> <span class="n">numerical_derivative</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span>   <span class="c1"># 42.000...</span>
+</code></pre><div class="outs"><pre class="out-text">analytic : 42.0
+numerical: 42.000000000896875</pre></div></div>
+<div class="md"><h3 id="s2-7">2.7 Probability for Machine Learning</h3>
+<p>Classification models do not really output classes — they output probabilities, and a threshold turns those
+into classes (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-6">8.6</a>). Naive Bayes (<a class="xref" href="/machine-learning/15-naive-bayes/">Chapter 15</a>) is built directly out of the rules below.</p>
+<h4 id="s2-7-1">2.7.1 Random variables, expectation and variance</h4>
+<p>A <strong>random variable</strong> takes a value determined by a random process. Two summaries characterize it:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Meaning</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Expectation</strong> \(E[Z]\)</td>
+<td>The long-run average value</td>
+<td>\(\sum_z z \, P(z)\)</td>
+</tr>
+<tr>
+<td><strong>Variance</strong> \(\mathrm{Var}(Z)\)</td>
+<td>The average squared deviation from that average</td>
+<td>\(E[(Z - E[Z])^2]\)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Expectation is not "the most likely value" and need not be attainable — a fair die has expectation 3.5.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">outcomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)</span>
+
+<span class="n">expectation</span> <span class="o">=</span> <span class="p">(</span><span class="n">outcomes</span> <span class="o">*</span> <span class="n">probs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="p">(((</span><span class="n">outcomes</span> <span class="o">-</span> <span class="n">expectation</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">probs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;E[die]  :&quot;</span><span class="p">,</span> <span class="n">expectation</span><span class="p">)</span>          <span class="c1"># 3.5 - a value the die can never show</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Var(die):&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>   <span class="c1"># 2.9167</span>
+
+<span class="n">rolls</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100_000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;empirical mean over 100k rolls:&quot;</span><span class="p">,</span> <span class="n">rolls</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>   <span class="c1"># ~3.5 - converges to E</span>
+</code></pre><div class="outs"><pre class="out-text">E[die]  : 3.5
+Var(die): 2.9167
+empirical mean over 100k rolls: 3.4995</pre></div></div>
+<div class="md"><h4 id="s2-7-2">2.7.2 The distributions that actually come up</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Models</th>
+<th>Appears in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bernoulli</strong></td>
+<td>A single yes/no trial with probability \(p\)</td>
+<td>The target of every binary classifier (<a class="xref" href="/machine-learning/13-logistic-regression/#s13-3">13.3</a>)</td>
+</tr>
+<tr>
+<td><strong>Binomial</strong></td>
+<td>Number of successes in \(n\) Bernoulli trials</td>
+<td>Bagging's bootstrap counts (<a class="xref" href="/machine-learning/18-ensembles-i-bagging-and-random-forests/#s18-3">18.3</a>)</td>
+</tr>
+<tr>
+<td><strong>Normal (Gaussian)</strong></td>
+<td>A symmetric bell around a mean</td>
+<td>Gaussian Naive Bayes (<a class="xref" href="/machine-learning/15-naive-bayes/#s15-3">15.3</a>), linear-model residuals (<a class="xref" href="/machine-learning/11-linear-regression/#s11-6">11.6</a>), the CLT (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-3">2.8.3</a>)</td>
+</tr>
+<tr>
+<td><strong>Uniform</strong></td>
+<td>Every value in a range equally likely</td>
+<td>Random search (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-5">23.5</a>), weight initialization</td>
+</tr>
+<tr>
+<td><strong>Poisson</strong></td>
+<td>Counts of events in a fixed interval</td>
+<td>Support-ticket counts, arrivals, defects</td>
+</tr>
+<tr>
+<td><strong>Exponential</strong></td>
+<td>Waiting time between Poisson events</td>
+<td>Time-to-churn, survival framing</td>
+</tr>
+</tbody>
+</table></div>
+<p>The normal distribution is disproportionately common for a specific reason covered in <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-3">2.8.3</a>, not because
+real data is usually bell-shaped — it usually is not (<a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-4">4.4</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n</span> <span class="o">=</span> <span class="mi">10_000</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;bernoulli(p=0.3)&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+    <span class="s2">&quot;binomial(10, 0.3)&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+    <span class="s2">&quot;normal(0, 1)&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+    <span class="s2">&quot;poisson(lam=2)&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+    <span class="s2">&quot;exponential(1)&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> mean </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">   var </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">bernoulli(p=0.3)     mean   0.304   var   0.212
+binomial(10, 0.3)    mean   2.999   var   2.075
+normal(0, 1)         mean  -0.015   var   1.004
+poisson(lam=2)       mean   2.007   var   2.035
+exponential(1)       mean   0.995   var   1.004</pre></div></div>
+<div class="md"><h4 id="s2-7-3">2.7.3 Bayes' theorem</h4>
+<p>Bayes' theorem inverts a conditional probability — it converts \(P(\text{evidence} \mid \text{cause})\),
+which is usually measurable, into \(P(\text{cause} \mid \text{evidence})\), which is usually what you want:</p>
+<p>\[P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)}\]</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Name</th>
+<th>In a classifier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(P(A)\)</td>
+<td>Prior</td>
+<td>How common the class is before seeing any features</td>
+</tr>
+<tr>
+<td>\(P(B \mid A)\)</td>
+<td>Likelihood</td>
+<td>How typical these feature values are within that class</td>
+</tr>
+<tr>
+<td>\(P(A \mid B)\)</td>
+<td>Posterior</td>
+<td>The predicted probability of the class, given the features</td>
+</tr>
+<tr>
+<td>\(P(B)\)</td>
+<td>Evidence</td>
+<td>A normalizing constant — the same for every class, so 15.1 drops it</td>
+</tr>
+</tbody>
+</table></div>
+<p>The classic demonstration is a medical test, and the result is genuinely counter-intuitive.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">prevalence</span> <span class="o">=</span> <span class="mf">0.001</span>          <span class="c1"># P(disease): 1 in 1000</span>
+<span class="n">sensitivity</span> <span class="o">=</span> <span class="mf">0.99</span>          <span class="c1"># P(positive | disease)</span>
+<span class="n">false_positive_rate</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># P(positive | no disease)</span>
+
+<span class="n">p_positive</span> <span class="o">=</span> <span class="n">sensitivity</span> <span class="o">*</span> <span class="n">prevalence</span> <span class="o">+</span> <span class="n">false_positive_rate</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">prevalence</span><span class="p">)</span>
+<span class="n">posterior</span> <span class="o">=</span> <span class="n">sensitivity</span> <span class="o">*</span> <span class="n">prevalence</span> <span class="o">/</span> <span class="n">p_positive</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;P(positive test)          : </span><span class="si">{</span><span class="n">p_positive</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;P(disease | positive test): </span><span class="si">{</span><span class="n">posterior</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 0.0194 -&gt; under 2%</span>
+</code></pre><div class="outs"><pre class="out-text">P(positive test)          : 0.0509
+P(disease | positive test): 0.0194</pre></div></div>
+<div class="md"><p>A test that is 99% sensitive returns a positive result that is right <strong>less than 2% of the time</strong>. Nothing
+is wrong with the test: the disease is so rare that the 5% of false positives drawn from the 999 healthy
+people vastly outnumber the true positives drawn from the 1 sick person.</p>
+<p><strong>Common mistake — base rate neglect.</strong> Reading a 99% sensitivity as "99% chance I have it" ignores
+\(P(A)\) entirely. This is not a curiosity; it is the arithmetic behind every rare-event classifier in
+<a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/">Chapter 22</a>. A fraud detector with excellent sensitivity, applied to a population where fraud is 0.1% of
+transactions, will produce alert queues that are overwhelmingly false alarms — and the fix is a threshold
+decision (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-6">8.6</a>), not a better model.</p></div>
+<div class="md"><h3 id="s2-8">2.8 Statistics for Machine Learning</h3>
+<h4 id="s2-8-1">2.8.1 Descriptive statistics</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Statistic</th>
+<th>What it says</th>
+<th>Robust to outliers?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mean</td>
+<td>The balance point</td>
+<td><strong>No</strong> — one extreme value moves it</td>
+</tr>
+<tr>
+<td>Median</td>
+<td>The middle value</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Standard deviation</td>
+<td>Typical distance from the mean</td>
+<td>No</td>
+</tr>
+<tr>
+<td>IQR (Q3 − Q1)</td>
+<td>The spread of the middle half</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Skew</td>
+<td>Asymmetry; positive means a long right tail</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<p>The robustness column decides real choices: it is why <code>RobustScaler</code> exists (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-5">5.5</a>), why median imputation is
+the safer default (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-2">5.2</a>), and why the IQR rule is the standard outlier test (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-3">5.3</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">clean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">,</span> <span class="mf">11.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">])</span>
+<span class="n">with_outlier</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clean</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">)</span>   <span class="c1"># one data-entry error</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}{</span><span class="s1">&#39;mean&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;median&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;std&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;IQR&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;clean&quot;</span><span class="p">,</span> <span class="n">clean</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;+ outlier&quot;</span><span class="p">,</span> <span class="n">with_outlier</span><span class="p">)):</span>
+    <span class="n">iqr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}{</span><span class="n">arr</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}{</span><span class="n">arr</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}{</span><span class="n">iqr</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">                  mean    median       std       IQR
+clean            11.60     12.00      1.02      1.00
++ outlier        93.00     12.00    182.02      1.50</pre></div></div>
+<div class="md"><p>One bad value moves the mean from <a class="xref" href="/machine-learning/11-linear-regression/#s11-6">11.6</a> to 93.0 and the standard deviation from 1.0 to 182.0. The median
+does not move at all, and the IQR barely. That single row is the entire argument for robust statistics.</p>
+<h4 id="s2-8-2">2.8.2 Covariance and correlation</h4>
+<p><strong>Covariance</strong> measures whether two variables move together, but its units are the product of theirs, so
+its magnitude is uninterpretable. <strong>Correlation</strong> is covariance divided by both standard deviations, which
+normalizes it to \([-1, 1]\):</p>
+<p>\[r = \frac{\mathrm{Cov}(a, b)}{\sigma_a \sigma_b}\]</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">height_cm</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">170</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">weight_kg</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">height_cm</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+
+<span class="n">cov_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">height_cm</span><span class="p">,</span> <span class="n">weight_kg</span><span class="p">)</span>
+<span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">height_cm</span><span class="p">,</span> <span class="n">weight_kg</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;covariance  : </span><span class="si">{</span><span class="n">cov_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>    <span class="c1"># 48.02 - units of cm*kg, meaningless on its own</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;correlation : </span><span class="si">{</span><span class="n">corr_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 0.709 - comparable across any pair of variables</span>
+</code></pre><div class="outs"><pre class="out-text">covariance  : 48.02
+correlation : 0.709</pre></div></div>
+<div class="md"><p><strong>Pearson</strong> correlation measures <em>linear</em> association only. <strong>Spearman</strong> correlates the ranks instead, so
+it detects any monotonic relationship — which is why 4.6 recommends looking at both.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">monotonic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>          <span class="c1"># strictly increasing, strongly curved</span>
+<span class="n">curved</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>         <span class="c1"># a clean U shape - not monotonic at all</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exponential  pearson </span><span class="si">{</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">monotonic</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   spearman </span><span class="si">{</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">monotonic</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;U-shaped     pearson </span><span class="si">{</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">curved</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   spearman </span><span class="si">{</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">curved</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">exponential  pearson 0.857   spearman 1.000
+U-shaped     pearson 0.000   spearman 0.005</pre></div></div>
+<div class="md"><p>The U-shaped case is the warning: <code>t</code> determines <code>curved</code> <strong>exactly</strong>, and both correlations report
+essentially zero. A correlation of 0 means "no <em>monotonic</em> relationship", never "no relationship". Any
+feature-selection method built on correlation alone (<a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/#s7-2">7.2</a>) inherits this blind spot.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">monotonic</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;monotonic: pearson </span><span class="si">{</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">monotonic</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">curved</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:orange&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;perfectly determined: pearson </span><span class="si">{</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">curved</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Correlation near zero does not mean no relationship&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c02_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p><strong>Correlation is not causation, and in ML it does not need to be.</strong> A predictive model exploits association
+regardless of its cause, and that is legitimate — until someone acts on it. "Customers who contact support
+churn more" supports <em>predicting</em> churn; it does not support <em>closing the support line</em>. 24.4 returns to
+this distinction, which is where interpretability and causal claims part company.</p>
+<h4 id="s2-8-3">2.8.3 Sampling, the central limit theorem and hypothesis tests</h4>
+<p>Any dataset is a <strong>sample</strong> from a larger population, so every statistic computed from it is itself a
+random quantity that would come out differently on a different sample. The <strong>central limit theorem</strong> says
+that the sample <em>mean</em> is approximately normally distributed regardless of the population's shape, provided
+the sample is large enough.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">population</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200_000</span><span class="p">)</span>   <span class="c1"># heavily right-skewed, nothing like a bell</span>
+
+<span class="n">sample_means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">)])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;population: mean </span><span class="si">{</span><span class="n">population</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  skew heavy, min </span><span class="si">{</span><span class="n">population</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sample means (n=50): mean </span><span class="si">{</span><span class="n">sample_means</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  std </span><span class="si">{</span><span class="n">sample_means</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;predicted std (sigma/sqrt(n)): </span><span class="si">{</span><span class="n">population</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># matches</span>
+</code></pre><div class="outs"><pre class="out-text">population: mean 1.991  skew heavy, min 0.0000
+sample means (n=50): mean 1.985  std 0.273
+predicted std (sigma/sqrt(n)): 0.282</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:blue&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;population: exponential, strongly skewed&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">sample_means</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:green&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;means of samples of 50: nearly normal&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c02_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>The quantity \(\sigma / \sqrt{n}\) is the <strong>standard error</strong> — the typical distance between a sample mean and
+the truth. Its \(\sqrt{n}\) shrinks slowly, which is a fact with direct consequences: quadrupling a test set
+only halves the uncertainty in its score. That is why 8.3 prefers cross-validation to a single large
+hold-out, and why comparing two models whose scores differ by less than their standard error is not a
+comparison at all.</p>
+<p>A <strong>hypothesis test</strong> formalizes that comparison. The <strong>p-value</strong> is the probability of seeing a difference
+at least this large <em>if there were no real difference</em>. It is not the probability that the models are the
+same.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [36]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttest_ind</span>
+
+<span class="n">model_a</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.850</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>   <span class="c1"># 30 CV fold scores</span>
+<span class="n">model_b</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.856</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>   <span class="c1"># genuinely better, but only just</span>
+
+<span class="n">stat</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">model_a</span><span class="p">,</span> <span class="n">model_b</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mean A </span><span class="si">{</span><span class="n">model_a</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   mean B </span><span class="si">{</span><span class="n">model_b</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;p-value </span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> -&gt; &quot;</span><span class="p">,</span> <span class="s2">&quot;difference is detectable&quot;</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mf">0.05</span> <span class="k">else</span> <span class="s2">&quot;cannot distinguish them&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">mean A 0.8512   mean B 0.8591
+p-value 0.129 -&gt;  cannot distinguish them</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — testing many things and reporting the winner.</strong> Run twenty comparisons at the 5% level
+on data with no real differences and, on average, one comes back "significant" by construction. This is
+exactly what a hyperparameter search does — it runs hundreds of comparisons and reports the maximum — which
+is why the best cross-validation score from a search is a biased estimate and needs a held-out set or
+nested CV to correct (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-8">23.8</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [37]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">significant</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>   <span class="c1"># SAME distribution - no real difference exists</span>
+    <span class="k">if</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+        <span class="n">significant</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;significant&#39; results among 20 tests of nothing: </span><span class="si">{</span><span class="n">significant</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># ~1</span>
+</code></pre><div class="outs"><pre class="out-text">&#x27;significant&#x27; results among 20 tests of nothing: 1</pre></div></div>
+<div class="md"><h3 id="s2-9">2.9 In Practice</h3>
+<h4 id="s2-9-1">2.9.1 Where this shows up: a linear model returning nonsense</h4>
+<p>The most common way this chapter's material surfaces in real work is a fitted model whose coefficients are
+absurd — enormous, wildly signed, and unstable between runs. The maths above diagnoses it in three lines.</p>
+<p>The scenario: a colleague's feature table has <code>total_spend</code>, and also <code>total_spend_usd</code> — the same quantity
+after a currency conversion that was later reverted, so the two columns now differ only by floating-point
+dust. Nobody noticed, because nothing errors.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [38]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span><span class="p">,</span> <span class="n">Ridge</span>
+
+<span class="n">case_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>   <span class="c1"># own generator: this case stands alone</span>
+
+<span class="n">n_obs</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">monthly</span> <span class="o">=</span> <span class="n">case_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>
+<span class="n">tenure</span> <span class="o">=</span> <span class="n">case_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>
+<span class="n">total_spend</span> <span class="o">=</span> <span class="n">monthly</span> <span class="o">*</span> <span class="n">tenure</span>
+<span class="n">total_spend_usd</span> <span class="o">=</span> <span class="n">total_spend</span> <span class="o">+</span> <span class="n">case_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>   <span class="c1"># the &quot;same&quot; column, off by dust</span>
+
+<span class="n">X_bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">monthly</span><span class="p">,</span> <span class="n">tenure</span><span class="p">,</span> <span class="n">total_spend</span><span class="p">,</span> <span class="n">total_spend_usd</span><span class="p">])</span>
+<span class="n">y_bad</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">monthly</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">tenure</span> <span class="o">+</span> <span class="n">case_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rank       :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">X_bad</span><span class="p">))</span>            <span class="c1"># 4 - technically FULL rank</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond(X)    :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">X_bad</span><span class="p">)</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>           <span class="c1"># 5.319e+09</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cond(X^T X):&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">X_bad</span><span class="o">.</span><span class="n">T</span><span class="w"> </span><span class="o">@</span><span class="w"> </span><span class="n">X_bad</span><span class="p">)</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># 7.744e+15 - squared, and now hopeless</span>
+</code></pre><div class="outs"><pre class="out-text">rank       : 4
+cond(X)    : 5.319e+09
+cond(X^T X): 7.744e+15</pre></div></div>
+<div class="md"><p>Two things to read here. First, <strong>rank says the matrix is fine and the condition number says it is not</strong>.
+<code>matrix_rank</code> answers "are any columns <em>exactly</em> dependent?"; the condition number answers "are any columns
+<em>nearly</em> dependent?" — and on real data only the second question matters. A rank check alone would have
+cleared this design matrix.</p>
+<p>Second, forming \(X^\top X\) <strong>squares</strong> the condition number, from \(10^{9}\) to \(10^{15}\). That is the
+stability row of <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5-2">2.5.2</a>'s table made concrete, and it is why the textbook normal equation is the worst way
+to solve this in practice.</p>
+<p>Now solve it three ways — the textbook formula, NumPy's least-squares routine, and scikit-learn.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [39]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># 1. The textbook normal equation, exactly as written in 11.3, with an explicit inverse.</span>
+<span class="n">normal_eq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">X_bad</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">X_bad</span><span class="p">)</span> <span class="o">@</span> <span class="n">X_bad</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">y_bad</span>
+
+<span class="c1"># 2. NumPy&#39;s least-squares solver (SVD-based, no inverse formed).</span>
+<span class="n">lstsq_sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">X_bad</span><span class="p">,</span> <span class="n">y_bad</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># 3. scikit-learn (also SVD-based, but with its own small-singular-value cutoff).</span>
+<span class="n">sklearn_sol</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_bad</span><span class="p">,</span> <span class="n">y_bad</span><span class="p">)</span><span class="o">.</span><span class="n">coef_</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;true effects  : [0.5    0.2    0.0    0.0   ]&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;inv(X^T X)    :&quot;</span><span class="p">,</span> <span class="n">normal_eq</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np.lstsq      :&quot;</span><span class="p">,</span> <span class="n">lstsq_sol</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sklearn       :&quot;</span><span class="p">,</span> <span class="n">sklearn_sol</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">true effects  : [0.5    0.2    0.0    0.0   ]
+inv(X^T X)    : [  0.643   0.278  19.056 -19.06 ]
+np.lstsq      : [     0.499      0.2   -69724.246  69724.246]
+sklearn       : [0.499 0.199 0.    0.   ]</pre></div></div>
+<div class="md"><p><strong>Three solvers, three completely different answers to the same problem.</strong> This is the moment the
+mathematics stops being decoration:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Solver</th>
+<th><code>monthly</code></th>
+<th><code>tenure</code></th>
+<th>The two spend columns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>inv(XᵀX)</code></td>
+<td>0.643 — <strong>wrong</strong></td>
+<td>0.278 — <strong>wrong</strong></td>
+<td>±19, cancelling</td>
+</tr>
+<tr>
+<td><code>np.linalg.lstsq</code></td>
+<td>0.499 ✓</td>
+<td>0.200 ✓</td>
+<td>±69724, cancelling</td>
+</tr>
+<tr>
+<td><code>LinearRegression</code></td>
+<td>0.499 ✓</td>
+<td>0.199 ✓</td>
+<td>0.0, 0.0</td>
+</tr>
+</tbody>
+</table></div>
+<p>The explicit inverse is the only one that corrupts the <em>good</em> coefficients too — <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4">2.4</a>'s "if you are writing
+<code>inv</code>, you want <code>solve</code>" is not a style preference, it is the difference between 0.643 and 0.499 on a
+coefficient someone is going to quote in a meeting.</p>
+<p>But look at <code>lstsq</code>: it recovers <code>monthly</code> and <code>tenure</code> perfectly and still reports a spend coefficient of
+about <strong>±70,000</strong>. It is not broken. The problem genuinely has no unique answer, and <code>lstsq</code> returns the
+minimum-norm one among infinitely many; scikit-learn returns a different one because it discards singular
+values below a cutoff. Both are defensible; neither is <em>the</em> answer, because there isn't one.</p>
+<p><strong>Proving the problem is non-identifiable.</strong> If two coefficient vectors that differ enormously make the same predictions, the data cannot distinguish
+between them. Add 1000 to one spend coefficient and subtract 1000 from the other:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [40]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">alt</span> <span class="o">=</span> <span class="n">lstsq_sol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">alt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">1000.0</span>
+<span class="n">alt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1000.0</span>     <span class="c1"># the two columns are near-identical, so this nearly cancels</span>
+
+<span class="n">pred_original</span> <span class="o">=</span> <span class="n">X_bad</span> <span class="o">@</span> <span class="n">lstsq_sol</span>
+<span class="n">pred_alt</span> <span class="o">=</span> <span class="n">X_bad</span> <span class="o">@</span> <span class="n">alt</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;largest prediction difference:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_original</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pred_alt</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSE original: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">y_bad</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pred_original</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSE altered : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">y_bad</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pred_alt</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">largest prediction difference: 0.002965
+RMSE original: 1.0328534299
+RMSE altered : 1.0328539111</pre></div></div>
+<div class="md"><p>The coefficients differ by 2000 and the predictions differ by three thousandths; the two models are
+indistinguishable to ten decimal places of RMSE. <strong>No amount of data, no better solver and no evaluation
+metric can tell these two models apart</strong>, because the information needed to separate the two columns is not
+in the data. The question "what is the effect of <code>total_spend</code>?" has no answer here — not an
+uncertain answer, no answer.</p>
+<p><strong>The fixes.</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [41]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Fix 1: drop the duplicate (2.4.1 - it carries no independent information).</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;duplicate dropped :&quot;</span><span class="p">,</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_bad</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">y_bad</span><span class="p">)</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+
+<span class="c1"># Fix 2: ridge on STANDARDIZED features (2.4.2; 12.8 on why the scaling is mandatory).</span>
+<span class="n">X_std</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_bad</span> <span class="o">-</span> <span class="n">X_bad</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">X_bad</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ridge (standardized):&quot;</span><span class="p">,</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_std</span><span class="p">,</span> <span class="n">y_bad</span><span class="p">)</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">duplicate dropped : [0.499 0.199 0.   ]
+ridge (standardized): [11.132  3.916  0.114  0.114]</pre></div></div>
+<div class="md"><p>Dropping the duplicate restores a unique solution and the true effects come straight back. Ridge takes a
+different route: the \(\lambda I\) term makes the problem identifiable again (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4-2">2.4.2</a>) and splits the shared
+effect <strong>evenly</strong> between the two duplicate columns — <code>0.114</code> each — which is a principled, reproducible
+choice rather than an arbitrary one. Note that ridge's coefficients are on standardized features, so they
+are in standard-deviation units and are not comparable to the raw <code>0.5</code> and <code>0.2</code>.</p>
+<p>Dropping the column is the right fix here because the duplication is a data bug. Ridge is the right fix
+when features are genuinely correlated and none of them can be discarded.</p>
+<p><strong>The finding, in one sentence for a colleague:</strong> <em><code>total_spend_usd</code> duplicates <code>total_spend</code>, making the
+design matrix ill-conditioned (\(\kappa \approx 5\times10^9\)); the spend coefficients are non-identifiable —
+values 2000 apart fit the data identically — so no conclusion may be drawn from them, and the numbers
+differ depending on which solver was used.</em> Every claim in that sentence was supported by three lines of
+NumPy. 11.7 turns the check into a routine one using the variance inflation factor.</p>
+<h4 id="s2-9-2">2.9.2 When you need the maths — and when the library is enough</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Do you need this chapter?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fitting a model and reading a score</td>
+<td><strong>No.</strong> The library handles it</td>
+</tr>
+<tr>
+<td>Choosing between ridge and lasso</td>
+<td><strong>Yes</strong> — it is an \(L_2\)-vs-\(L_1\) choice (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-3">2.3</a>) and nothing else</td>
+</tr>
+<tr>
+<td>A model returns absurd or unstable coefficients</td>
+<td><strong>Yes</strong> — rank and condition number (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4">2.4</a>)</td>
+</tr>
+<tr>
+<td>Deciding how many PCA components to keep</td>
+<td><strong>Yes</strong> — explained variance is eigenvalue share (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5-1">2.5.1</a>)</td>
+</tr>
+<tr>
+<td>Implementing a custom loss or a gradient</td>
+<td><strong>Yes</strong> — and verify it numerically (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-6-2">2.6.2</a>)</td>
+</tr>
+<tr>
+<td>A probability output looks impossible</td>
+<td><strong>Yes</strong> — usually base rates (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-7-3">2.7.3</a>)</td>
+</tr>
+<tr>
+<td>Comparing two models' scores</td>
+<td><strong>Yes</strong> — standard error and multiple comparisons (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-3">2.8.3</a>)</td>
+</tr>
+<tr>
+<td>Explaining a correlation to a stakeholder</td>
+<td><strong>Yes</strong> — Pearson's blind spot and causation (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-8-2">2.8.2</a>)</td>
+</tr>
+<tr>
+<td>Choosing a distance metric for k-NN</td>
+<td><strong>Yes</strong> — it is a norm choice (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-3">2.3</a>)</td>
+</tr>
+<tr>
+<td>Picking <code>n_estimators</code> for a random forest</td>
+<td><strong>No.</strong> Search it (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-5">23.5</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The pattern: the maths is not needed to <em>run</em> things. It is needed to explain a result that looks wrong,
+and to know whether a result that looks right actually is.</p>
+<h4 id="s2-9-3">2.9.3 What goes wrong in production</h4>
+<p>Numerical failures are quiet. None of these raises an exception:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What happens</th>
+<th>Where it bites</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ill-conditioning</strong></td>
+<td>Coefficients are numerical noise; predictions may still look fine</td>
+<td>Any linear model on correlated features (<a class="xref" href="/machine-learning/11-linear-regression/#s11-7">11.7</a>)</td>
+</tr>
+<tr>
+<td><strong>Underflow in probability products</strong></td>
+<td>Multiplying many small probabilities reaches exactly 0.0</td>
+<td>Naive Bayes on long documents — hence log space (<a class="xref" href="/machine-learning/15-naive-bayes/#s15-6">15.6</a>)</td>
+</tr>
+<tr>
+<td><strong>float32 vs float64</strong></td>
+<td>A pipeline that silently downcasts loses precision; results drift from the notebook</td>
+<td>Serving code, ONNX/TensorRT export</td>
+</tr>
+<tr>
+<td><strong>Catastrophic cancellation</strong></td>
+<td>Subtracting two nearly equal large numbers destroys precision</td>
+<td>Naive variance formulas, incremental statistics</td>
+</tr>
+<tr>
+<td><strong>Non-associative float addition</strong></td>
+<td>Parallel or reordered summation changes the last digits</td>
+<td><code>n_jobs &gt; 1</code>, GPU inference, differing thread counts</td>
+</tr>
+<tr>
+<td><strong>Eigenvector sign flips</strong></td>
+<td>Plots and loadings invert between runs (<a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5-3">2.5.3</a>)</td>
+<td>Hand-rolled PCA, saved component matrices</td>
+</tr>
+</tbody>
+</table></div>
+<p>The underflow row is the one that most often reaches production undetected, so it is worth seeing happen.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [42]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">probabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>   <span class="c1"># 800 independent features, each with a small likelihood</span>
+
+<span class="n">naive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span>
+<span class="n">log_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probabilities</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;product in normal space:&quot;</span><span class="p">,</span> <span class="n">naive</span><span class="p">)</span>              <span class="c1"># 0.0 - underflowed to exactly zero</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sum of logs            :&quot;</span><span class="p">,</span> <span class="n">log_space</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>  <span class="c1"># -1842.07 - perfectly representable</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;recovered exponent     :&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;e^</span><span class="si">{</span><span class="n">log_space</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">product in normal space: 0.0
+sum of logs            : -1842.07
+recovered exponent     : e^-1842.1</pre></div></div>
+<div class="md"><p>In normal space the answer is exactly <code>0.0</code>, and comparing two classes both scoring <code>0.0</code> is a coin flip.
+In log space the same quantity is an ordinary number and the comparison is exact. Every serious
+implementation of Naive Bayes works this way — <code>sklearn</code>'s exposes it as <code>predict_log_proba</code> — and <a class="xref" href="/machine-learning/15-naive-bayes/#s15-6">15.6</a>
+covers it as a first-class technique rather than an optimization.</p>
+<p>The general rule this chapter leaves you with: <strong>when a numerical result is surprising, check the
+conditioning and the scale before questioning the model.</strong> Most inexplicable machine learning results are
+explicable arithmetic.</p></div></article>
+<nav class="spn"><a href="/machine-learning/01-machine-learning-fundamentals/">← Machine Learning Fundamentals</a><a href="/machine-learning/03-the-python-machine-learning-stack/">The Python Machine Learning Stack →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

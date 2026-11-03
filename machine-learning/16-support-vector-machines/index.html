@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Support Vector Machines – Machine Learning Chapter 16 | Gradient Atlas</title>
+<meta name="description" content="Classification as a geometry problem: find the widest possible separating band, and bend the space when no straight band exists.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/16-support-vector-machines/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Support Vector Machines – Machine Learning Chapter 16 | Gradient Atlas">
+<meta property="og:description" content="Classification as a geometry problem: find the widest possible separating band, and bend the space when no straight band exists.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/16-support-vector-machines/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Support Vector Machines", "headline": "Support Vector Machines", "description": "Classification as a geometry problem: find the widest possible separating band, and bend the space when no straight band exists.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/16-support-vector-machines/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT36M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Support Vector Machines", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/16-support-vector-machines/"}]}]}</script>
+</head>
+<body class="static">
+<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
+<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
+<main class="sdoc">
+<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 16</p>
+<h1><small>Machine Learning · Chapter 16</small>Support Vector Machines</h1>
+<p class="lead">Classification as a geometry problem: find the widest possible separating band, and bend the space when no straight band exists.</p>
+<p class="cta"><a class="sbtn" href="/#ch16">Read in the interactive reader, with quizzes and flashcards →</a></p>
+<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s16-1">16.1 The Maximum Margin Idea</a></li><li class="l3"><a href="#s16-2">16.2 The Hard-Margin Problem</a></li><li class="l3"><a href="#s16-3">16.3 Soft Margin, Slack and C</a></li><li class="l3"><a href="#s16-4">16.4 Hinge Loss</a></li><li class="l3"><a href="#s16-5">16.5 The Kernel Trick</a></li><li class="l3"><a href="#s16-6">16.6 Kernels and Their Hyperparameters</a></li><li class="l3"><a href="#s16-7">16.7 Support Vector Regression</a></li><li class="l3"><a href="#s16-8">16.8 Practical Considerations and Scaling Limits</a></li><li class="l3"><a href="#s16-9">16.9 In Practice</a></li></ol></nav>
+<article class="body"><div class="md"><p>Logistic regression finds <em>a</em> separating line by maximizing a likelihood. Support vector machines ask a
+sharper question: <strong>of all the lines that separate the classes, which one is furthest from both?</strong></p>
+<p>That reframing turns classification into a geometry problem, and the geometry brings two things nothing
+else in this material has — a solution that depends on only a handful of training points, and a way to fit
+curved boundaries without ever constructing the curved features.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVC</span><span class="p">,</span> <span class="n">LinearSVC</span><span class="p">,</span> <span class="n">SVR</span><span class="p">,</span> <span class="n">LinearSVR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">cross_val_score</span><span class="p">,</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.inspection</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionBoundaryDisplay</span>
+
+<span class="n">RANDOM_STATE</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.width&quot;</span><span class="p">,</span> <span class="mi">115</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.dpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>        <span class="c1"># this chapter is figure-heavy; keep the notebook small</span>
+
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ready&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">ready</pre></div></div>
+<div class="md"><h3 id="s16-1">16.1 The Maximum Margin Idea</h3>
+<p>When two classes are linearly separable there are <strong>infinitely many</strong> separating hyperplanes. Logistic
+regression picks one by maximizing likelihood; a perceptron picks whichever one it stumbles into first.
+Neither asks whether the chosen line is a <em>good</em> one.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">23 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span><span class="p">,</span> <span class="n">Perceptron</span>
+
+<span class="c1"># Two clearly separated blobs.</span>
+<span class="n">X_sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">1.9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">5.1</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]])</span>
+<span class="n">y_sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">boundary_line</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the y values of the decision boundary w0*x + w1*y + b = 0.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">intercept_</span><span class="p">)</span> <span class="k">else</span> <span class="n">model</span><span class="o">.</span><span class="n">intercept_</span>
+    <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;logistic&quot;</span><span class="p">:</span> <span class="n">LogisticRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">),</span>
+    <span class="s2">&quot;perceptron&quot;</span><span class="p">:</span> <span class="n">Perceptron</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">),</span>
+    <span class="s2">&quot;SVM (max margin)&quot;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2"> all training points correct: </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span><span class="w"> </span><span class="n">y_sep</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">1.0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">logistic           all training points correct: True
+perceptron         all training points correct: True
+SVM (max margin)   all training points correct: True</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_sep</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_sep</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_sep</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">m</span><span class="p">),</span> <span class="n">style</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">boundary_line</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">xs</span><span class="p">),</span> <span class="n">style</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Three boundaries, all perfect on the training data&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_01.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>All three are perfect on the training set, and they are not equally good. A boundary that skims one class
+will misclassify the first new point that lands slightly to one side. The <strong>margin</strong> — the distance from
+the boundary to the nearest training point of either class — is the natural measure of that robustness,
+and the SVM maximizes it.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Margin</strong></td>
+<td>The perpendicular distance from the boundary to the closest point of either class</td>
+</tr>
+<tr>
+<td><strong>Support vectors</strong></td>
+<td>The points that sit exactly on the margin (or violate it)</td>
+</tr>
+<tr>
+<td><strong>Maximum-margin hyperplane</strong></td>
+<td>The unique boundary that makes the margin as wide as possible</td>
+</tr>
+</tbody>
+</table></div>
+<p>The defining property is that <strong>only the support vectors matter.</strong> Delete every other training point and
+the solution is unchanged.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">svm</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;training points : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_sep</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;support vectors : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">}</span><span class="s2">   at indices </span><span class="si">{</span><span class="n">svm</span><span class="o">.</span><span class="n">support_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">the support vectors themselves:</span><span class="se">\n</span><span class="si">{</span><span class="n">svm</span><span class="o">.</span><span class="n">support_vectors_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">training points : 10
+support vectors : 3   at indices [2 5 6]
+
+the support vectors themselves:
+[[2.  2.5]
+ [4.  4.5]
+ [4.5 4. ]]</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Refit using ONLY the support vectors.</span>
+<span class="n">sv_only</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">[</span><span class="n">svm</span><span class="o">.</span><span class="n">support_</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;coefficients from all 10 points   :&quot;</span><span class="p">,</span> <span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;coefficients from 3 support vectors:&quot;</span><span class="p">,</span> <span class="n">sv_only</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">identical:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">,</span> <span class="n">sv_only</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span> <span class="ow">and</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span> <span class="n">sv_only</span><span class="o">.</span><span class="n">intercept_</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">coefficients from all 10 points   : [0.5 0.5]
+coefficients from 3 support vectors: [0.5 0.5]
+
+identical: True</pre></div></div>
+<div class="md"><p>Seventy percent of the training data was discarded and the model did not change at all. No other algorithm
+in this material has that property — a linear regression coefficient depends on every row, and a tree's
+splits depend on the whole distribution.</p></div>
+<div class="md"><h3 id="s16-2">16.2 The Hard-Margin Problem</h3>
+<p>Write the boundary as \(\mathbf{w}\cdot\mathbf{x} + b = 0\), and encode the labels as \(y \in \{-1, +1\}\)
+rather than \(\{0, 1\}\) — this is the convention that makes the algebra work.</p>
+<p>The (signed) distance from a point to the hyperplane is \(\frac{\mathbf{w}\cdot\mathbf{x} + b}{\lVert \mathbf{w} \rVert}\).
+Because \(\mathbf{w}\) and \(b\) can be rescaled freely without moving the boundary, we can <strong>fix the scale</strong> by
+requiring the closest points to satisfy \(\lvert \mathbf{w}\cdot\mathbf{x} + b \rvert = 1\). The margin is
+then exactly \(\frac{2}{\lVert \mathbf{w} \rVert}\), and maximizing it means <strong>minimizing \(\lVert \mathbf{w} \rVert\)</strong>:</p>
+<p>\[\min_{\mathbf{w}, b} \; \frac{1}{2}\lVert \mathbf{w} \rVert^2 \quad \text{subject to} \quad y^{(i)}\left(\mathbf{w}\cdot\mathbf{x}^{(i)} + b\right) \ge 1 \;\; \text{for every } i\]</p>
+<p>This is a <strong>convex quadratic program</strong> (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/#s10-3">10.3</a>): a quadratic objective with linear constraints, so it has a
+unique global optimum. Unlike <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–13 there is no gradient-descent story — it is solved by a
+constrained optimizer, and <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-2-1">16.2.1</a> explains why the from-scratch version here is a verification rather than
+a re-implementation.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">w_svm</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">b_svm</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">margin_width</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">w_svm</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;||w||          : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">w_svm</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;margin width   : </span><span class="si">{</span><span class="n">margin_width</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   (= 2 / ||w||)&quot;</span><span class="p">)</span>
+
+<span class="c1"># The constraint y(w.x + b) &gt;= 1 should hold for every point, with equality at support vectors.</span>
+<span class="n">y_pm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y_sep</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">functional_margin</span> <span class="o">=</span> <span class="n">y_pm</span> <span class="o">*</span> <span class="p">(</span><span class="n">X_sep</span> <span class="o">@</span> <span class="n">w_svm</span> <span class="o">+</span> <span class="n">b_svm</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">smallest y(w.x + b) over all points: </span><span class="si">{</span><span class="n">functional_margin</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">   (should be 1)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;points achieving it (the support vectors): </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">functional_margin</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">||w||          : 0.7071
+margin width   : 2.8284   (= 2 / ||w||)
+
+smallest y(w.x + b) over all points: 1.000000   (should be 1)
+points achieving it (the support vectors): [2 5 6]</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_sep</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_sep</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_sep</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">svm</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+           <span class="n">s</span><span class="o">=</span><span class="mi">220</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;support vectors&quot;</span><span class="p">)</span>
+
+<span class="n">xs_fine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs_fine</span><span class="p">,</span> <span class="n">boundary_line</span><span class="p">(</span><span class="n">svm</span><span class="p">,</span> <span class="n">xs_fine</span><span class="p">),</span> <span class="s2">&quot;k-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;boundary&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">style</span> <span class="ow">in</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">)):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs_fine</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">w_svm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">xs_fine</span> <span class="o">+</span> <span class="n">b_svm</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">w_svm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">style</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum-margin boundary and its margin (width </span><span class="si">{</span><span class="n">margin_width</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_02.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><h4 id="s16-2-1">16.2.1 Solving it from scratch</h4>
+<p>The dual formulation of the problem above is itself a quadratic program in the Lagrange multipliers
+\(\alpha_i\), one per training point:</p>
+<p>\[\max_{\boldsymbol{\alpha}} \; \sum_i \alpha_i - \frac{1}{2}\sum_i \sum_j \alpha_i \alpha_j y^{(i)} y^{(j)} \left(\mathbf{x}^{(i)} \cdot \mathbf{x}^{(j)}\right) \quad \text{s.t.} \quad \alpha_i \ge 0, \;\; \sum_i \alpha_i y^{(i)} = 0\]</p>
+<p>Two facts make this the form everyone uses. First, \(\alpha_i = 0\) for every non-support-vector, which is
+where <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-1">16.1</a>'s property comes from. Second, <strong>the data appears only inside a dot product</strong> — which is the
+opening 16.5 needs.</p>
+<p>Writing a general QP solver is out of scope, but <code>scipy.optimize</code> can solve this one directly, which is
+enough to verify that the formulation above really is what scikit-learn computes.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">32 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_hard_margin_dual</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_pm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve the SVM dual with a generic constrained optimizer.&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">X</span> <span class="o">@</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>                                    <span class="c1"># the Gram matrix of dot products</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">y_pm</span><span class="p">,</span> <span class="n">y_pm</span><span class="p">)</span> <span class="o">*</span> <span class="n">K</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">negative_objective</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">@</span> <span class="n">P</span> <span class="o">@</span> <span class="n">alpha</span> <span class="o">-</span> <span class="n">alpha</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">gradient</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">P</span> <span class="o">@</span> <span class="n">alpha</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">negative_objective</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">jac</span><span class="o">=</span><span class="n">gradient</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;SLSQP&quot;</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span>                                        <span class="c1"># alpha_i &gt;= 0</span>
+        <span class="n">constraints</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;eq&quot;</span><span class="p">,</span> <span class="s2">&quot;fun&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span> <span class="o">@</span> <span class="n">y_pm</span><span class="p">},</span>          <span class="c1"># sum alpha_i y_i = 0</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;ftol&quot;</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">y_pm</span><span class="p">)</span> <span class="o">@</span> <span class="n">X</span>
+    <span class="n">sv</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mf">1e-5</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_pm</span><span class="p">[</span><span class="n">sv</span><span class="p">]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="n">sv</span><span class="p">]</span> <span class="o">@</span> <span class="n">w</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span>
+
+
+<span class="n">w_mine</span><span class="p">,</span> <span class="n">b_mine</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">fit_hard_margin_dual</span><span class="p">(</span><span class="n">X_sep</span><span class="p">,</span> <span class="n">y_pm</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;alpha (Lagrange multipliers):&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">non-zero alphas at indices </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">alpha</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-5</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sklearn&#39;s support vectors at </span><span class="si">{</span><span class="n">svm</span><span class="o">.</span><span class="n">support_</span><span class="si">}</span><span class="s2">   &lt;- the same points&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">alpha (Lagrange multipliers): [0.   0.   0.25 0.   0.   0.25 0.   0.   0.   0.  ]
+
+non-zero alphas at indices [2 5]
+sklearn&#x27;s support vectors at [2 5 6]   &lt;- the same points</pre></div></div>
+<div class="md"><p><strong>Step 4 of the contract.</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;from scratch : w =&quot;</span><span class="p">,</span> <span class="n">w_mine</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;  b =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">b_mine</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;scikit-learn : w =&quot;</span><span class="p">,</span> <span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;  b =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">svm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">5</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">w agrees:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">w_mine</span><span class="p">,</span> <span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;b agrees:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">b_mine</span><span class="p">,</span> <span class="n">svm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">max difference in w: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">w_mine</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">svm</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">from scratch : w = [0.5 0.5]   b = -3.25
+scikit-learn : w = [0.5 0.5]   b = -3.25
+
+w agrees: True
+b agrees: True
+
+max difference in w: 1.67e-15</pre></div></div>
+<div class="md"><p>The recovered \(\mathbf{w}\) and \(b\) match scikit-learn to fifteen decimal places. But look at the support
+sets: <strong>the dual found two non-zero multipliers where scikit-learn reports three support vectors.</strong></p>
+<p>That is not an error in either solver. <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-2">16.2</a>'s constraint check showed that points 2, 5 <strong>and</strong> 6 all sit
+exactly on the margin — the solution is <em>degenerate</em>, and two of those three points are enough to pin the
+hyperplane down. Both solvers found the same unique boundary; they simply expressed it with different
+subsets of the points available. It is a useful reminder that "the support vectors" is a property of a
+particular solution, not of the data.</p>
+<p><strong>This is verification rather than a practical implementation.</strong> SLSQP on a dense \(n \times n\) matrix is
+hopeless beyond a few hundred points, which is why real solvers use SMO (sequential minimal optimization)
+and why 16.8 discusses the resulting scaling limits.</p></div>
+<div class="md"><h3 id="s16-3">16.3 Soft Margin, Slack and C</h3>
+<p>Hard margin requires the classes to be perfectly separable. Real data is not, and even when it is, a hard
+margin fits outliers exactly.</p>
+<p>The <strong>soft margin</strong> introduces slack variables \(\xi_i \ge 0\) that allow violations, and pays for them in
+the objective:</p>
+<p>\[\min_{\mathbf{w}, b, \boldsymbol{\xi}} \; \frac{1}{2}\lVert \mathbf{w} \rVert^2 + C\sum_{i=1}^{n} \xi_i \quad \text{s.t.} \quad y^{(i)}\left(\mathbf{w}\cdot\mathbf{x}^{(i)} + b\right) \ge 1 - \xi_i, \;\; \xi_i \ge 0\]</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>\(\xi_i\)</th>
+<th>The point is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(0\)</td>
+<td>Correctly classified, on or outside the margin</td>
+</tr>
+<tr>
+<td>\(0 &lt; \xi_i &lt; 1\)</td>
+<td>Correct, but <strong>inside</strong> the margin</td>
+</tr>
+<tr>
+<td>\(\xi_i \ge 1\)</td>
+<td><strong>Misclassified</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong><code>C</code> is an inverse regularization strength</strong>, exactly as in logistic regression (<a class="xref" href="/machine-learning/13-logistic-regression/#s13-8-1">13.8.1</a>) and the reverse
+of <code>alpha</code> in <a class="xref" href="/machine-learning/12-regularized-linear-models/">Chapter 12</a>:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th><code>C</code></th>
+<th>Slack is</th>
+<th>Margin</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large</td>
+<td>Expensive</td>
+<td>Narrow</td>
+<td>Fits the training data hard; approaches hard margin</td>
+</tr>
+<tr>
+<td>Small</td>
+<td>Cheap</td>
+<td>Wide</td>
+<td>Tolerates violations; more regularized</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+
+<span class="n">X_soft</span><span class="p">,</span> <span class="n">y_soft</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cluster_std</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
+                            <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;C&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;support vectors&#39;</span><span class="si">:</span><span class="s2">&gt;18</span><span class="si">}{</span><span class="s1">&#39;||w||&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;margin width&#39;</span><span class="si">:</span><span class="s2">&gt;15</span><span class="si">}{</span><span class="s1">&#39;train errors&#39;</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_soft</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">)</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_soft</span><span class="p">)</span> <span class="o">!=</span> <span class="n">y_soft</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">&gt;10g</span><span class="si">}{</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;18</span><span class="si">}{</span><span class="n">norm</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}{</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">norm</span><span class="si">:</span><span class="s2">&gt;15.4f</span><span class="si">}{</span><span class="n">errors</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">         C   support vectors     ||w||   margin width  train errors
+      0.01                14    0.3376         5.9233             0
+       0.1                 4    0.4594         4.3531             0
+         1                 3    0.4923         4.0628             0
+       100                 3    0.4923         4.0628             0</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">)):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_soft</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">)</span>
+    <span class="n">DecisionBoundaryDisplay</span><span class="o">.</span><span class="n">from_estimator</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">X_soft</span><span class="p">,</span> <span class="n">response_method</span><span class="o">=</span><span class="s2">&quot;decision_function&quot;</span><span class="p">,</span>
+                                           <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                                           <span class="n">linestyles</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">],</span>
+                                           <span class="n">plot_method</span><span class="o">=</span><span class="s2">&quot;contour&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_soft</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_soft</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_soft</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
+               <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+               <span class="n">facecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C = </span><span class="si">{</span><span class="n">C</span><span class="si">}</span><span class="s2">   (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">}</span><span class="s2"> support vectors)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Small C: wide margin, many support vectors. Large C: narrow margin, few.&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_03.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p>The number of support vectors is a useful diagnostic. A model where almost every point is a support vector
+is heavily regularized and is effectively averaging over the whole dataset; a model with very few is
+hard-fitting a handful of points and is fragile.</p></div>
+<div class="md"><h3 id="s16-4">16.4 Hinge Loss</h3>
+<p>The constrained problem of 16.3 can be rewritten as an <strong>unconstrained</strong> one, which connects the SVM back
+to every other model in this material. The optimal slack is \(\xi_i = \max(0,\; 1 - y^{(i)} f(\mathbf{x}^{(i)}))\),
+so substituting gives</p>
+<p>\[\min_{\mathbf{w}, b} \; \underbrace{\sum_{i=1}^{n} \max\!\left(0,\; 1 - y^{(i)} f(\mathbf{x}^{(i)})\right)}_{\text{hinge loss}} \;+\; \underbrace{\frac{1}{2C}\lVert \mathbf{w} \rVert^2}_{\text{L2 penalty}}\]</p>
+<p><strong>The SVM is a linear model with hinge loss and an L2 penalty.</strong> 10.2.2 already plotted the hinge against
+the alternatives; its defining feature is the flat region.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">margin_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>     <span class="c1"># y * f(x) for a correctly-labelled point</span>
+
+<span class="n">hinge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">margin_score</span><span class="p">)</span>
+<span class="n">log_loss_curve</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">margin_score</span><span class="p">))</span>
+<span class="n">zero_one</span> <span class="o">=</span> <span class="p">(</span><span class="n">margin_score</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">margin_score</span><span class="p">,</span> <span class="n">hinge</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hinge (SVM)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">margin_score</span><span class="p">,</span> <span class="n">log_loss_curve</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log loss (logistic)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">margin_score</span><span class="p">,</span> <span class="n">zero_one</span><span class="p">,</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;0-1 loss&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;y * f(x)   (margin)&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Hinge loss is exactly zero once the margin exceeds 1&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_04.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p><strong>That flat region is the whole reason support vectors exist.</strong> A point with margin above 1 contributes
+exactly zero loss and exactly zero gradient, so moving it — or deleting it — changes nothing. Log loss
+never reaches zero, which is why logistic regression's coefficients depend on every point.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">for</span> <span class="n">m_score</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;margin </span><span class="si">{</span><span class="n">m_score</span><span class="si">:</span><span class="s2">&gt;5.1f</span><span class="si">}</span><span class="s2">   hinge loss </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">m_score</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;6.3f</span><span class="si">}</span><span class="s2">   &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;log loss </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">m_score</span><span class="p">))</span><span class="si">:</span><span class="s2">&gt;8.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">hinge reaches exactly 0; log loss only approaches it.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">margin   0.5   hinge loss  0.500   log loss  0.47408
+margin   1.0   hinge loss  0.000   log loss  0.31326
+margin   1.5   hinge loss  0.000   log loss  0.20141
+margin   3.0   hinge loss  0.000   log loss  0.04859
+margin  10.0   hinge loss  0.000   log loss  0.00005
+
+hinge reaches exactly 0; log loss only approaches it.</pre></div></div>
+<div class="md"><p><code>SGDClassifier(loss="hinge")</code> fits the same objective by gradient descent (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/#s10-5">10.5</a>), which is how SVMs are
+scaled to large data (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-8">16.8</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGDClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_classification</span>
+
+<span class="n">X_h</span><span class="p">,</span> <span class="n">y_h</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                               <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">X_h</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_h</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;SVC(kernel=&#39;linear&#39;)&quot;</span><span class="p">,</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="s2">&quot;LinearSVC&quot;</span><span class="p">,</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="s2">&quot;SGDClassifier(hinge)&quot;</span><span class="p">,</span> <span class="n">SGDClassifier</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s2">&quot;hinge&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="mi">2000</span><span class="p">),</span>
+                                                           <span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+                                                           <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">))):</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_h</span><span class="p">,</span> <span class="n">y_h</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;24</span><span class="si">}</span><span class="s2"> CV accuracy </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">three implementations of the same objective, three different solvers.&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">SVC(kernel=&#x27;linear&#x27;)     CV accuracy 0.8300
+LinearSVC                CV accuracy 0.8315
+SGDClassifier(hinge)     CV accuracy 0.8170
+
+three implementations of the same objective, three different solvers.</pre></div></div>
+<div class="md"><h3 id="s16-5">16.5 The Kernel Trick</h3>
+<p>16.2.1 noted that the data appears in the dual <strong>only inside a dot product</strong> \(\mathbf{x}^{(i)} \cdot \mathbf{x}^{(j)}\).
+That is not a curiosity; it is the opening for the most elegant idea in classical machine learning.</p>
+<p>Suppose we map the data into a higher-dimensional space with some \(\phi(\mathbf{x})\) and solve the same
+problem there. The dual needs only \(\phi(\mathbf{x}^{(i)}) \cdot \phi(\mathbf{x}^{(j)})\) — never
+\(\phi(\mathbf{x})\) itself. If that inner product can be computed directly from the original vectors, the
+mapping never has to be performed.</p>
+<p>A function \(K(\mathbf{a}, \mathbf{b}) = \phi(\mathbf{a}) \cdot \phi(\mathbf{b})\) is called a <strong>kernel</strong>, and
+using one in place of the dot product is the <strong>kernel trick</strong>.</p>
+<p>The cleanest demonstration is an explicit case where both sides can be computed.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">phi</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map (x1, x2) into 3-D so that a quadratic boundary becomes linear.&quot;&quot;&quot;</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">])</span>
+
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">])</span>
+
+<span class="n">explicit</span> <span class="o">=</span> <span class="n">phi</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">@</span> <span class="n">phi</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>          <span class="c1"># map both, then take the dot product</span>
+<span class="n">kernel</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">b</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>                <span class="c1"># never leave 2-D</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;phi(a) = </span><span class="si">{</span><span class="n">phi</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;phi(b) = </span><span class="si">{</span><span class="n">phi</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">explicit  phi(a) . phi(b) : </span><span class="si">{</span><span class="n">explicit</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;kernel    (a . b)^2       : </span><span class="si">{</span><span class="n">kernel</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;identical: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">explicit</span><span class="p">,</span><span class="w"> </span><span class="n">kernel</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">phi(a) = [1.     2.8284 4.    ]
+phi(b) = [ 9.     -4.2426  1.    ]
+
+explicit  phi(a) . phi(b) : 1.000000
+kernel    (a . b)^2       : 1.000000
+identical: True</pre></div></div>
+<div class="md"><p>The kernel computed a dot product in three dimensions using only two-dimensional arithmetic. For the RBF
+kernel the implicit space is <strong>infinite-dimensional</strong>, and the same trick still costs one exponential.</p>
+<p>Why it matters: a boundary that is curved in the original space is a <strong>flat hyperplane</strong> in the mapped
+space.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_circles</span>
+
+<span class="n">X_circ</span><span class="p">,</span> <span class="n">y_circ</span> <span class="o">=</span> <span class="n">make_circles</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">linear_score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">),</span> <span class="n">X_circ</span><span class="p">,</span> <span class="n">y_circ</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">rbf_score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">),</span> <span class="n">X_circ</span><span class="p">,</span> <span class="n">y_circ</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;linear kernel CV accuracy: </span><span class="si">{</span><span class="n">linear_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RBF kernel    CV accuracy: </span><span class="si">{</span><span class="n">rbf_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">linear kernel CV accuracy: 0.5450
+RBF kernel    CV accuracy: 1.0000</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Show the lift explicitly: a 3rd dimension equal to the squared radius makes it linearly separable.</span>
+<span class="n">radius_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_circ</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_circ</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_circ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_circ</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;original 2-D: no straight line separates these&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_circ</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_circ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">radius_sq</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">y_circ</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">&quot;$x_1^2 + x_2^2$&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;lifted to 3-D: a flat plane separates them&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_05.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><h3 id="s16-6">16.6 Kernels and Their Hyperparameters</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Kernel</th>
+<th>\(K(\mathbf{a}, \mathbf{b})\)</th>
+<th>Hyperparameters</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Linear</strong></td>
+<td>\(\mathbf{a}\cdot\mathbf{b}\)</td>
+<td><code>C</code></td>
+<td>Many features, text, \(p &gt; n\)</td>
+</tr>
+<tr>
+<td><strong>Polynomial</strong></td>
+<td>\((\gamma\,\mathbf{a}\cdot\mathbf{b} + r)^d\)</td>
+<td><code>C</code>, <code>degree</code>, <code>gamma</code>, <code>coef0</code></td>
+<td>Known polynomial structure</td>
+</tr>
+<tr>
+<td><strong>RBF (Gaussian)</strong></td>
+<td>\(\exp(-\gamma \lVert \mathbf{a} - \mathbf{b} \rVert^2)\)</td>
+<td><code>C</code>, <code>gamma</code></td>
+<td><strong>The default</strong> — general-purpose non-linearity</td>
+</tr>
+<tr>
+<td><strong>Sigmoid</strong></td>
+<td>\(\tanh(\gamma\,\mathbf{a}\cdot\mathbf{b} + r)\)</td>
+<td><code>C</code>, <code>gamma</code>, <code>coef0</code></td>
+<td>Rarely; not always a valid kernel</td>
+</tr>
+</tbody>
+</table></div>
+<p>The RBF kernel is a similarity measure that decays with distance, which gives <code>gamma</code> a direct reading:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th><code>gamma</code></th>
+<th>Each point's influence</th>
+<th>Boundary</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small</td>
+<td>Reaches far</td>
+<td>Smooth, almost linear</td>
+<td>Underfitting</td>
+</tr>
+<tr>
+<td>Large</td>
+<td>Very local</td>
+<td>Wiggly, islands around points</td>
+<td><strong>Overfitting</strong></td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">rbf_kernel</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+
+<span class="n">centre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;distance&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;gamma=0.1&#39;</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}{</span><span class="s1">&#39;gamma=1&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}{</span><span class="s1">&#39;gamma=10&#39;</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">):</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="si">:</span><span class="s2">&gt;10.1f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rbf_kernel</span><span class="p">(</span><span class="n">centre</span><span class="p">,</span><span class="w"> </span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rbf_kernel</span><span class="p">(</span><span class="n">centre</span><span class="p">,</span><span class="w"> </span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rbf_kernel</span><span class="p">(</span><span class="n">centre</span><span class="p">,</span><span class="w"> </span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="mf">10.0</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;11.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">  distance   gamma=0.1   gamma=1   gamma=10
+       0.0      1.0000    1.0000     1.0000
+       0.5      0.9753    0.7788     0.0821
+       1.0      0.9048    0.3679     0.0000
+       2.0      0.6703    0.0183     0.0000
+       3.0      0.4066    0.0001     0.0000</pre></div></div>
+<div class="md"><p>At <code>gamma=10</code> a point two units away has essentially zero influence — the model becomes a collection of
+tiny local bubbles. At <code>gamma=0.1</code> every point influences every prediction and the boundary flattens out.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_moons</span>
+
+<span class="n">X_m</span><span class="p">,</span> <span class="n">y_m</span> <span class="o">=</span> <span class="n">make_moons</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">X_m</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_m</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]</span>
+<span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gamma=0.1, C=1&quot;</span><span class="p">,</span> <span class="s2">&quot;gamma=1, C=1&quot;</span><span class="p">,</span> <span class="s2">&quot;gamma=10, C=1&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;gamma=1, C=0.01&quot;</span><span class="p">,</span> <span class="s2">&quot;gamma=1, C=1&quot;</span><span class="p">,</span> <span class="s2">&quot;gamma=1, C=100&quot;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">C</span><span class="p">),</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">settings</span><span class="p">,</span> <span class="n">titles</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_m</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span>
+    <span class="n">DecisionBoundaryDisplay</span><span class="o">.</span><span class="n">from_estimator</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">X_m</span><span class="p">,</span> <span class="n">response_method</span><span class="o">=</span><span class="s2">&quot;predict&quot;</span><span class="p">,</span>
+                                           <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                                           <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_m</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_m</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y_m</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">   (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">}</span><span class="s2"> SVs)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([]);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Top row: gamma controls wiggliness.   Bottom row: C controls tolerance for errors.&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_06.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="md"><p><strong><code>gamma="scale"</code> is the default and is almost always the right starting point.</strong> It sets
+\(\gamma = 1 / (p \cdot \mathrm{Var}(X))\), which adapts to both the number of features and their spread.
+<code>gamma="auto"</code> is the older \(1/p\), which ignores the spread entirely.</p>
+<p>On standardized data the two coincide, because \(\mathrm{Var}(X) = 1\) — which is exactly why they agree
+below, and exactly why an unscaled SVM misbehaves (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-8-1">16.8.1</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">X_demo</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_m</span><span class="p">)</span>
+<span class="n">p_features</span> <span class="o">=</span> <span class="n">X_demo</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">scale_gamma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_features</span> <span class="o">*</span> <span class="n">X_demo</span><span class="o">.</span><span class="n">var</span><span class="p">())</span>
+<span class="n">auto_gamma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">p_features</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gamma=&#39;scale&#39; -&gt; </span><span class="si">{</span><span class="n">scale_gamma</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">   (1 / (p * Var(X)))&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gamma=&#39;auto&#39;  -&gt; </span><span class="si">{</span><span class="n">auto_gamma</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">   (1 / p, ignores the spread)&quot;</span><span class="p">)</span>
+
+<span class="n">fitted</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_demo</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">sklearn&#39;s fitted _gamma: </span><span class="si">{</span><span class="n">fitted</span><span class="o">.</span><span class="n">_gamma</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matches:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">fitted</span><span class="o">.</span><span class="n">_gamma</span><span class="p">,</span> <span class="n">scale_gamma</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">gamma=&#x27;scale&#x27; -&gt; 0.500000   (1 / (p * Var(X)))
+gamma=&#x27;auto&#x27;  -&gt; 0.500000   (1 / p, ignores the spread)
+
+sklearn&#x27;s fitted _gamma: 0.500000
+matches: True</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — tuning <code>C</code> and <code>gamma</code> independently.</strong> They interact strongly: a large <code>gamma</code> with a
+large <code>C</code> overfits catastrophically, while either alone may be fine. They must be searched <strong>jointly</strong>
+over a logarithmic grid (<a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-5">23.5</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridSearchCV</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">),</span>
+    <span class="p">{</span><span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]},</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_m</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s2">&quot;mean_test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;C=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;gamma=</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">best: </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">   CV accuracy </span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">       gamma=0.01  gamma=0.1  gamma=1  gamma=10
+C=0.1      0.8567     0.8500   0.9000    0.9100
+C=1        0.8500     0.8633   0.9100    0.9167
+C=10       0.8533     0.8900   0.9133    0.9200
+C=100      0.8567     0.9067   0.9167    0.8800
+
+best: {&#x27;C&#x27;: 10, &#x27;gamma&#x27;: 10}   CV accuracy 0.9200</pre></div></div>
+<div class="md"><h3 id="s16-7">16.7 Support Vector Regression</h3>
+<p>The same machinery applies to a continuous target, with the logic inverted. Classification wants points
+<strong>outside</strong> the margin; regression wants them <strong>inside</strong> a tube of width \(\epsilon\) around the prediction,
+and only points outside the tube incur a loss.</p>
+<p>\[\text{loss}(r) = \max\!\left(0,\; \lvert r \rvert - \epsilon\right)\]</p>
+<p>This is the <strong>epsilon-insensitive loss</strong> from <a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/#s10-2-1">10.2.1</a>: errors smaller than \(\epsilon\) are free.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;epsilon-insensitive (eps=</span><span class="si">{</span><span class="n">epsilon</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">),</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;absolute loss&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">residual</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;squared loss&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;residual&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Errors inside the epsilon tube cost nothing&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_07.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x_reg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">120</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">y_reg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x_reg</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">x_reg</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">grid_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">eps</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVR</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">eps</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">grid_x</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid_x</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">grid_x</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">pred</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">eps</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:red&quot;</span><span class="p">)</span>
+    <span class="n">n_sv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epsilon = </span><span class="si">{</span><span class="n">eps</span><span class="si">}</span><span class="s2">   (</span><span class="si">{</span><span class="n">n_sv</span><span class="si">}</span><span class="s2"> support vectors)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;A wider tube means fewer support vectors and a simpler fit&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre><div class="outs"><figure class="out-img"><img src="/img/c16_08.png" alt="Figure produced by the cell above" loading="lazy"></figure></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;epsilon&#39;</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}{</span><span class="s1">&#39;support vectors&#39;</span><span class="si">:</span><span class="s2">&gt;18</span><span class="si">}{</span><span class="s1">&#39;CV R^2&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVR</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">eps</span><span class="p">))</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;r2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">n_sv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_reg</span><span class="p">,</span> <span class="n">y_reg</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">eps</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}{</span><span class="n">n_sv</span><span class="si">:</span><span class="s2">&gt;18</span><span class="si">}{</span><span class="n">score</span><span class="si">:</span><span class="s2">&gt;10.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">  epsilon   support vectors    CV R^2
+      0.1                99    0.6817
+      0.5                43    0.6551
+      1.0                10    0.5733
+      2.0                 5   -0.2220
+      3.0                 4   -1.2572</pre></div></div>
+<div class="md"><p>Note the direction: <strong>a larger \(\epsilon\) gives fewer support vectors</strong>, because more points fall inside
+the free tube. It is a sparsity control as much as an accuracy one.</p></div>
+<div class="md"><h3 id="s16-8">16.8 Practical Considerations and Scaling Limits</h3>
+<h4 id="s16-8-1">16.8.1 Scaling is mandatory</h4>
+<p>Both the RBF kernel and the L2 penalty depend on distances, so an SVM inherits every scaling problem k-NN
+has (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-7-1">14.7.1</a>) — and <code>gamma="scale"</code> uses a single global variance, so it cannot compensate for features
+that differ from each other.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">n_s</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">small_scale</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_s</span><span class="p">)</span>
+<span class="n">large_scale</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="n">n_s</span><span class="p">)</span>
+<span class="n">y_s</span> <span class="o">=</span> <span class="p">(</span><span class="n">small_scale</span> <span class="o">+</span> <span class="n">large_scale</span> <span class="o">/</span> <span class="mi">500</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>      <span class="c1"># both contribute equally</span>
+<span class="n">X_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">small_scale</span><span class="p">,</span> <span class="n">large_scale</span><span class="p">])</span>
+
+<span class="n">unscaled</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">),</span> <span class="n">X_s</span><span class="p">,</span> <span class="n">y_s</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">scaled</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)),</span> <span class="n">X_s</span><span class="p">,</span> <span class="n">y_s</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unscaled CV accuracy : </span><span class="si">{</span><span class="n">unscaled</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;scaled   CV accuracy : </span><span class="si">{</span><span class="n">scaled</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">unscaled CV accuracy : 0.7460
+scaled   CV accuracy : 0.9800</pre></div></div>
+<div class="md"><h4 id="s16-8-2">16.8.2 It does not scale to large data</h4>
+<p>The kernel matrix has \(n^2\) entries and the solver is roughly \(O(n^2)\) to \(O(n^3)\). This is the hardest
+practical limit of any model in this material.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;n&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">&#39;kernel matrix&#39;</span><span class="si">:</span><span class="s2">&gt;16</span><span class="si">}{</span><span class="s1">&#39;SVC fit (ms)&#39;</span><span class="si">:</span><span class="s2">&gt;15</span><span class="si">}{</span><span class="s1">&#39;LinearSVC (ms)&#39;</span><span class="si">:</span><span class="s2">&gt;17</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">4000</span><span class="p">):</span>
+    <span class="n">Xn</span><span class="p">,</span> <span class="n">yn</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                                 <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+    <span class="n">Xn</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Xn</span><span class="p">)</span>
+
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">();</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">);</span> <span class="n">svc_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">();</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">);</span> <span class="n">lin_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+
+    <span class="n">entries</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="n">entries</span><span class="si">:</span><span class="s2">&gt;16,</span><span class="si">}{</span><span class="n">svc_ms</span><span class="si">:</span><span class="s2">&gt;15.1f</span><span class="si">}{</span><span class="n">lin_ms</span><span class="si">:</span><span class="s2">&gt;17.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">       n   kernel matrix   SVC fit (ms)   LinearSVC (ms)
+     500         250,000           13.6              4.5
+    1000       1,000,000           50.0              4.1
+    2000       4,000,000          172.5              5.5
+    4000      16,000,000          489.3              9.4</pre></div></div>
+<div class="md"><p>Extrapolate the kernel-matrix column: at \(n = 100{,}000\) it holds \(10^{10}\) entries, which is 80 GB in
+double precision. <code>SVC</code> is simply not usable there.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Use</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(n \lesssim 10{,}000\), non-linear boundary</td>
+<td><code>SVC(kernel="rbf")</code></td>
+<td>The kernel trick is affordable</td>
+</tr>
+<tr>
+<td>Large \(n\), linear boundary is enough</td>
+<td><code>LinearSVC</code></td>
+<td>Solves the primal; scales roughly linearly</td>
+</tr>
+<tr>
+<td>Very large $n<code>|</code>SGDClassifier(loss="hinge")`</td>
+<td>Mini-batch (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/#s10-5">10.5</a>); constant memory</td>
+<td></td>
+</tr>
+<tr>
+<td>Large \(n\), non-linear needed</td>
+<td><code>Nystroem</code> + <code>LinearSVC</code></td>
+<td>Approximates the kernel map explicitly</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.kernel_approximation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Nystroem</span>
+
+<span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">6000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">X_big</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_big</span><span class="p">)</span>
+
+<span class="n">approaches</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;SVC(rbf)&quot;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;LinearSVC&quot;</span><span class="p">:</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">),</span>
+    <span class="s2">&quot;Nystroem(300) + LinearSVC&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span>
+        <span class="n">Nystroem</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">),</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">approaches</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_big</span><span class="p">,</span> <span class="n">y_big</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">elapsed</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;28</span><span class="si">}</span><span class="s2"> CV accuracy </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   total </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">&gt;8.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">SVC(rbf)                     CV accuracy 0.9483   total     3835 ms
+LinearSVC                    CV accuracy 0.8013   total       58 ms
+Nystroem(300) + LinearSVC    CV accuracy 0.9323   total     1807 ms</pre></div></div>
+<div class="md"><h4 id="s16-8-3">16.8.3 No probabilities, natively</h4>
+<p>An SVM outputs a <strong>signed distance</strong> from the hyperplane, not a probability. <code>probability=True</code> fits a
+Platt-scaling calibration (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-7">8.7</a>) by internal cross-validation, which multiplies the fitting cost and was
+deprecated in scikit-learn 1.9 in favour of doing it explicitly.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">CalibratedClassifierCV</span>
+
+<span class="n">X_p</span><span class="p">,</span> <span class="n">y_p</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                               <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+<span class="n">X_p</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_p</span><span class="p">)</span>
+<span class="n">Xp_tr</span><span class="p">,</span> <span class="n">Xp_te</span><span class="p">,</span> <span class="n">yp_tr</span><span class="p">,</span> <span class="n">yp_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_p</span><span class="p">,</span> <span class="n">y_p</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y_p</span><span class="p">,</span>
+                                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="n">plain</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xp_tr</span><span class="p">,</span> <span class="n">yp_tr</span><span class="p">)</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">plain</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">Xp_te</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;decision_function range: [</span><span class="si">{</span><span class="n">scores</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">scores</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]  &lt;- not probabilities&quot;</span><span class="p">)</span>
+
+<span class="n">calibrated</span> <span class="o">=</span> <span class="n">CalibratedClassifierCV</span><span class="p">(</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xp_tr</span><span class="p">,</span> <span class="n">yp_tr</span><span class="p">)</span>
+<span class="n">probs</span> <span class="o">=</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">Xp_te</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;calibrated probabilities: [</span><span class="si">{</span><span class="n">probs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">probs</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">brier_score_loss</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC from decision_function : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">yp_te</span><span class="p">,</span><span class="w"> </span><span class="n">scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AUC from calibrated proba  : </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">yp_te</span><span class="p">,</span><span class="w"> </span><span class="n">probs</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Brier score, calibrated    : </span><span class="si">{</span><span class="n">brier_score_loss</span><span class="p">(</span><span class="n">yp_te</span><span class="p">,</span><span class="w"> </span><span class="n">probs</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">decision_function range: [-2.555, 2.107]  &lt;- not probabilities
+calibrated probabilities: [0.003, 0.992]
+
+AUC from decision_function : 0.9551
+AUC from calibrated proba  : 0.9558
+Brier score, calibrated    : 0.0736</pre></div></div>
+<div class="md"><p>For <strong>ranking and thresholding</strong> (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-6">8.6</a>) the raw <code>decision_function</code> is sufficient and free — a threshold on
+it is exactly a threshold on a probability, since Platt scaling is monotonic. Calibrate only when the
+number itself must mean something.</p></div>
+<div class="md"><h3 id="s16-9">16.9 In Practice</h3>
+<h4 id="s16-9-1">16.9.1 A worked case: separating overlapping classes on the breast-cancer data</h4>
+<p>The request: <em>"We have 30 measurements per sample and 569 samples. Get the best classification we can, and
+tell us what it costs."</em></p>
+<p>That shape — small \(n\), moderate \(p\), a non-linear boundary plausible — is exactly the regime where SVMs
+are still the strongest classical choice, and where their cost is affordable.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+
+<span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Xb_tr</span><span class="p">,</span> <span class="n">Xb_te</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">,</span> <span class="n">yb_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">yb</span><span class="p">,</span>
+                                              <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Xb</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> samples, </span><span class="si">{</span><span class="n">Xb</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> features, </span><span class="si">{</span><span class="n">yb</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2"> positive&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;feature scale ranges from </span><span class="si">{</span><span class="n">Xb</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">Xb</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;  -&gt; scaling is not optional (16.8.1)&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">569 samples, 30 features, 62.7% positive
+feature scale ranges from 0.0026 to 568.9  -&gt; scaling is not optional (16.8.1)</pre></div></div>
+<div class="md"><p><strong>Step 1 — establish the baseline before reaching for a kernel.</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">baselines</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;logistic regression&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+    <span class="s2">&quot;linear SVM&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)),</span>
+    <span class="s2">&quot;RBF SVM (defaults)&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)),</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">baselines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Xb_tr</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2"> CV ROC AUC </span><span class="si">{</span><span class="n">scores</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> +/- &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scores</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">logistic regression    CV ROC AUC 0.9962 +/- 0.0018
+linear SVM             CV ROC AUC 0.9949 +/- 0.0025
+RBF SVM (defaults)     CV ROC AUC 0.9951 +/- 0.0015</pre></div></div>
+<div class="md"><p><strong>Step 2 — search <code>C</code> and <code>gamma</code> jointly (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-6">16.6</a>).</strong> The grid is logarithmic, and the search happens inside
+a pipeline so the scaler is refitted per fold (<a class="xref" href="/machine-learning/05-data-preprocessing/#s5-1">5.1</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">)),</span>
+    <span class="p">{</span><span class="s2">&quot;svc__C&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;svc__gamma&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)},</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">)</span>
+
+<span class="n">heat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="n">search</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s2">&quot;mean_test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;C=</span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;g=</span><span class="si">{</span><span class="n">g</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">heat</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">best: </span><span class="si">{</span><span class="n">search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;best CV ROC AUC: </span><span class="si">{</span><span class="n">search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">        g=0.0001  g=0.001  g=0.01   g=0.1     g=1
+C=0.1     0.9859   0.9859  0.9893  0.9810  0.9506
+C=1       0.9859   0.9914  0.9957  0.9885  0.9507
+C=10      0.9918   0.9956  0.9971  0.9860  0.9508
+C=100     0.9956   0.9962  0.9944  0.9857  0.9508
+C=1000    0.9959   0.9958  0.9896  0.9857  0.9508
+
+best: {&#x27;svc__C&#x27;: np.float64(10.0), &#x27;svc__gamma&#x27;: np.float64(0.01)}
+best CV ROC AUC: 0.9971</pre></div></div>
+<div class="md"><p>Read the grid rather than just its maximum. The good region is a <strong>diagonal band</strong>: large <code>C</code> needs small
+<code>gamma</code> and vice versa, which is <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-6">16.6</a>'s interaction made visible. A one-dimensional search over either
+parameter alone would have missed it.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">classification_report</span>
+
+<span class="n">best_model</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">best_estimator_</span>
+<span class="n">test_proba</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">Xb_te</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test ROC AUC: </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">yb_te</span><span class="p">,</span><span class="w"> </span><span class="n">test_proba</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;support vectors: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">best_model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">)</span><span class="si">}</span><span class="s2"> training samples &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">best_model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">)</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">yb_te</span><span class="p">,</span> <span class="n">best_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xb_te</span><span class="p">),</span>
+                            <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;malignant&quot;</span><span class="p">,</span> <span class="s2">&quot;benign&quot;</span><span class="p">],</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</code></pre><div class="outs"><pre class="out-text">test ROC AUC: 0.9987
+support vectors: 54 of 426 training samples (12.7%)
+
+              precision    recall  f1-score   support
+
+   malignant      0.963     0.981     0.972        53
+      benign      0.989     0.978     0.983        90
+
+    accuracy                          0.979       143
+   macro avg      0.976     0.979     0.978       143
+weighted avg      0.979     0.979     0.979       143</pre></div></div>
+<div class="md"><p><strong>Step 3 — what it costs.</strong> The question was "tell us what it costs", and the answer has three parts:
+fitting time, prediction time, and interpretability.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">comparison</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;logistic regression&quot;</span><span class="p">:</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">)),</span>
+    <span class="s2">&quot;RBF SVM (tuned)&quot;</span><span class="p">:</span> <span class="n">best_model</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">comparison</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">();</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">);</span> <span class="n">fit_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xb_te</span><span class="p">)</span>
+    <span class="n">pred_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">50</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">yb_te</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">Xb_te</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2"> fit </span><span class="si">{</span><span class="n">fit_ms</span><span class="si">:</span><span class="s2">&gt;7.1f</span><span class="si">}</span><span class="s2"> ms   predict </span><span class="si">{</span><span class="n">pred_ms</span><span class="si">:</span><span class="s2">&gt;6.2f</span><span class="si">}</span><span class="s2"> ms   test AUC </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">logistic regression    fit    19.2 ms   predict   0.78 ms   test AUC 0.9977
+RBF SVM (tuned)        fit     8.8 ms   predict   3.38 ms   test AUC 0.9987</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># Interpretability: a linear model has one coefficient per feature; an RBF SVM has none.</span>
+<span class="n">lin</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;logistic regression exposes coefficients:&quot;</span><span class="p">)</span>
+<span class="n">top</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">lin</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">load_breast_cancer</span><span class="p">()</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">RBF SVM exposes: </span><span class="si">{</span><span class="p">[</span><span class="n">a</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;coef_&#39;</span><span class="p">,)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">hasattr</span><span class="p">(</span><span class="n">best_model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">a</span><span class="p">)]</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;no coefficients at all&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">best_model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
+<span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  accessing coef_ -&gt;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="mi">75</span><span class="p">])</span>
+</code></pre><div class="outs"><pre class="out-text">logistic regression exposes coefficients:
+worst texture          -1.250
+radius error           -1.070
+worst symmetry         -0.957
+worst concave points   -0.942
+
+RBF SVM exposes: no coefficients at all
+  accessing coef_ -&gt; coef_ is only available when using a linear kernel</pre></div></div>
+<div class="md"><p><strong>Step 4 — the report.</strong></p>
+<blockquote>
+<p><strong>Best result.</strong> An RBF-kernel SVM with jointly tuned <code>C</code> and <code>gamma</code> reaches a test ROC AUC in the high
+0.99s, marginally ahead of a linear SVM and logistic regression — all three are within roughly one
+standard error of each other on cross-validation.</p>
+<p><strong>Is the kernel earning its keep?</strong> Barely. This data is close to linearly separable after scaling, so
+the non-linear boundary adds very little. The honest recommendation is the <strong>linear</strong> model: the same
+accuracy, faster prediction, and coefficients someone can read.</p>
+<p><strong>What the SVM costs.</strong> Prediction requires evaluating the kernel against every support vector — here
+54 of 426 training samples, about an eighth — which makes it roughly <strong>four times slower per prediction</strong>
+than a linear model's single dot product, and the gap widens with training-set size (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-8-2">16.8.2</a>). It also
+exposes <strong>no coefficients</strong>: <code>coef_</code> raises an <code>AttributeError</code> for any non-linear kernel, so explaining
+a prediction needs <a class="xref" href="/machine-learning/24-interpretability-and-deployment/">Chapter 24</a>'s model-agnostic tools.</p>
+<p><strong>When would the kernel be worth it?</strong> If the linear baseline had been materially worse. The decision
+rule is the one this section followed: <strong>fit the linear model first, and only pay for the kernel if the
+gap justifies it.</strong></p>
+</blockquote>
+<h4 id="s16-9-2">16.9.2 When to reach for an SVM</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Use an SVM?</th>
+<th>Instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small-to-medium \(n\), non-linear boundary</td>
+<td><strong>Yes</strong> — <code>SVC(kernel="rbf")</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>\(p &gt; n\) (text, genomics)</td>
+<td><strong>Yes</strong> — <code>LinearSVC</code> handles it well</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Clear margin between classes</td>
+<td><strong>Yes</strong> — this is what it optimizes</td>
+<td>—</td>
+</tr>
+<tr>
+<td>$n &gt; $ ~50,000</td>
+<td><strong>No</strong> — \(O(n^2)\) kernel matrix (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-8-2">16.8.2</a>)</td>
+<td><code>LinearSVC</code>, <code>SGDClassifier</code>, boosting</td>
+</tr>
+<tr>
+<td>You need probabilities</td>
+<td>Only with explicit calibration (<a class="xref" href="/machine-learning/16-support-vector-machines/#s16-8-3">16.8.3</a>)</td>
+<td>Logistic regression (<a class="xref" href="/machine-learning/13-logistic-regression/#s13-9-1">13.9.1</a>)</td>
+</tr>
+<tr>
+<td>You need to explain the model</td>
+<td><strong>No</strong> for non-linear kernels</td>
+<td>Linear models, trees</td>
+</tr>
+<tr>
+<td>Many irrelevant features</td>
+<td>Weak — like k-NN, distances dilute</td>
+<td>Trees (<a class="xref" href="/machine-learning/17-decision-trees/#s17-8">17.8</a>), or select first (Ch. 7)</td>
+</tr>
+<tr>
+<td>Mixed categorical and numeric</td>
+<td>Awkward — one-hot distorts distances (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-9-1">14.9.1</a>)</td>
+<td>Trees, boosting</td>
+</tr>
+<tr>
+<td>Heavy class imbalance</td>
+<td>With <code>class_weight="balanced"</code></td>
+<td><a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/">Chapter 22</a></td>
+</tr>
+<tr>
+<td>Maximum accuracy on tabular data</td>
+<td>Usually no</td>
+<td>Gradient boosting (Ch. 19)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>In practice — the SVM's position has narrowed.</strong> Through the 2000s it was the default strong classifier.
+Gradient boosting (<a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/">Chapter 19</a>) now beats it on most tabular problems, scales far better, and handles mixed
+types natively. What SVMs retain is the \(p &gt; n\) regime, problems with a genuine geometric margin, and
+their role as the cleanest illustration of the kernel idea — which reappears in Gaussian processes,
+kernel PCA and elsewhere.</p>
+<h4 id="s16-9-3">16.9.3 What goes wrong in production</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What it looks like</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unscaled features</strong></td>
+<td>Accuracy collapses; <code>gamma="scale"</code> cannot compensate per-feature</td>
+<td>16.8.1</td>
+</tr>
+<tr>
+<td><strong>Training set grows</strong></td>
+<td>Fitting time grows quadratically; the nightly retrain stops finishing</td>
+<td>16.8.2</td>
+</tr>
+<tr>
+<td><strong><code>decision_function</code> read as a probability</strong></td>
+<td>Thresholds and expected values are meaningless</td>
+<td>16.8.3</td>
+</tr>
+<tr>
+<td><strong><code>probability=True</code> used casually</strong></td>
+<td>Fitting cost multiplies; the internal CV is invisible</td>
+<td>16.8.3</td>
+</tr>
+<tr>
+<td><strong>Model artefact is large</strong></td>
+<td>Support vectors are stored with the model; it grows with \(n\)</td>
+<td>Below</td>
+</tr>
+<tr>
+<td><strong><code>gamma</code> tuned on unscaled data</strong></td>
+<td>The tuned value is meaningless once scaling changes</td>
+<td>16.6</td>
+</tr>
+</tbody>
+</table></div>
+<p>The support-vector storage point is worth quantifying, because it is the same class of problem k-NN had
+(<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-9-3">14.9.3</a>) in a milder form.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+
+<span class="n">lin_model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xb_tr</span><span class="p">,</span> <span class="n">yb_tr</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;logistic regression&quot;</span><span class="p">,</span> <span class="n">lin_model</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;RBF SVM&quot;</span><span class="p">,</span> <span class="n">best_model</span><span class="p">)):</span>
+    <span class="n">size_kb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">model</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1024</span>
+    <span class="n">n_sv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;support_&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2"> serialized </span><span class="si">{</span><span class="n">size_kb</span><span class="si">:</span><span class="s2">&gt;7.1f</span><span class="si">}</span><span class="s2"> KB   support vectors stored: </span><span class="si">{</span><span class="n">n_sv</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">logistic regression    serialized     2.0 KB   support vectors stored: 0
+RBF SVM                serialized    16.0 KB   support vectors stored: 54</pre></div></div>
+<div class="md"><p>The SVM's artefact carries a slice of the training data with it, and that slice grows with the training
+set. For a model retrained on ever more data, both the file size and the prediction latency drift upward
+with no change to the code — which is exactly the kind of failure that surfaces as a mysterious
+latency regression months after deployment.</p></div></article>
+<nav class="spn"><a href="/machine-learning/15-naive-bayes/">← Naive Bayes</a><a href="/machine-learning/17-decision-trees/">Decision Trees →</a></nav>
+</main>
+<footer class="sfoot">
+<span>© 2026 Gradient Atlas. All rights reserved.</span>
+<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
+</footer>
+<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+</body>
+</html>

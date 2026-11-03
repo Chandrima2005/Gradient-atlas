@@ -19,8 +19,15 @@ function show(v) {
   curView = v;
   VIEWS.forEach(k => $('#v-' + k).hidden = k !== v);
   $$('.rail a').forEach(a => a.classList.toggle('on', a.dataset.v === (v === 'path' ? 'metro' : v)));
-  if (v !== 'read') document.title = 'Gradient Atlas';
+  if (v !== 'read') document.title = TITLES[v]();
 }
+const TITLES = {
+  home: () => 'Gradient Atlas: Free Data Science Pathway & Roadmap',
+  path: () => 'Data Science Roadmap: Five Stages, Python to GenAI — Gradient Atlas',
+  metro: () => `${C.name} Route Map — Gradient Atlas`,
+  console: () => 'Search — Gradient Atlas',
+  recall: () => `${C.name} Flashcards and Quizzes — Gradient Atlas`,
+};
 async function route() {
   if (!M) return;
   const my = ++ticket;
