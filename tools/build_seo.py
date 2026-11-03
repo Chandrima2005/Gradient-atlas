@@ -1,10 +1,12 @@
-"""Build the static, crawlable pages that search engines index.
+"""Write a real page for every URL that search engines should index.
 
-The app itself lives at / and switches pages with #hash links, which Google
-treats as one URL. This script writes a real page for the roadmap, each
-course, and each chapter, plus sitemap.xml and robots.txt.
+Every page is index.html with its own title, description, canonical link, structured
+data and text, so /python-for-data-science/ opens the Python route map and
+/machine-learning/11-linear-regression/ opens that chapter, and both are readable
+before any JavaScript runs. Also writes js/slugs.js (chapter URL names for
+js/paths.js), sitemap.xml and robots.txt.
 
-Run it from the repository folder after changing anything in data/ or js/tracks.js:
+Run it from the repository folder after changing index.html, anything in data/, or js/tracks.js:
     python tools/build_seo.py
 """
 import html
@@ -17,24 +19,36 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BASE = 'https://gradient-atlas.chandrima-das.com'
 TODAY = date.today().isoformat()
+SHELL = (ROOT / 'index.html').read_text(encoding='utf-8')
 
-# app link prefix, data folder, URL folder, chapters to publish (0 and the appendix are bookkeeping)
+# URLs and route keys must match js/paths.js; titles must match js/router.js and js/views/reader.js
 COURSES = {
-    'py': dict(name='Python', dir='data/py/', url='python', pfx='py/', skip=set(),
-               lead='Python for data science, from the fundamentals to concurrency, databases and Pydantic.'),
-    'ml': dict(name='Machine Learning', dir='data/', url='machine-learning', pfx='', skip={0, 25},
+    'py': dict(name='Python for Data Science', short='Python', dir='data/py/', url='/python-for-data-science/', pfx='py/', key='py/route',
+               title='Python for Data Science: Free Course | Gradient Atlas',
+               lead='Learn Python for data science, from the fundamentals to OOP, generators, concurrency, databases and Pydantic.'),
+    'ml': dict(name='Machine Learning', short='Machine learning', dir='data/', url='/machine-learning/', pfx='', key='route-ml',
+               title='Machine Learning for Data Science: Free Course | Gradient Atlas',
                lead='Every classic machine learning algorithm built from scratch in NumPy, then checked against scikit-learn.'),
 }
-STAGES = [  # mirrors js/tracks.js
-    ('Python', 'py', 'The language everything else is written in, from the basics to concurrency.'),
-    ('Python libraries', None, 'The data toolkit: NumPy, pandas, Matplotlib, Seaborn and SciPy.'),
-    ('Machine learning', 'ml', 'Every classic algorithm built from scratch, then checked against scikit-learn.'),
-    ('Deep learning', None, 'Neural networks, from one neuron to transformers, with PyTorch.'),
-    ('Generative AI', None, 'LLMs, prompt engineering, embeddings, RAG, LangChain and agents.'),
-]
+STAGE_URL = {'python': COURSES['py']['url'], 'libs': '/python-libraries/', 'ml': COURSES['ml']['url'],
+             'dl': '/deep-learning/', 'genai': '/generative-ai/'}
+STAGE_PAGE = {  # the stages that are not live yet
+    'libs': ('Python Libraries for Data Science: NumPy, pandas, Matplotlib | Gradient Atlas',
+             'Python libraries for data science',
+             'NumPy, pandas, Matplotlib, Seaborn and SciPy: the data toolkit every data scientist uses after learning Python.'),
+    'dl': ('Deep Learning Roadmap: Neural Networks to Transformers | Gradient Atlas',
+           'Deep learning roadmap',
+           'A deep learning roadmap from a single neuron to transformers: backpropagation, optimisers, PyTorch, CNNs, RNNs and attention.'),
+    'genai': ('Generative AI Roadmap: LLMs, RAG and LangChain | Gradient Atlas',
+              'Generative AI roadmap',
+              'A generative AI roadmap for data scientists: how LLMs work, tokens and embeddings, prompt engineering, vector databases, RAG, LangChain and agents.'),
+}
+ROADMAP_TITLE = 'Data Science Roadmap 2026: Python to Generative AI | Gradient Atlas'
+OUT_DIRS = ['data-science-roadmap', 'python', 'python-for-data-science', 'machine-learning', 'python-libraries', 'deep-learning', 'generative-ai']
 
 esc = lambda s: html.escape(str(s), quote=True)
 slug = lambda s: re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
+ORG = {'@type': 'Organization', 'name': 'Gradient Atlas', 'url': BASE + '/'}
 
 
 def clip(s, n=155):
@@ -42,28 +56,36 @@ def clip(s, n=155):
     return s if len(s) <= n else s[:n - 1].rsplit(' ', 1)[0] + '…'
 
 
+def read_tracks():
+    """The five stages, read from js/tracks.js so the two never disagree."""
+    src = (ROOT / 'js/tracks.js').read_text(encoding='utf-8')
+    out = []
+    for block in re.findall(r'\{\s*id:.*?\n  \}', src, re.S):
+        get = lambda k: re.search(k + r":\s*'((?:[^'\\]|\\.)*)'", block).group(1).replace("\\'", "'")
+        out.append(dict(id=get('id'), n=int(re.search(r'n:\s*(\d+)', block).group(1)), title=get('title'), sub=get('sub'),
+                        live="status: 'live'" in block,
+                        mods=re.findall(r"'((?:[^'\\]|\\.)*)'", re.search(r'mods:\s*\[(.*?)\]', block, re.S).group(1))))
+    return out
+
+
 def load(cid):
     c = COURSES[cid]
     c['manifest'] = json.loads((ROOT / c['dir'] / 'manifest.json').read_text(encoding='utf-8'))
-    c['chapters'] = [ch for ch in c['manifest']['chapters'] if ch['n'] not in c['skip']]
+    c['chapters'] = c['manifest']['chapters']
     for ch in c['chapters']:
-        ch['path'] = f"/{c['url']}/{ch['n']:02d}-{slug(ch['title'])}/"
+        ch['slug'] = f"{ch['n']:02d}-{slug(ch['title'])}"
+        ch['path'] = f"{c['url']}{ch['slug']}/"
 
 
 def chapter_url(cid, n, frag=''):
-    """Static page for a chapter, or the app when that chapter has no static page."""
-    c = COURSES[cid]
-    for ch in c['chapters']:
-        if ch['n'] == n:
-            return ch['path'] + (f'#{frag}' if frag else '')
-    return f"/#{c['pfx']}{frag or f'ch{n}'}"
+    ch = next(x for x in COURSES[cid]['chapters'] if x['n'] == n)
+    return ch['path'] + (f'#{frag}' if frag else '')
 
 
 def fix_links(body):
-    # same rules as js/router.js: no prefix means the ML course, py/ means Python
+    # the notes link with #keys (no prefix: ML, py/: Python), the same rule as js/paths.js
     def sub(m):
-        cid = 'py' if m.group(1) else 'ml'
-        target = m.group(2)
+        cid, target = ('py' if m.group(1) else 'ml'), m.group(2)
         if target.startswith('ch'):
             return f'href="{chapter_url(cid, int(target[2:]))}"'
         return f'href="{chapter_url(cid, int(re.match(r"s(\d+)", target).group(1)), target)}"'
@@ -71,17 +93,14 @@ def fix_links(body):
     return body.replace('src="img/', 'src="/img/')
 
 
-def page(path, title, desc, body, ld, math=False):
-    head_math = ('<script src="/js/mathjax-config.js"></script>\n'
-                 '<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>\n') if math else ''
-    # the shared config has typeset off and works through a queue, as js/core.js typeset() does
-    foot_math = ("<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body'));"
-                 " if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>\n") if math else ''
-    out = f'''<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+def crumbs(*items):
+    return {'@type': 'BreadcrumbList', 'itemListElement': [
+        {'@type': 'ListItem', 'position': i + 1, 'name': n, 'item': BASE + p} for i, (n, p) in enumerate(items)]}
+
+
+def page(path, title, desc, body, ld, key=None):
+    """index.html with this page's head tags and text. With a key, the text stays visible under the app's view."""
+    head = f'''<!-- seo:start  written by tools/build_seo.py -->
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{BASE}{path}">
@@ -92,73 +111,53 @@ def page(path, title, desc, body, ld, math=False):
 <meta property="og:url" content="{BASE}{path}">
 <meta property="og:image" content="{BASE}/icon-512.png">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="theme-color" content="#2563eb">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
-<script>window.dataLayer = window.dataLayer || []; function gtag(){{dataLayer.push(arguments);}} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
-<script>try {{ const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; }} catch {{}}</script>
-<link rel="stylesheet" href="/css/base.css">
-<link rel="stylesheet" href="/css/reader.css">
-<link rel="stylesheet" href="/css/static.css">
-{head_math}<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
-</head>
-<body class="static">
-<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
-<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
-<main class="sdoc">
-{body}
-</main>
-<footer class="sfoot">
-<span>© 2026 Gradient Atlas. All rights reserved.</span>
-<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
-</footer>
-{foot_math}</body>
-</html>
-'''
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
+<!-- seo:end -->'''
+    attrs = f' data-key="{esc(key)}"' if key else ''
+    main = f'<!-- page:start -->\n<section class="sdoc" id="seo"{attrs}>\n{body}\n</section>\n<!-- page:end -->'
+    out = re.sub(r'<!-- seo:start.*?<!-- seo:end -->', lambda _: head, SHELL, count=1, flags=re.S)
+    out = re.sub(r'<!-- page:start -->.*?<!-- page:end -->', lambda _: main, out, count=1, flags=re.S)
     f = ROOT / path.strip('/') / 'index.html'
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(out, encoding='utf-8')
 
 
-ORG = {'@type': 'Organization', 'name': 'Gradient Atlas', 'url': BASE + '/'}
-
-
-def crumbs(*items):
-    return {'@type': 'BreadcrumbList', 'itemListElement': [
-        {'@type': 'ListItem', 'position': i + 1, 'name': n, 'item': BASE + p} for i, (n, p) in enumerate(items)]}
-
-
-def build_roadmap():
+def build_roadmap(tracks):
     lis = []
-    for i, (name, cid, sub) in enumerate(STAGES, 1):
-        if cid:
-            c = COURSES[cid]
+    for t in tracks:
+        url = STAGE_URL[t['id']]
+        if t['live']:
+            c = next(c for c in COURSES.values() if c['url'] == url)
             mins = sum(ch['minutes'] for ch in c['chapters'])
-            link = f'<a href="/{c["url"]}/">{len(c["chapters"])} chapters · ~{round(mins / 60)} h →</a>'
+            more = f'{len(c["chapters"])} free chapters · about {round(mins / 60)} hours'
         else:
-            link = '<span class="soon">Coming soon</span>'
-        lis.append(f'<li><h2>Stage {i}: {esc(name)}</h2><p>{esc(sub)}</p><p>{link}</p></li>')
-    body = f'''<p class="crumb"><a href="/">Home</a> › Data science roadmap</p>
-<h1>Data Science Roadmap: a free pathway from Python to Generative AI</h1>
-<p class="lead">This is a step-by-step data science route map. Work through five stages in order, from your first line of Python to machine learning, deep learning and generative AI. Each stage builds on the one before it.</p>
-<ol class="stagelist">{''.join(lis)}</ol>
-<h2>How to use this pathway</h2>
-<p><b>To learn everything,</b> follow the stages in order, chapter by chapter. <b>To learn one topic fast,</b> open the <a href="/#route">interactive route map</a>, pick the chapter you want, such as gradient boosting or Python decorators, and it shows only the chapters you need to read first.</p>
-<p class="cta"><a class="sbtn" href="/#route">Open the interactive route map →</a></p>'''
+            more = 'Coming soon'
+        lis.append(f'<li><h3><a href="{url}">Stage {t["n"]}: {esc(t["title"])}</a></h3><p>{esc(t["sub"])}</p>'
+                   f'<p class="meta">{esc(more)} · {esc(", ".join(t["mods"][:6]))}…</p></li>')
+    body = f'''<h1>Data science roadmap: from Python to generative AI</h1>
+<p class="lead">A free, step-by-step data science roadmap. Work through five stages in order, from your first line of Python to machine learning, deep learning and generative AI. Each stage builds on the one before it, and each has its own route map that shows only the chapters you need.</p>
+<ol class="stagelist">{''.join(lis)}</ol>'''
     ld = {'@context': 'https://schema.org', '@graph': [
         {'@type': 'ItemList', 'name': 'Data science roadmap', 'itemListOrder': 'https://schema.org/ItemListOrderAscending',
-         'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'name': n,
-                              **({'url': f"{BASE}/{COURSES[cid]['url']}/"} if cid else {})}
-                             for i, (n, cid, _) in enumerate(STAGES)]},
-        crumbs(('Home', '/'), ('Data science roadmap', '/data-science-roadmap/'))]}
-    page('/data-science-roadmap/', 'Data Science Roadmap 2026: Free Pathway from Python to ML & GenAI | Gradient Atlas',
-         'A free, step-by-step data science roadmap and route map: Python, Python libraries, machine learning, deep learning and generative AI, one stage at a time.',
-         body, ld)
+         'itemListElement': [{'@type': 'ListItem', 'position': t['n'], 'name': t['title'], 'url': BASE + STAGE_URL[t['id']]} for t in tracks]},
+        crumbs(('Gradient Atlas', '/'), ('Data science roadmap', '/data-science-roadmap/'))]}
+    page('/data-science-roadmap/', ROADMAP_TITLE,
+         'A free, step-by-step data science roadmap for 2026: Python, Python libraries, machine learning, deep learning and generative AI, one stage at a time.',
+         body, ld, key='route')
+
+
+def build_stage(t, tracks):
+    title, h1, lead = STAGE_PAGE[t['id']]
+    first = next(x for x in tracks if x['live'])
+    body = f'''<h1>{esc(h1)}</h1>
+<p class="lead">{esc(lead)} This is stage {t['n']} of the five-stage <a href="/data-science-roadmap/">data science roadmap</a>.</p>
+<h2>What this stage covers</h2>
+<ol>{''.join(f'<li>{esc(m)}</li>' for m in t['mods'])}</ol>
+<p>The chapters for this stage are being written. Meanwhile, start with <a href="{STAGE_URL[first['id']]}">stage {first['n']}: {esc(first['title'])}</a>.</p>'''
+    ld = {'@context': 'https://schema.org', '@graph': [
+        {'@type': 'ItemList', 'name': h1, 'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'name': m} for i, m in enumerate(t['mods'])]},
+        crumbs(('Gradient Atlas', '/'), ('Data science roadmap', '/data-science-roadmap/'), (h1, STAGE_URL[t['id']]))]}
+    page(STAGE_URL[t['id']], title, clip(lead), body, ld, key='route-' + t['id'])
 
 
 def build_course(cid):
@@ -167,61 +166,54 @@ def build_course(cid):
     rows, last = [], None
     for ch in c['chapters']:
         if ch['part'] != last:
-            if last is not None:
-                rows.append('</ol>')
-            rows.append(f'<h2>{esc(parts[ch["part"]])}</h2><ol class="chlist" start="{ch["n"]}">')
+            rows.append(('</ol>' if last is not None else '') + f'<h2>{esc(parts[ch["part"]])}</h2><ol class="chlist">')
             last = ch['part']
-        rows.append(f'<li><a href="{ch["path"]}">{esc(ch["title"])}</a><span>{esc(ch["scope"])}</span></li>')
+        rows.append(f'<li><a href="{ch["path"]}">{esc(ch["title"])}</a><span>{esc(ch["scope"] or ch["covers"])}</span></li>')
     rows.append('</ol>')
     mins = sum(ch['minutes'] for ch in c['chapters'])
-    title = f'Free {c["name"]} Course for Data Science: {len(c["chapters"])} Chapters | Gradient Atlas'
-    desc = clip(f'{c["lead"]} {len(c["chapters"])} free chapters, about {round(mins / 60)} hours of reading, with examples, flashcards and quizzes.')
-    body = f'''<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Data science roadmap</a> › {esc(c["name"])}</p>
-<h1>{esc(c["name"])} for data science: a free course</h1>
-<p class="lead">{esc(c["lead"])} {len(c["chapters"])} chapters, about {round(mins / 60)} hours of reading.</p>
-<p class="cta"><a class="sbtn" href="/#{c["pfx"]}route">Open the {esc(c["name"].lower())} route map →</a></p>
+    desc = clip(f'{c["lead"]} {len(c["chapters"])} free chapters with examples, flashcards and quizzes.')
+    body = f'''<h1>{esc(c["name"])}: a free course</h1>
+<p class="lead">{esc(c["lead"])} {len(c["chapters"])} chapters, about {round(mins / 60)} hours of reading. Part of the <a href="/data-science-roadmap/">data science roadmap</a>.</p>
 {''.join(rows)}'''
     ld = {'@context': 'https://schema.org', '@graph': [
-        {'@type': 'Course', 'name': f'{c["name"]} for data science', 'description': desc, 'url': f'{BASE}/{c["url"]}/',
+        {'@type': 'Course', 'name': c['name'], 'description': desc, 'url': BASE + c['url'],
          'provider': ORG, 'isAccessibleForFree': True, 'inLanguage': 'en',
          'offers': {'@type': 'Offer', 'category': 'Free', 'price': 0, 'priceCurrency': 'USD'},
          'hasCourseInstance': {'@type': 'CourseInstance', 'courseMode': 'online', 'courseWorkload': f'PT{round(mins / 60)}H'},
          'hasPart': [{'@type': 'LearningResource', 'name': ch['title'], 'url': BASE + ch['path']} for ch in c['chapters']]},
-        crumbs(('Home', '/'), ('Data science roadmap', '/data-science-roadmap/'), (c['name'], f'/{c["url"]}/'))]}
-    page(f'/{c["url"]}/', title, desc, body, ld)
+        crumbs(('Gradient Atlas', '/'), ('Data science roadmap', '/data-science-roadmap/'), (c['name'], c['url']))]}
+    page(c['url'], c['title'], desc, body, ld, key=c['key'])
 
 
 def build_chapters(cid):
     c = COURSES[cid]
-    chs = c['chapters']
-    for i, ch in enumerate(chs):
+    for ch in c['chapters']:
         d = json.loads((ROOT / c['dir'] / f'ch{ch["n"]:02d}.json').read_text(encoding='utf-8'))
-        prev, nxt = (chs[i - 1] if i else None), (chs[i + 1] if i + 1 < len(chs) else None)
-        pn = ''.join([f'<a href="{prev["path"]}">← {esc(prev["title"])}</a>' if prev else '<span></span>',
-                      f'<a href="{nxt["path"]}">{esc(nxt["title"])} →</a>' if nxt else ''])
-        toc = ''.join(f'<li class="l{s["lvl"]}"><a href="#{s["id"]}">{esc(s["num"])} {esc(s["title"])}</a></li>'
-                      for s in ch['sections'] if s['lvl'] <= 3)
         title = f'{ch["title"]} – {c["name"]} Chapter {ch["n"]} | Gradient Atlas'
         desc = clip(ch['scope'] or ch['covers'] or f'{ch["title"]}, chapter {ch["n"]} of the free {c["name"]} course.')
-        body = f'''<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/{c["url"]}/">{esc(c["name"])}</a> › Chapter {ch["n"]}</p>
-<h1><small>{esc(c["name"])} · Chapter {ch["n"]}</small>{esc(ch["title"])}</h1>
+        body = f'''<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="{c["url"]}">{esc(c["name"])}</a> › Chapter {ch["n"]}</p>
+<h1>{esc(ch["title"])}</h1>
 {f'<p class="lead">{esc(ch["scope"])}</p>' if ch["scope"] else ''}
-<p class="cta"><a class="sbtn" href="/#{c["pfx"]}ch{ch["n"]}">Read in the interactive reader, with quizzes and flashcards →</a></p>
-<nav class="stoc" aria-label="Sections"><ol>{toc}</ol></nav>
-<article class="body">{fix_links(d["html"])}</article>
-<nav class="spn">{pn}</nav>'''
+<article class="body">{fix_links(d["html"])}</article>'''
         ld = {'@context': 'https://schema.org', '@graph': [
             {'@type': 'LearningResource', 'name': ch['title'], 'headline': ch['title'], 'description': desc,
              'url': BASE + ch['path'], 'learningResourceType': 'Course chapter', 'inLanguage': 'en',
              'isAccessibleForFree': True, 'timeRequired': f'PT{ch["minutes"]}M', 'publisher': ORG,
-             'isPartOf': {'@type': 'Course', 'name': f'{c["name"]} for data science', 'url': f'{BASE}/{c["url"]}/', 'provider': ORG}},
-            crumbs(('Home', '/'), ('Data science roadmap', '/data-science-roadmap/'), (c['name'], f'/{c["url"]}/'),
+             'isPartOf': {'@type': 'Course', 'name': c['name'], 'url': BASE + c['url'], 'provider': ORG}},
+            crumbs(('Gradient Atlas', '/'), ('Data science roadmap', '/data-science-roadmap/'), (c['name'], c['url']),
                    (ch['title'], ch['path']))]}
-        page(ch['path'], title, desc, body, ld, math=True)
+        page(ch['path'], title, desc, body, ld)
 
 
-def build_sitemap():
-    urls = ['/', '/data-science-roadmap/'] + [f'/{c["url"]}/' for c in COURSES.values()]
+def write_slugs():
+    data = {cid: {ch['n']: ch['slug'] for ch in c['chapters']} for cid, c in COURSES.items()}
+    (ROOT / 'js/slugs.js').write_text(
+        '// chapter URL names, written by tools/build_seo.py from data/*/manifest.json. Do not edit by hand.\n'
+        f'export const SLUG = {json.dumps(data, ensure_ascii=False)};\n', encoding='utf-8')
+
+
+def build_sitemap(tracks):
+    urls = ['/', '/data-science-roadmap/'] + [STAGE_URL[t['id']] for t in tracks]
     urls += [ch['path'] for c in COURSES.values() for ch in c['chapters']]
     (ROOT / 'sitemap.xml').write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -232,12 +224,17 @@ def build_sitemap():
 
 
 if __name__ == '__main__':
-    for c in COURSES.values():  # start clean so renamed chapters don't leave old pages behind
-        shutil.rmtree(ROOT / c['url'], ignore_errors=True)
+    for d in OUT_DIRS:  # start clean so renamed chapters don't leave old pages behind
+        shutil.rmtree(ROOT / d, ignore_errors=True)
+    tracks = read_tracks()
     for cid in COURSES:
         load(cid)
-    build_roadmap()
+    write_slugs()
+    build_roadmap(tracks)
+    for t in tracks:
+        if not t['live']:
+            build_stage(t, tracks)
     for cid in COURSES:
         build_course(cid)
         build_chapters(cid)
-    print(f'sitemap.xml: {build_sitemap()} URLs')
+    print(f'sitemap.xml: {build_sitemap(tracks)} URLs')

@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>File Handling – Python for Data Science Chapter 16 | Gradient Atlas</title>
+<meta name="description" content="Persisting and reading data on disk.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="File Handling – Python for Data Science Chapter 16 | Gradient Atlas">
+<meta property="og:description" content="Persisting and reading data on disk.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "File Handling", "headline": "File Handling", "description": "Persisting and reading data on disk.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT19M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "File Handling", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 16</p>
+<h1>File Handling</h1>
+<p class="lead">Persisting and reading data on disk.</p>
+<article class="body"><div class="md"><h3 id="s16-1">16.1 File Fundamentals</h3>
+<p><strong>Why file handling.</strong> A variable lives only in the running process's memory (RAM) — the
+instant the program ends (or crashes), everything it held is gone. <strong>File handling</strong> is
+how a program persists data beyond its own lifetime, by asking the operating system to
+read and write it to disk instead:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Storage</th>
+<th>Lifetime</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In-memory (a variable)</td>
+<td>only while the program is running</td>
+<td>a <code>list</code>, a <code>dict</code></td>
+</tr>
+<tr>
+<td>Temporary storage</td>
+<td>until the OS/user cleans it up; often explicit</td>
+<td>the system temp directory, a cache</td>
+</tr>
+<tr>
+<td>Permanent storage (a file)</td>
+<td>survives the program ending <em>and</em> the machine rebooting</td>
+<td>a <code>.txt</code>, <code>.csv</code>, <code>.json</code> file on disk</td>
+</tr>
+</tbody>
+</table></div>
+<p>Python's built-in <strong><code>open()</code></strong> is the entry point for all of this — it hands back a
+<strong>file object</strong> connected to a real file on disk, through which the program reads or
+writes data.</p>
+<p><strong>Text vs. binary</strong> — every file is really just a sequence of bytes on disk; the
+difference is what those bytes are <em>interpreted as</em>:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Interpreted as</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text</td>
+<td>characters, via a text encoding (default: UTF-8)</td>
+<td><code>.txt</code>, <code>.py</code>, <code>.csv</code>, <code>.json</code> — human-readable</td>
+</tr>
+<tr>
+<td>Binary</td>
+<td>raw bytes, no encoding/decoding at all</td>
+<td>images, executables, pickled data</td>
+</tr>
+</tbody>
+</table></div>
+<p>Encoding is exactly the boundary between the two — a <code>str</code> only becomes bytes (what
+actually gets written to disk) by going through one:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;hi&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>                      <span class="c1"># hi -&gt; just a str in memory</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>   <span class="c1"># b&#39;hi&#39; -&gt; the actual bytes that would be written to disk</span>
+</code></pre><div class="outs"><pre class="out-text">hi
+b&#x27;hi&#x27;</pre></div></div>
+<div class="md"><h3 id="s16-2">16.2 Text File Open Modes</h3>
+<p><code>open(path, mode)</code>'s second argument controls both <em>what</em> is allowed (read/write) and
+<em>where</em> it starts:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"r"</code></td>
+<td>read an <strong>existing</strong> file (the default if <code>mode</code> is omitted); error if missing</td>
+</tr>
+<tr>
+<td><code>"w"</code></td>
+<td>write — <strong>creates</strong> the file if missing, <strong>truncates</strong> (erases) it if it exists</td>
+</tr>
+<tr>
+<td><code>"a"</code></td>
+<td>append — creates the file if missing, writes are added after existing content</td>
+</tr>
+<tr>
+<td><code>"x"</code></td>
+<td>exclusive creation — creates a <strong>new</strong> file; errors if it already exists</td>
+</tr>
+<tr>
+<td><code>"r+"</code></td>
+<td>read <strong>and</strong> write on an existing file, without truncating it</td>
+</tr>
+<tr>
+<td><code>"w+"</code></td>
+<td>write <strong>and</strong> read, but truncates first, exactly like <code>"w"</code></td>
+</tr>
+<tr>
+<td><code>"a+"</code></td>
+<td>append <strong>and</strong> read</td>
+</tr>
+</tbody>
+</table></div>
+<p>A trailing <code>"t"</code> (text) is the implicit default for every mode above — <code>"rt"</code> means
+exactly the same thing as <code>"r"</code>. Reading, writing, and appending, in order:</p></div>
+<div class="md"><p>The examples below use <code>tempfile.mkdtemp()</code> to create a fresh temporary directory, so
+running this notebook doesn't scatter files around your filesystem; in your own code
+you'd normally pass a plain path (e.g. <code>"notes.txt"</code> or <code>"/home/you/notes.txt"</code>)
+instead:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">20 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">work_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;notes.txt&quot;</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>   <span class="c1"># &#39;w&#39; - create (or truncate) for writing</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;first line</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>    <span class="c1"># &#39;r&#39; - read an existing file (the default mode)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>            <span class="c1"># first line</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>   <span class="c1"># &#39;a&#39; - append, creating the file if it doesn&#39;t exist</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;second line</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>   <span class="c1"># first line \n second line</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">first line
+
+first line
+second line</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — every config-reading or report-writing script does this.</strong> A DevOps
+script reading a YAML/<code>.env</code>-style config file, or a nightly job writing out a report
+file, uses exactly this open/read-or-write/close shape — the only real question in
+practice is almost always <em>which mode</em> (<code>"r"</code>, <code>"w"</code>, <code>"a"</code>) fits the task, since the
+mechanics are identical across every one of them.</p></div>
+<div class="md"><p><code>"x"</code> refuses to clobber an existing file, and <code>"r+"</code> writes into an existing file
+<em>without</em> erasing what was already there:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>   <span class="c1"># &#39;x&#39; - exclusive creation, fails if the file already exists</span>
+<span class="k">except</span> <span class="ne">FileExistsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FileExistsError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># [Errno 17] File exists: &#39;...notes.txt&#39;</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span>   <span class="c1"># &#39;r+&#39; - read AND write on an existing file, no truncation</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;XXXX&quot;</span><span class="p">)</span>            <span class="c1"># overwrites starting at position 0, doesn&#39;t erase the rest</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>   <span class="c1"># XXXXt line \n second line \n -&gt; only the first 4 characters were overwritten</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">FileExistsError: [Errno 17] File exists: &#x27;/tmp/tmpc0oemt3i/notes.txt&#x27;
+XXXXt line
+second line</pre></div></div>
+<div class="md"><p><code>"w+"</code> combines writing with reading back, and <code>"rt"</code> demonstrates the implicit <code>"t"</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">scratch_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;scratch.txt&quot;</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">scratch_path</span><span class="p">,</span> <span class="s2">&quot;w+&quot;</span><span class="p">)</span>   <span class="c1"># &#39;w+&#39; - write AND read, but truncates the file first</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>                                  <span class="c1"># move back to the start to read what was just written</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>                            <span class="c1"># hello</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">scratch_path</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span>   <span class="c1"># &#39;rt&#39; - the same as plain &quot;r&quot;; &#39;t&#39; (text) is the implicit default</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>                        <span class="c1"># hello</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">hello
+hello</pre></div></div>
+<div class="md"><h3 id="s16-3">16.3 Binary File Open Modes</h3>
+<p>Every text mode from <a class="xref" href="/python-for-data-science/16-file-handling/#s16-2">16.2</a> has a binary counterpart — just append <code>"b"</code> instead of the
+implicit <code>"t"</code>, and reads/writes deal in raw <code>bytes</code> instead of <code>str</code>:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>One-liner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"rb"</code></td>
+<td>read raw bytes from an existing file</td>
+</tr>
+<tr>
+<td><code>"wb"</code></td>
+<td>write raw bytes, creating/truncating the file</td>
+</tr>
+<tr>
+<td><code>"ab"</code></td>
+<td>append raw bytes to the end of the file</td>
+</tr>
+<tr>
+<td><code>"xb"</code></td>
+<td>exclusive creation, in binary</td>
+</tr>
+<tr>
+<td><code>"rb+"</code></td>
+<td>read and write raw bytes on an existing file, no truncation</td>
+</tr>
+<tr>
+<td><code>"wb+"</code></td>
+<td>write and read raw bytes, truncating first</td>
+</tr>
+<tr>
+<td><code>"ab+"</code></td>
+<td>append and read raw bytes</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">bin_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;data.bin&quot;</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">bin_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>     <span class="c1"># &#39;wb&#39; - write raw bytes, no text encoding involved</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">([</span><span class="mi">72</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">33</span><span class="p">]))</span>   <span class="c1"># writes those exact byte values directly</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">bin_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>      <span class="c1"># &#39;rb&#39; - read raw bytes back</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>   <span class="c1"># b&#39;Hi!&#39;</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">b&#x27;Hi!&#x27;</pre></div></div>
+<div class="md"><h3 id="s16-4">16.4 The File Object</h3>
+<p><code>open()</code> returns a <strong>file object</strong> carrying a handful of properties about how it was
+opened, plus state-query methods for what it currently allows:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Property / method</th>
+<th>Gives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.name</code></td>
+<td>the path (or descriptor) it was opened with</td>
+</tr>
+<tr>
+<td><code>.mode</code></td>
+<td>the mode string it was opened with</td>
+</tr>
+<tr>
+<td><code>.encoding</code></td>
+<td>the text encoding in use (text mode only)</td>
+</tr>
+<tr>
+<td><code>.closed</code></td>
+<td><code>True</code> once <code>.close()</code> has run, <code>False</code> while still open</td>
+</tr>
+<tr>
+<td><code>.writable()</code></td>
+<td>whether writing is currently allowed</td>
+</tr>
+<tr>
+<td><code>.readable()</code></td>
+<td>whether reading is currently allowed</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>.write(s)</code> sends <code>s</code> to the file and returns how many characters were written:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">profile_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;profile.txt&quot;</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">profile_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">profile_path</span><span class="p">)</span>   <span class="c1"># True -&gt; the exact path it was opened with</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>                            <span class="c1"># w</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>                       <span class="c1"># utf-8</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>                          <span class="c1"># False -&gt; still open</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">writable</span><span class="p">())</span>                     <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readable</span><span class="p">())</span>                    <span class="c1"># False -&gt; opened write-only</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Ada Lovelace</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># write() returns the number of characters written</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                                     <span class="c1"># 13</span>
+
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># True -&gt; now closed</span>
+</code></pre><div class="outs"><pre class="out-text">True
+w
+utf-8
+False
+True
+False
+13
+True</pre></div></div>
+<div class="md"><p><strong>Giving <code>open()</code> a path.</strong> A relative path (<code>"notes.txt"</code>) is resolved against the
+<strong>current working directory</strong> — wherever the process happens to be running from, not
+where the <code>.py</code> file lives — while an absolute path always names the same file
+regardless of the working directory. Building a path by hand with <code>+</code> and <code>"/"</code> breaks
+on Windows, whose separator is <code>"\\"</code> — <code>os.path.join()</code> (or <code>pathlib</code>'s <code>/</code> operator,
+9.6) picks whichever separator the running OS actually needs (<a class="xref" href="/python-for-data-science/01-python-fundamentals/#s1-1-5">1.1.5</a>'s platform
+independence, applied to paths):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">joined</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;sub&quot;</span><span class="p">,</span> <span class="s2">&quot;notes.txt&quot;</span><span class="p">)</span>           <span class="c1"># portable - right separator for the OS</span>
+<span class="n">pathlib_version</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;sub&quot;</span> <span class="o">/</span> <span class="s2">&quot;notes.txt&quot;</span>      <span class="c1"># pathlib&#39;s / operator does the same job</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pathlib_version</span><span class="p">)</span> <span class="o">==</span> <span class="n">joined</span><span class="p">)</span>   <span class="c1"># True -&gt; two ways to build the identical path</span>
+
+<span class="n">relative</span> <span class="o">=</span> <span class="s2">&quot;relative_notes.txt&quot;</span>   <span class="c1"># resolved against the CURRENT WORKING DIRECTORY, not this file&#39;s location</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">relative</span><span class="p">)</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">relative</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">True
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — deployment scripts that run on more than one OS.</strong> A DevOps script
+built and tested on a developer's Mac/Windows machine but deployed to a Linux
+production server will silently break if it hardcodes a path with <code>"/"</code> or <code>"\\"</code> —
+<code>os.path.join()</code>/<code>pathlib.Path</code> are what make the exact same script work unmodified in
+both places.</p></div>
+<div class="md"><p><strong>Going deeper.</strong> For new code, prefer <code>pathlib.Path</code> over <code>os.path</code> — it wraps a path
+in an object with useful methods (<code>.exists()</code>, <code>.suffix</code>, <code>.read_text()</code>, ...) instead
+of loose functions that take and return plain strings. <code>os.path</code> is shown here because
+it's still extremely common in existing codebases, and reading it fluently matters even
+when it isn't your first choice for new work.</p></div>
+<div class="md"><h3 id="s16-5">16.5 Reading Character Data from Text Files</h3>
+<p>Four ways to pull characters back out of a text file, from least to most structured:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>f.read(n)</code></td>
+<td>exactly <code>n</code> characters (or fewer, if the file ends first)</td>
+</tr>
+<tr>
+<td><code>f.read()</code></td>
+<td>everything left in the file, as one <code>str</code></td>
+</tr>
+<tr>
+<td><code>f.readline()</code></td>
+<td>one line at a time, including its trailing <code>\n</code>; <code>""</code> once nothing's left</td>
+</tr>
+<tr>
+<td><code>f.readlines()</code></td>
+<td>every remaining line, all at once, as a <code>list</code> of strings</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">poem_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;poem.txt&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">poem_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;roses are red</span><span class="se">\n</span><span class="s2">violets are blue</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">poem_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>    <span class="c1"># roses -&gt; read(n) reads exactly n CHARACTERS</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>        <span class="c1"># &#39; are red\nviolets are blue\n&#39; -&gt; read() with no args reads the REST</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">poem_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>   <span class="c1"># roses are red\n -&gt; ONE line, including the trailing newline</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>   <span class="c1"># violets are blue\n</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>   <span class="c1"># &quot;&quot; -&gt; empty string once there&#39;s nothing left</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">poem_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>   <span class="c1"># [&#39;roses are red\n&#39;, &#39;violets are blue\n&#39;]</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre><div class="outs"><pre class="out-text">roses
+ are red
+violets are blue
+
+roses are red
+
+violets are blue
+
+
+[&#x27;roses are red\n&#x27;, &#x27;violets are blue\n&#x27;]</pre></div></div>
+<div class="md"><p>The idiomatic way to process a file line by line is to iterate over the file object
+directly — it's itself a lazy iterator (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-1">14.1</a>, <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-2">14.2</a>) that yields one line per <code>next()</code>
+call, instead of loading every line into memory at once like <code>readlines()</code> does:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">poem_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>              <span class="c1"># one line at a time, lazily</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="c1"># roses are red</span>
+<span class="c1"># violets are blue</span>
+</code></pre><div class="outs"><pre class="out-text">roses are red
+violets are blue</pre></div></div>
+<div class="md"><h3 id="s16-6">16.6 The <code>with</code> Statement</h3>
+<p>An open file holds an OS-level resource (a file descriptor) that needs to be released
+with <code>.close()</code> — but if an exception happens between <code>open()</code> and <code>.close()</code>, that
+<code>.close()</code> call is skipped entirely, leaking the resource. The concrete failure story:
+a program that opens many files without ever closing them eventually hits the OS's
+open-file-descriptor limit and crashes with <code>OSError: [Errno 24] Too many open files</code>.
+<code>with open(...) as f:</code> fixes this structurally: <code>open()</code>'s return value is a <strong>context
+manager</strong> — it implements <code>__enter__</code>/<code>__exit__</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>) — and <code>with</code> guarantees
+<code>__exit__</code> (which closes the file) runs when the block ends, <em>no matter how</em> it ends:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;log.txt&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>   <span class="c1"># calls f.__enter__() on entry, f.__exit__() on exit</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;with a context manager&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># False -&gt; still open INSIDE the block</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># True -&gt; closed automatically the instant the block ends</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;partial&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;something went wrong&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># True -&gt; __exit__ ran and closed the file EVEN THOUGH an exception was raised</span>
+</code></pre><div class="outs"><pre class="out-text">False
+True
+True</pre></div></div>
+<div class="md"><h4>Writing your own context manager</h4>
+<p><code>with</code> isn't limited to files — any object implementing <code>__enter__(self)</code> and
+<code>__exit__(self, exc_type, exc_val, exc_tb)</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>) can follow <code>with</code>. <code>__enter__</code> runs
+on entry, and its return value becomes whatever <code>as</code> binds to. <code>__exit__</code> always runs on
+exit, whether the block finished normally or raised an exception, and it receives that
+exception's type, value, and traceback as its three arguments (all <code>None</code> if nothing
+went wrong). Returning <code>True</code> from <code>__exit__</code> tells <code>with</code> to <strong>suppress</strong> the exception
+instead of letting it propagate; returning <code>None</code>/<code>False</code> (the usual case) lets it
+propagate normally after cleanup runs:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">ManagedFile</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span>   <span class="c1"># this becomes &quot;f&quot; in &quot;with ManagedFile(...) as f:&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">False</span>   <span class="c1"># False/None - don&#39;t suppress any exception that occurred</span>
+
+<span class="k">with</span> <span class="n">ManagedFile</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;hand-written context manager&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># True -&gt; __exit__ closed it, exactly like the built-in file&#39;s does</span>
+</code></pre><div class="outs"><pre class="out-text">True</pre></div></div>
+<div class="md"><p>The class above is boilerplate for something conceptually simple: "run this setup code,
+then always run that cleanup code." <code>contextlib.contextmanager</code> turns a <strong>generator
+function</strong> into a context manager without writing a class at all — everything before a
+single <code>yield</code> runs as <code>__enter__</code>, the yielded value becomes what <code>as</code> binds to, and
+everything after <code>yield</code> runs as <code>__exit__</code> (wrapped in <code>try</code>/<code>finally</code> so the cleanup
+still runs if the <code>with</code> block raises). This is the same send/close/<code>yield from</code>
+machinery from <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-6">14.6</a>, repurposed to drive a <code>with</code> block instead of being called by hand:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">managed_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">f</span>   <span class="c1"># this becomes &quot;f&quot; in &quot;with managed_file(...) as f:&quot;</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>   <span class="c1"># always runs when the block ends, even on an exception</span>
+
+<span class="k">with</span> <span class="n">managed_file</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;contextlib.contextmanager version&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>   <span class="c1"># True -&gt; closed automatically, same guarantee as the built-in with</span>
+</code></pre><div class="outs"><pre class="out-text">True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — wrapping a database connection or a distributed lock.</strong> Production
+code commonly wraps things far more consequential than a file in exactly this pattern:
+a context manager that acquires a database connection or a distributed lock (e.g. via
+Redis) on entry and guarantees it's released on exit — even if the code inside the
+<code>with</code> block raises — so a crash never leaves a lock held or a connection leaked.</p></div>
+<div class="md"><h3 id="s16-7">16.7 Other Structured File Formats</h3>
+<p>CSV, JSON, Excel spreadsheets, and PDFs all have real internal <strong>structure</strong> — rows and
+columns, sheets, pages — that plain <code>.read()</code>/<code>.write()</code> (<a class="xref" href="/python-for-data-science/16-file-handling/#s16-5">16.5</a>) knows nothing about; it
+only sees characters or bytes. Each format instead gets its own dedicated module that
+understands that structure:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Structure</th>
+<th>Python module</th>
+<th>Built-in?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CSV</td>
+<td>plain text; rows of delimiter-separated values</td>
+<td><code>csv</code></td>
+<td>yes (stdlib)</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>plain text; nested key-value/array structure</td>
+<td><code>json</code> (<a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-6">9.6</a>)</td>
+<td>yes (stdlib)</td>
+</tr>
+<tr>
+<td>Excel (<code>.xlsx</code>)</td>
+<td>a zip archive of XML; sheets, cells, formulas, styles</td>
+<td><code>openpyxl</code></td>
+<td>no — <code>pip install openpyxl</code> (<a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-7">9.7</a>)</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>binary; pages of positioned text, fonts, images</td>
+<td><code>pypdf</code>, <code>pdfplumber</code></td>
+<td>no — <code>pip install pypdf</code> (<a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-7">9.7</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong><code>csv</code></strong> is the simplest and ships with Python — <code>csv.writer</code>/<code>csv.reader</code> work
+row-by-row as lists, and <code>csv.DictReader</code> reads each row as a <code>dict</code> keyed by the header
+row instead:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">22 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+
+<span class="n">csv_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;people.csv&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>   <span class="c1"># newline=&quot;&quot; - stops csv from adding blank lines itself</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">])</span>              <span class="c1"># header row</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;Grace&quot;</span><span class="p">,</span> <span class="mi">34</span><span class="p">])</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="c1"># [&#39;name&#39;, &#39;age&#39;]</span>
+<span class="c1"># [&#39;Ada&#39;, &#39;28&#39;]</span>
+<span class="c1"># [&#39;Grace&#39;, &#39;34&#39;]</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>   <span class="c1"># each row as a dict, keyed by the header</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="c1"># {&#39;name&#39;: &#39;Ada&#39;, &#39;age&#39;: &#39;28&#39;}</span>
+<span class="c1"># {&#39;name&#39;: &#39;Grace&#39;, &#39;age&#39;: &#39;34&#39;}</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;name&#x27;, &#x27;age&#x27;]
+[&#x27;Ada&#x27;, &#x27;28&#x27;]
+[&#x27;Grace&#x27;, &#x27;34&#x27;]
+{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;age&#x27;: &#x27;28&#x27;}
+{&#x27;name&#x27;: &#x27;Grace&#x27;, &#x27;age&#x27;: &#x27;34&#x27;}</pre></div></div>
+<div class="md"><p><strong><code>json</code></strong> ships with Python too (9.6 introduced the <code>json</code> module for its data-structure
+side; here's the file-handling side) and mirrors <code>csv</code>'s shape: <code>json.dump(obj, f)</code>
+writes a Python object out to an open file as JSON text, and <code>json.load(f)</code> reads that
+text back into Python objects:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;people.json&quot;</span><span class="p">)</span>
+<span class="n">people</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Grace&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">34</span><span class="p">}]</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">people</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>   <span class="c1"># writes the Python object out as JSON text</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">loaded</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>   <span class="c1"># reads the JSON text back into Python objects</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">loaded</span><span class="p">)</span>                     <span class="c1"># [{&#39;name&#39;: &#39;Ada&#39;, &#39;age&#39;: 28}, {&#39;name&#39;: &#39;Grace&#39;, &#39;age&#39;: 34}]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">loaded</span> <span class="o">==</span> <span class="n">people</span><span class="p">)</span>   <span class="c1"># True -&gt; round-tripped exactly</span>
+</code></pre><div class="outs"><pre class="out-text">[{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;age&#x27;: 28}, {&#x27;name&#x27;: &#x27;Grace&#x27;, &#x27;age&#x27;: 34}]
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — JSON is the default format for config and API payloads.</strong> Application
+config files (<code>config.json</code>), the request/response bodies of virtually every REST API,
+and data exchanged between microservices are almost always JSON — <code>json.dump()</code>/
+<code>json.load()</code> (or the <code>.model_dump_json()</code>/<code>.model_validate_json()</code> pair from Pydantic,
+20.3/20.5) are two of the most frequently used file-adjacent calls in real Python
+services.</p></div>
+<div class="md"><p><strong>Excel and PDF</strong> are both binary formats with no standard-library reader — the usual
+choice is a third-party package (<code>pip install</code>, <a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-7">9.7</a>). Their shape (once installed) —
+<strong>illustrative only: not run in this notebook, since no third-party dependency is
+installed here</strong>:</p>
+<pre class="fence" data-lang="text"><code># Excel (.xlsx) - openpyxl
+import openpyxl
+wb = openpyxl.load_workbook(&quot;data.xlsx&quot;)   # a Workbook: one or more Sheets
+sheet = wb.active                                     # or wb[&quot;SheetName&quot;]
+print(sheet[&quot;A1&quot;].value)                            # read one cell
+sheet[&quot;B2&quot;] = &quot;new value&quot;                          # write one cell
+wb.save(&quot;data.xlsx&quot;)
+
+# PDF - pypdf
+from pypdf import PdfReader
+reader = PdfReader(&quot;document.pdf&quot;)
+print(len(reader.pages))                            # number of pages
+print(reader.pages[0].extract_text())        # the text on page 1
+</code></pre>
+<p>(Illustrative only, as noted above — not executed in this notebook.) Both libraries
+mirror the same core idea as <code>csv</code>/<code>json</code>: parse the file's real structure (sheets and
+cells; pages and their content) into Python objects, instead of handing back an
+undifferentiated blob of bytes.</p></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

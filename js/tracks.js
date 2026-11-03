@@ -1,9 +1,9 @@
 // The five stages of the data science pathway.
-// To open a stage when its material is ready: set status to 'live' and give it an href.
+// To open a stage when its material is ready: set status to 'live' and give it an href (a route key, see js/paths.js).
 // The module lists for stages marked 'soon' are a planned outline and can be edited freely.
 export const TRACKS = [
   {
-    id: 'python', n: 1, title: 'Python', v: '--p1', status: 'live', href: '#py/route',
+    id: 'python', n: 1, title: 'Python', v: '--p1', status: 'live', href: 'py/route',
     sub: 'The language everything else is written in, from the basics to concurrency.',
     mods: ['Fundamentals', 'Objects and data types', 'Operators', 'Flow control', 'Built-in data types', 'Functions', 'Exceptions', 'Logging and debugging', 'Modules and packages', 'OOP foundations', 'Object relationships', 'Inheritance and MRO', 'Special methods', 'Iterators and generators', 'Regular expressions', 'File handling', 'Concurrency', 'Databases', 'Memory and GC', 'Pydantic'],
     stats: '20 chapters · ~10 h',
@@ -14,7 +14,7 @@ export const TRACKS = [
     mods: ['NumPy arrays', 'NumPy maths and broadcasting', 'pandas Series and DataFrames', 'Cleaning data with pandas', 'Grouping, joining, reshaping', 'Matplotlib', 'Seaborn', 'SciPy essentials'],
   },
   {
-    id: 'ml', n: 3, title: 'Machine learning', v: '--p4', status: 'live', href: '#route-ml',
+    id: 'ml', n: 3, title: 'Machine learning', v: '--p4', status: 'live', href: 'route-ml',
     sub: 'Every classic algorithm built from scratch, then checked against scikit-learn.',
     mods: ['Maths foundations', 'Data and features', 'Model evaluation', 'Linear and logistic regression', 'Trees and ensembles', 'SVMs and k-NN', 'Clustering', 'Tuning and deployment'],
     stats: '24 chapters · ~16 h',

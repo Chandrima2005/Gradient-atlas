@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Appendix – Machine Learning Chapter 25 | Gradient Atlas</title>
+<meta name="description" content="Bookkeeping about the material itself, not machine-learning content.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/25-appendix/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Appendix – Machine Learning Chapter 25 | Gradient Atlas">
+<meta property="og:description" content="Bookkeeping about the material itself, not machine-learning content.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/25-appendix/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Appendix", "headline": "Appendix", "description": "Bookkeeping about the material itself, not machine-learning content.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/25-appendix/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT42M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Appendix", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/25-appendix/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 25</p>
+<h1>Appendix</h1>
+<p class="lead">Bookkeeping about the material itself, not machine-learning content.</p>
+<article class="body"><div class="md"><h3 id="s25-1">25.1 Chapter Coverage Tracker</h3>
+<p>What is written versus what is still an empty heading.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Machine Learning Fundamentals</td>
+<td><code>[DONE]</code></td>
+<td>1.1 (Mitchell's T/P/E definition, a rule recovered from data alone, generalization as the defining problem), 1.2 (rule-based vs. learned comparison table, a keyword spam rule failing in both directions, the common mistake of modelling a known rule), 1.3 (the five learning types keyed on what the training data contains; 1.3.1 regression vs. classification shown as a difference in <code>y</code> alone, 1.3.2 clustering with no <code>y</code>, 1.3.3 a self-training demo where 80 unlabelled rows beat 20 labelled ones alone, 1.3.4 reinforcement learning defined and scoped out), 1.4 (the full synonym table, <code>X</code>/<code>y</code> shape convention, and the parameter-vs-hyperparameter distinction demonstrated via scikit-learn's trailing-underscore convention), 1.5 (the eight-stage workflow diagram, a failure-mode table keyed to chapters, the entire workflow in fifteen lines, and the real time split), 1.6 (the seven disqualifying conditions, and a 30-feature/28-row model scoring a perfect 1.000 on train and -38.3 on test against a dummy's -0.05), 1.7 (classical-vs-deep comparison table, why tabular still favours boosting, an explicit exclusion list, and what transfers anyway), 1.8 (In Practice — framing "fix churn" into instance/T/E/P on <code>data/customers.csv</code>, the 86%-accuracy/0%-recall do-nothing baseline, <code>cancellation_reason</code> caught as target leakage, a framing-choice decision table including the unfixable corrupt-labels row, and the six post-deployment failure modes) — all filled</td>
+</tr>
+<tr>
+<td>2. Mathematical Foundations</td>
+<td><code>[DONE]</code></td>
+<td>2.1 (vectors, the dot product as a linear model's prediction, its geometric/angle reading, the (3,)-vs-(3,1) shape trap), 2.2 (matrices, <code>X @ w</code> as every prediction at once, the <code>*</code>-vs-<code>@</code> mistake), 2.3 (L1/L2/Linf norms, distance as the norm of a difference, cosine similarity on documents of different lengths), 2.4 (linear systems, rank vs. singularity, the condition number, <code>inv</code> vs. <code>solve</code> vs. <code>pinv</code>, and <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-4-2">2.4.2</a> ridge as a numerical fix), 2.5 (eigenvectors, 2.5.1 covariance eigendecomposition as PCA with 97.9% variance in one direction, 2.5.2 the SVD and an eig-vs-svd table, 2.5.3 eigenvector sign non-determinism), 2.6 (derivatives, the numerical-check habit, gradients, 2.6.2 the MSE gradient verified numerically and the dropped-2/n mistake, 2.6.3 the chain rule), 2.7 (expectation/variance, the six distributions that come up, Bayes' theorem with a 99%-sensitive test that is right under 2% of the time), 2.8 (descriptive stats and robustness, covariance vs. correlation, Pearson's blind spot on a U-shape shown with a figure, the CLT demonstrated on an exponential population, standard error, p-values and the 20-tests-of-nothing multiple-comparisons demo), 2.9 (In Practice — a duplicated column giving cond(X)=5.3e9 where rank says 4; three solvers returning three different answers; a proof of non-identifiability by shifting coefficients 2000 apart for identical predictions; the drop-vs-ridge fixes; a when-you-need-the-maths table; and six silent numerical failures including probability underflow to exactly 0.0) — all filled</td>
+</tr>
+<tr>
+<td>3. The Python Machine Learning Stack</td>
+<td><code>[DONE]</code></td>
+<td>3.1 (ndarray attributes and constructors, the integer-dtype truncation trap, indexing, the slice-is-a-view demo, broadcasting rules with a table and the failure case, vectorization timed at 47x), 3.2 (the axis-is-what-collapses rule, <code>keepdims</code>, <code>default_rng</code> over legacy global state), 3.3 (Series/DataFrame, pandas 3's <code>str</code> dtype, and the four-call triage that exposes <code>total_charges</code> stored as text with 9 blanks), 3.4 (<code>loc</code> vs <code>iloc</code> and the inclusive-endpoint trap, boolean filtering and <code>.query</code>, <code>.assign</code> chains, <code>.apply</code> vs vectorized timed at 25x, <code>.map</code> as ordinal encoding, <code>.isna</code> and why <code>== np.nan</code> fails), 3.5 (<code>groupby</code>/<code>agg</code>, merge types, a non-unique key silently adding 461 rows, <code>pivot_table</code> exposing six spellings of two genders), 3.6 (the Figure/Axes model and the four exploratory plots, then seaborn's <code>hue=</code>), 3.7 (the estimator API contract, transformer/predictor/meta-estimator, fit-on-train-only shown via a test mean that is correctly NOT zero, 3.7.1 the trailing-underscore convention, 3.7.2 four models swapped in one loop, 3.7.3 a first Pipeline), 3.8 (<code>random_state</code> int vs <code>RandomState</code> instance, the ValueError from passing a modern <code>Generator</code>, and five sources of non-determinism a seed does not fix), 3.9 (In Practice — a churn segment report built correctly: dedup, gender canonicalization, impossible ages blanked rather than dropped, revenue-at-risk as the decision column, a chi-square test returning p=0.82 that makes the honest finding a negative one; a which-tool table; and index misalignment silently producing NaN) — all filled</td>
+</tr>
+<tr>
+<td>4. Data and Exploratory Data Analysis</td>
+<td><code>[DONE]</code></td>
+<td>4.1 (the variable-type table driving every downstream choice, a cardinality heuristic and the four places it is wrong, the encoded-category-as-number mistake), 4.2 (bundled loaders, the <code>make_*</code> generators and why knowing the truth matters), 4.3 (numeric and categorical <code>describe</code>, a four-check summary reading, 4.3.1 numeric sentinel values), 4.4 (a distribution-shape table, six histograms revealing multimodal <code>monthly_charges</code>, skew/kurtosis as bin-width-independent outlier alarms - age kurtosis 28.9 caused by four rows), 4.5 (the pair-of-types tool table, plan explaining the multimodality, and city churn rates whose confidence intervals all overlap), 4.6 (correlation heatmap read for signal and redundancy, a programmatic top-pairs extraction, a pairplot, and <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/#s4-6-1">4.6.1</a> Simpson's paradox where B wins in both departments and loses overall), 4.7 (target balance, per-feature AUC ranked by distance from 0.5, and <code>cancellation_reason</code> scoring exactly 1.000 as leakage), 4.8 (what EDA answers and when to stop, 4.8.1 EDA as mild leakage with a strict/pragmatic/wrong rigour table), 4.9 (In Practice — a 30-minute data-quality review done split-first: a mechanical quality table, domain-rule violations, a mutual-information shortlist where MI and AUC disagree, a 0.786-vs-0.468 go/no-go check, and a six-line written deliverable) — all filled</td>
+</tr>
+<tr>
+<td>5. Data Preprocessing</td>
+<td><code>[DONE]</code></td>
+<td>5.1 (the split first; stratification shown to hold the test churn rate at 0.140 where plain splits range 0.085-0.205; scaling-before-splitting as the commonest leak; a fit-on-train table), 5.2 (5.2.1 MCAR/MAR/MNAR with a 1.9-standard-error test on whether missingness relates to churn, 5.2.2 deletion costing 20% of rows, 5.2.3 the imputer catalogue and the repair-before-impute ordering, 5.2.4 missingness indicators and the lopsided economics of adding them), 5.3 (impossible vs. extreme-but-real vs. influential; detection methods; the exact bound</td>
+</tr>
+<tr>
+<td>6. Feature Engineering</td>
+<td><code>[DONE]</code></td>
+<td>6.1 (feature engineering as making the implicit reachable, XOR defeating logistic regression at 0.463 AUC and solved perfectly by one product column, with a figure and a model-family sensitivity table), 6.2 (the encoder catalogue; 6.2.1 one-hot, <code>handle_unknown</code> as the setting that decides production survival, and the dummy-variable trap shown via matrix rank; 6.2.2 ordinal encoding and the alphabetical-default trap; 6.2.3 target encoding leaking 0.894 AUC out of a random column, fixed to 0.522 by cross-fitted <code>TargetEncoder</code>), 6.3 (binning strategies, manual tenure bands showing 49% to 3% churn, and binning costing AUC when the relationship was already monotonic), 6.4 (interactions, the O(p^2)/O(p^3) explosion table, polynomial features taking R^2 from 0.603 to 0.968), 6.5 (datetime decomposition, the <code>now()</code> mistake, 6.5.1 cyclical sin/cos encoding with a figure), 6.6 (CountVectorizer vs TF-IDF read honestly including the document where a stop word still wins, n-grams), 6.7 (the four domain-feature patterns, measured and found not to help, plus <code>spend_vs_plan</code> as a hidden group-statistic leak), 6.8 (the is-it-learned test as a table), 6.9 (In Practice — a five-rung feature ladder in which every rung makes the model worse, 0.814 to 0.781, reported as the real finding and used to motivate <a class="xref" href="/machine-learning/07-feature-selection-and-dimensionality-reduction/">Chapter 7</a>) — all filled</td>
+</tr>
+<tr>
+<td>7. Feature Selection and Dimensionality Reduction</td>
+<td><code>[DONE]</code></td>
+<td>7.1 (the curse of dimensionality shown three ways: nearest/farthest contrast collapsing from 615 to 0.12, exponential sample requirements, and pure-noise columns dragging AUC from 0.906 to 0.745), 7.2 (filter catalogue; 7.2.1 variance thresholds broken by units; 7.2.2 mutual information recovering all six real features where ANOVA F admits two noise columns and drops two informative ones; chi2 requiring non-negative input; 7.2.3 the univariate blind spot, where two features that determine the target exactly both score below pure noise), 7.3 (wrappers - RFE, RFECV with a figure, sequential selection solving the interaction case - and selection outside the CV loop manufacturing 0.793 AUC from a coin-flip target), 7.4 (embedded methods, L1 producing exact zeros, <code>SelectFromModel</code>), 7.5 (PCA from scratch via eigendecomposition matched against sklearn, scree and cumulative-variance plots, <code>n_components</code> as a float, an adversarial case where PC1 captures 99.95% of variance and discards the only signal, 7.5.3 scaling as mandatory with <code>proline</code> taking 99.8% of an unscaled PC1), 7.6 (LDA vs PCA compared in a table and a figure, the n_classes-1 component limit, and LDA recovering the signal PCA threw away), 7.7 (t-SNE, its missing <code>transform()</code> demonstrated, and three perplexities giving three pictures), 7.8 (selection vs extraction decision table, and forests degrading far more gently than linear models under noise), 7.9 (In Practice — repairing <a class="xref" href="/machine-learning/06-feature-engineering/">Chapter 6</a>'s ladder: 0.7804 with all 26 encoded columns, 0.8104 with mutual-information selection, best k=4 by grid search, and 0.8347 on the held-out test set using 4 of 26 columns) — all filled</td>
+</tr>
+<tr>
+<td>8. Model Evaluation and Validation</td>
+<td><code>[DONE]</code></td>
+<td>8.1 (training score as memorization; a tree at 1.0000 train, and why a LOW training score is the only informative one), 8.2 (train/validation/test, and 40 worthless candidate models on a coin-flip target yielding a best score of 0.565 from selection alone), 8.3 (the splitter catalogue; 8.3.1 stratification; 8.3.2 <code>cross_validate</code> with train scores; 8.3.3 group leakage producing 0.86 AUC on data with no signal, against GroupKFold's honest 0.47; 8.3.4 temporal leakage with a fold-structure figure), 8.4 (regression metrics; 8.4.1 MAE vs RMSE disagreeing tenfold about which error pattern is worse; 8.4.2 negative R^2 and adjusted R^2 falling as 60 noise columns are added; 8.4.3 MAPE's discontinuity at zero), 8.5 (the confusion matrix and every scalar derived from it; 8.5.1 accuracy 0.967 vs MCC 0.000 on a 1% problem; 8.5.2 ROC vs PR curves side by side under imbalance; 8.5.3 log loss punishing confident errors; 8.5.4 micro/macro/weighted averaging), 8.6 (the threshold as a business lever - one model read seven ways, a cost-optimal threshold of 0.14 saving 43%, Youden/F1/fixed-precision rules, and <code>TunedThresholdClassifierCV</code> to avoid tuning on the test set), 8.7 (calibration curves for four model families, the sigmoid-vs-isotonic table, <code>FrozenEstimator</code> replacing <code>cv="prefit"</code>, sigmoid leaving AUC <em>exactly</em> unchanged while isotonic's ties move it), 8.8 (dummy baselines; a paired t-test over 30 repeated folds; and the winner's CV score being optimistic against its test score), 8.9 (In Practice — an evaluation report whose headline finding is that the campaign LOSES ₹11,000 at the default threshold, with break-even precision 0.417, a profitable operating point at 0.90, an acceptance-rate sensitivity table, and a caveat that <code>class_weight="balanced"</code> inflated the probabilities every expected value was computed from) — all filled</td>
+</tr>
+<tr>
+<td>9. Bias, Variance and Regularization</td>
+<td><code>[DONE]</code></td>
+<td>9.1 (the under/overfitting table, polynomial degrees 1/3/20 with a figure, and the mistake of treating the train-validation gap rather than the validation score as the criterion), 9.2 (the bias-variance decomposition simulated over 200 training sets, with the scatter of 40 fits at degree 1 and degree 12 drawn side by side, and a model-family table), 9.3 (capacity knobs per family, <code>C</code> as an inverse penalty vs <code>alpha</code> as a direct one, and capacity being relative to n), 9.4 (learning curves and the four shapes, showing when more data cannot help), 9.5 (validation curves - where the literal argmin picks degree 14 on cubic data and the one-standard-error rule recovers degree 3), 9.6 (regularization as loss + penalty, a degree-15 fit with max</td>
+</tr>
+<tr>
+<td>10. Optimization and Gradient Descent</td>
+<td><code>[DONE]</code></td>
+<td>10.1 (model + loss + optimizer, and why the loss surface can be drawn for one parameter and never for a thousand), 10.2 (10.2.1 squared/absolute/Huber compared in a figure and by one outlier dragging OLS from 2.0 to 2.52; 10.2.2 the three classification surrogates plotted against the undifferentiable 0-1 loss), 10.3 (convexity, and three starting points converging to one answer or two), 10.4 (batch gradient descent from scratch, matched against the normal equation and scikit-learn), 10.5 (batch vs SGD vs mini-batch, with SGD's non-monotonic loss drawn up close), 10.6 (the learning rate: too small crawls, 1.05 diverges to 3e+40; 10.6.1 unscaled features needing a rate a million times smaller, tied to the condition number), 10.7 (momentum on an ill-conditioned problem that plain GD never catches, plus the optimizer catalogue and lbfgs as sklearn's actual default), 10.8 (closed form vs iterative timed, with the honest note that memory rather than speed is the real argument; 10.8.1 convergence diagnostics, and a fit still warning after 5000 iterations at AUC 0.905 that 12 scaled iterations beat), 10.9 (In Practice — a five-step diagnostic path for a model that will not train, resolving 'slow and inaccurate' into one cause: at sklearn's default max_iter=100 the unscaled fit caps out at 0.8201, scaled it converges in 13 iterations to 0.8248) — all filled</td>
+</tr>
+<tr>
+<td>11. Linear Regression</td>
+<td><code>[DONE]</code></td>
+<td>11.1 (the model; 11.1.1 'linear in the parameters' with a six-row table of what does and does not qualify), 11.2 (the least-squares objective, why squared error is the Gaussian MLE, 11.2.1 absorbing the intercept, 11.2.2 the normal equation derived and its gradient verified numerically), 11.3 (the normal equation from scratch matching sklearn to 10 decimals; 11.3.1 multiple features; 11.3.2 the two ways it breaks - an exact duplicate raises LinAlgError, while p&gt;n silently returns one of infinitely many exact interpolations of noise), 11.4 (gradient descent converging to the same answer to 1e-15, plus SGDRegressor), 11.5 (the sklearn API and fit_intercept=False turning a true slope of 2.0 into 6.8), 11.6 (the five assumptions with a table separating what breaks prediction from what breaks inference; residual panels for the satisfied case, non-linearity and heteroscedasticity; Breusch-Pagan; HC3 robust errors; and the precise point that non-normality costs precision, not correctness), 11.7 (VIF from scratch matched against statsmodels, collinearity leaving R^2 unchanged while inflating a coefficient's bootstrap spread 9x), 11.8 (polynomial regression, degree by CV, and a degree-8 fit predicting -7072 where the truth is 46), 11.9 (the five clauses of an honest coefficient reading, 11.9.1 raw-vs-standardized at 376x vs 3.1x, 11.9.2 statsmodels intervals and a sign flip under collinearity), 11.10 (In Practice - an inference report on the diabetes data: bmi/bp/sex safe to report, s1 and s5 significant but collinear, s1's bootstrap sd of 430 against bmi's 81, a borderline Breusch-Pagan p=0.052 disclosed rather than rounded, and 64 of 111 test rows already outside the training range) - all filled</td>
+</tr>
+<tr>
+<td>12. Regularized Linear Models</td>
+<td><code>[DONE]</code></td>
+<td>12.1 (60 rows and 100 features where OLS fits perfectly and scores 0.12 on held-out data, lasso reaches 0.76, and ridge does no better than OLS - because the penalty must match the sparsity of the truth), 12.2 (ridge derived to (X'X + lambda I)^-1 X'y, implemented from scratch with centring so the intercept is unpenalized, matched to sklearn; 12.2.2 shrinkage that never reaches zero even at alpha=10000), 12.3 (lasso, no closed form, coordinate descent; 12.3.1 the soft-threshold operator drawn against ridge's proportional shrink; 12.3.2 coordinate descent from scratch agreeing with sklearn to 1e-6 including the exact zero pattern), 12.4 (the geometric argument, circle vs diamond, with ridge never producing a single zero at any alpha), 12.5 (elastic net; lasso picking an arbitrary member of a correlated triple - 21/24/55 across bootstrap resamples - where elastic net keeps all three 100/100 times), 12.6 (regularization paths, real features surviving longest, lasso_path), 12.7 (RidgeCV/LassoCV/ElasticNetCV on a log grid, nothing to choose between them when n&gt;&gt;p, and the one-standard-error rule), 12.8 (scaling as mandatory: the large-scale feature contributing 0.0000 of the penalty, no single alpha regularizing both features, and scaling outside the CV loop leaking), 12.9 (In Practice - ridge cutting s1's bootstrap sd 23x on the diabetes data, stability selection ranking bp/bmi/s5/s3/sex above 99%, and the honest finding that regularization fixed a stability problem rather than an accuracy one) - all filled</td>
+</tr>
+<tr>
+<td>13. Logistic Regression</td>
+<td><code>[DONE]</code></td>
+<td>13.1 (linear regression on a 0/1 target failing twice - unbounded output, and a distant point rotating the boundary from 3.25 to 3.94 hours where logistic regression does not move), 13.2 (the sigmoid and its derivative verified numerically; 13.2.1 odds, log-odds, and the sentence that makes the model interpretable), 13.3 (Bernoulli likelihood -&gt; cross-entropy derived and matched to sklearn's log_loss; 13.3.1 the gradient X'(sigma(Xw) - y)/n verified numerically, and why there is no closed form), 13.4 (gradient descent from scratch agreeing with sklearn to 3 decimals and 2.85e-04 in predicted probability), 13.5 (the API, the penalty= deprecation in sklearn 1.8 with its C=np.inf / l1_ratio replacement table, and the solver-penalty compatibility matrix), 13.6 (the boundary is a hyperplane; degree-3 features lifting CV accuracy on moons from 0.843 to 0.915), 13.7 (OvR vs softmax, the z - z.max() stability trick shown overflowing without it, and softmax reducing to the sigmoid at K=2), 13.8 (13.8.1 C as an inverse penalty and L1 selecting; 13.8.2 odds ratios, and the same odds ratio of 2.0 moving probability by +0.010 at p=0.01 and +0.167 at p=0.50), 13.9 (In Practice - an interpretable churn model: calibrated to within 0.0002 of the base rate, coefficients as odds ratios with bootstrap intervals marking which are conclusive, perfect separation driving an unpenalized coefficient to 15.2 and probabilities from 0.0007 to 0.9996 across one unit, and a closing conversion from odds ratios to probabilities at the real base rate) - all filled</td>
+</tr>
+<tr>
+<td>14. k-Nearest Neighbors and Distance Metrics</td>
+<td><code>[DONE]</code></td>
+<td>14.1 (lazy vs eager learning, with k-NN fitting in 2 ms and predicting 2000 rows in 443 ms where logistic regression is the reverse), 14.2 (the metric catalogue, Minkowski unifying L1/L2/Linf verified against scipy, 14.2.1 Euclidean and Manhattan disagreeing about which point is nearest, and cosine calling a 50x-longer document identical), 14.3 (kNN from scratch matching sklearn exactly; 14.3.1 three implementations timed, where broadcasting gives only 1.1x and the matmul expansion gives 4.9x - rewriting a loop as a broadcast is not automatically an optimization), 14.4 (kNN regression, step-function predictions, and flat extrapolation contrasted with <a class="xref" href="/machine-learning/11-linear-regression/#s11-8">11.8</a>'s explosion), 14.5 (the API, distance weighting, and probabilities that take only 6 distinct values at k=5), 14.6 (k inverted relative to other hyperparameters, effective parameters ~ n/k, k=1 scoring a guaranteed 1.0 on training, and even-k ties), 14.7 (14.7.1 unscaled distance where age contributes 0.000016% of the total; 14.7.2 k-NN degrading from 0.943 to 0.532 under noise features where a forest holds 0.852), 14.8 (brute/KD-tree/ball-tree timed, the ball tree LOSING to brute force at 8 dimensions, and KD-tree speedup falling from 2.41x to 0.03x as dimensions grow), 14.9 (In Practice - a 'customers like this one' retrieval tool, where one-hot city and plan contribute 34% of the distance among actual nearest neighbours against 20% among random pairs, and a single mismatched city contributes 2.0 against a typical near-neighbour distance of 2.36) - all filled</td>
+</tr>
+<tr>
+<td>15. Naive Bayes</td>
+<td><code>[DONE]</code></td>
+<td>15.1 (Bayes as a classifier, the evidence term dropped, and a prior turning an 8:1 likelihood ratio into a 77% posterior), 15.2 (the independence assumption and the parameter count it saves; 15.2.1 a duplicated feature leaving accuracy unchanged while inflating confidence), 15.3 (Gaussian NB from scratch matching sklearn's means, variances and priors exactly, with the fitted model drawn as a grid of per-class bell curves), 15.4 (the family table, and MultinomialNB refusing standardized input), 15.5 (the zero-frequency problem making a spam likelihood exactly 0, Laplace smoothing, and var_smoothing rescuing predict_proba from nan), 15.6 (log space, a product underflowing to 0.0 after 229 factors, and the log-sum-exp trick), 15.7 (text classification on a deliberately hard corpus, the model recovering the generating vocabulary at ~61% accuracy, and MultinomialNB scoring F1 exactly 0.000 on imbalanced data by predicting one positive in the whole test set where ComplementNB predicts 66), 15.8 (speed; 15.8.2 measuring the 'needs less data' folklore and finding regularized logistic regression wins below 100 rows even when independence holds exactly; 15.8.3 94.3% of predictions beyond 1%/99%), 15.9 (In Practice - support-ticket triage where ComplementNB lifts macro F1 from 0.454 to 0.605, the raw confidence turns out UNDER-confident rather than over-confident, and calibration makes claimed and delivered accuracy agree bin by bin) - all filled</td>
+</tr>
+<tr>
+<td>16. Support Vector Machines</td>
+<td><code>[DONE]</code></td>
+<td>16.1 (three boundaries all perfect on training data, and refitting on 3 of 10 points giving identical coefficients), 16.2 (the hard-margin QP derived, margin = 2/</td>
+</tr>
+<tr>
+<td>17. Decision Trees</td>
+<td><code>[DONE]</code></td>
+<td>17.1 (recursive partitioning and its four consequences; 17.1.1 the axis-aligned limitation needing 18 leaves for a diagonal a line handles), 17.2 (gini/entropy/misclassification, the curvature argument, and a split with a PERFECTLY pure child that misclassification error scores at exactly 0 gain; 17.2.1 exhaustive split search matching sklearn), 17.3 (CART from scratch in ~30 lines, identical at depths 1-2 and 98.2% agreement beyond - the residual divergence being tie-breaking, not error), 17.4 (the API, unrestricted defaults memorizing, and random_state mattering only when ties exist - shown stable on wine and random across 12 fits once features are duplicated), 17.5 (export_text, plot_tree, reading <code>samples</code>, and 4 of 8 leaves backed by a single training row), 17.6 (pre-pruning knobs compared; 17.6.2 cost-complexity pruning, with the test-set-optimal alpha giving 0.9357 against the honest CV-chosen alpha's 0.9240), 17.7 (regression trees, step functions, and every input beyond the training range receiving the same constant), 17.8 (feature importance, correlated features splitting credit 1.0/0.0; 17.8.1 the cardinality bias giving pure-noise continuous features 0.77 importance, corrected by permutation importance), 17.9 (instability: depth 7-12 and 22-34 leaves across resamples, 33% of test points contested, and majority vote beating a single tree by 0.055 - which is <a class="xref" href="/machine-learning/18-ensembles-i-bagging-and-random-forests/">Chapter 18</a>), 17.10 (In Practice - churn rules for a retention playbook, with leaf-level coverage and churn rates validated on held-out data, and the root split changing feature in 4 of 15 retrains with thresholds from <a class="xref" href="/machine-learning/02-mathematical-foundations/#s2-5">2.5</a> to 30.5 months) - all filled</td>
+</tr>
+<tr>
+<td>18. Ensembles I: Bagging and Random Forests</td>
+<td><code>[DONE]</code></td>
+<td>18.1 (the variance-of-an-average formula rho<em>s^2 + (1-rho)/k</em>s^2 verified by simulation, with the rho*s^2 floor that no number of trees can cross; 18.1.2 the Condorcet jury theorem and its failure mode below p=0.5; 50 identical trees giving 1 distinct prediction vector against 50), 18.2 (hard vs soft voting, and a pairwise agreement matrix showing all four members agree on only 60% of rows), 18.3 (the bootstrap, (1-1/n)^n -&gt; 1/e verified empirically), 18.4 (bagging from scratch matching sklearn's accuracy exactly while agreeing on 93% of rows - the right kind of agreement for a stochastic algorithm - and n_estimators as a budget not a complexity parameter), 18.5 (out-of-bag scoring from scratch, OOB 0.807 against test 0.846 and a 5-fold CV that costs five fits, plus sklearn's UserWarning firing at 5 and 10 trees), 18.6 (random forests decorrelating: pairwise correlation 0.352 -&gt; 0.298, root feature used 97% of the time by bagging against 28% by a forest; 18.6.1 max_features driving correlation from 0.18 to 0.36 while single-tree accuracy rises and ensemble accuracy peaks in between), 18.7 (Extra Trees, half the fit time, neither dominating across three datasets), 18.8 (impurity importance still tracking cardinality with 300 trees; 18.8.1 permutation importance collapsing 8x under a duplicated feature, asymmetrically and arbitrarily), 18.9 (In Practice - tuning by OOB: the trap that oob_score=roc_auc_score returns 0.579 because the callable receives hard labels, the fix via oob_decision_function_ giving 0.728 against CV's 0.745, a 3.2x faster search selecting the identical configuration CV chose, and +0.04 test AUC from min_samples_leaf alone) - all filled</td>
+</tr>
+<tr>
+<td>19. Ensembles II: Boosting and Stacking</td>
+<td><code>[DONE]</code></td>
+<td>19.1 (bagging vs boosting by base learner: bagging a stump makes it slightly WORSE while boosting lifts it 0.08; boosting a deep tree makes it worse while bagging lifts it 0.07), 19.2 (AdaBoost from scratch matching sklearn on 100% of predictions with identical alphas; the alpha formula including the inverted vote below 0.5; 19.2.1 weight trajectories drawn on a log scale, corrupted rows holding 1.7x their fair share, and the honest finding that at 10% noise the accuracy cost is small - the gap opens at 20%, shown in <a class="xref" href="/machine-learning/19-ensembles-ii-boosting-and-stacking/#s19-8">19.8</a>), 19.3 (gradient boosting from scratch matching GradientBoostingRegressor EXACTLY - correlation 1.000000 - with the ensemble drawn at 1, 5, 20 and 100 trees and tree 6 shown fitting the residuals of the first five; 19.3.2 the learning-rate/n_estimators trade), 19.4 (GradientBoosting vs HistGradientBoosting, 11x faster and handling raw NaNs where the other raises), 19.5 (XGBoost, LightGBM and CatBoost within 0.002 AUC of each other and of sklearn - the honest headline - with native categorical handling beating one-hot on a 60-level feature), 19.6 (early stopping choosing 384 of 2000 rounds, and randomized search beating defaults by 0.001), 19.7 (stacking, the meta-learner's coefficients as trust weights, and a naive in-sample stack handing weight 9.6 to a tree whose out-of-fold AUC is 0.82 where the correct version gives it 2.6), 19.8 (the comparison table, with the forest winning under 20% label noise), 19.9 (In Practice - the nine-model churn scoreboard where BOOSTING COMES SIXTH at 0.709 against logistic regression's 0.795, paired tests confirming that gap at p=0.0001 while the top two rows are a tie at p=0.12, and n_estimators driving test AUC from 0.800 down to 0.706 while a forest rises) - all filled</td>
+</tr>
+<tr>
+<td>20. Clustering</td>
+<td><code>[DONE]</code></td>
+<td>20.1 (clustering never refuses - k-means partitioning uniform noise into 3 and 6 confident, meaningless groups), 20.2 (Lloyd's algorithm from scratch matching sklearn's inertia to 1148.157315 exactly with an identical partition, while the raw label arrays agree on only 50% - the case for ARI made by the contract itself; 20.2.1 k-means++ raising the minimum initial centroid separation from 1.27 to 5.77), 20.3 (25 random starts finding 12 distinct local minima, the worst 3.41x the best; 20.3.2 inertia monotone to 0.00 at k=n, so only the elbow's shape carries information), 20.4 (four shapes k-means gets wrong for one reason, and scaling taking ARI from -0.00 to 1.00 where one noise feature is 500x the scale), 20.5 (four linkages, four trees; eight bridge points - 5% of the data - dropping single linkage to ARI 0.56 with sizes [108 49 1] while the other three stay at 1.00, then single linkage alone recovering the moons at 1.00 where k-means gets 0.25), 20.6 (DBSCAN finding the cluster count itself, and single linkage chaining across the same 40 noise points DBSCAN refuses; 20.6.1 eps controlling the cluster count anyway - 17, 2, 2, 1, 1), 20.7 (GMM 1.00 against k-means 0.67 on sheared blobs, soft assignment leaving 1 point in 6 undecided, BIC and AIC both picking the true k=4; 20.7.1 a collapsed component - min covariance eigenvalue sitting exactly on reg_covar - buying 373 nats of likelihood, with the one-line diagnostic), 20.8 (the silhouette preferring k-means 0.49 over DBSCAN 0.33 on moons where the truth says 1.00 vs 0.25; NMI inflating to 0.135 on random labels at k=100 where AMI stays at 0.016; 20.8.3 the Hopkins statistic, and the seed collision that silently drove it to 0.04), 20.9 (In Practice - segmentation with Hopkins only +0.037 over a column-shuffled null and silhouettes near 0.2 against 0.79 for real blobs, so IMPOSED segments not discovered ones; three criteria disagreeing on k with the GMM's winner a collapsed fit; stability under 80% resampling as the strongest available claim; external validation via a churn column excluded from the features, segment 2 churning at 2.5x; two refits with ARI 0.9943 and 24% raw label agreement, and naming segments by profile rank instead; MiniBatchKMeans at its DEFAULT batch_size 11x SLOWER than KMeans on 200k rows) - all filled</td>
+</tr>
+<tr>
+<td>21. Anomaly Detection and Association Rules</td>
+<td><code>[DONE]</code></td>
+<td>21.1 (point/contextual/collective, and outlier vs novelty detection; a contextual anomaly at global z=1.44 and within-month z=4.35 - a modelling decision, not an algorithm choice), 21.2 (a point at z=2.10 and z=-2.27 on its two features with Mahalanobis d^2=125 against a threshold of 9.21; then masking - the contaminated covariance determinant 4.495 against the robust 0.222, catching 1 anomaly of 60 where MCD catches all 60), 21.3 (Isolation Forest from scratch, AUC 0.9765 against sklearn's 0.9794 with rank correlation 0.954 and 19 of the same top-20 rows; contamination leaving the AUC at 0.9794 for every value because it moves only the cut point), 21.4 (four detectors within 0.01 AUC; then LOF ranking a planted point 1st where Isolation Forest says 10th and global Mahalanobis says 201st of 401), 21.5 (ROC-AUC 0.8613 next to PR-AUC 0.0587 at a 0.6% positive rate, and precision@50 of 0.140 - the number that describes an analyst's day), 21.6 (the basket matrix at 16.4% density, and 2^20 itemsets from 20 items), 21.7 (the confidence trap: onions=&gt;milk at confidence 0.333 and lift 0.946 against cereal=&gt;yogurt at 0.356 and 1.962 - near-identical confidence, opposite verdicts; a rule with confidence 1.00, lift 1.01 and INFINITE conviction; and lift's arithmetic ceiling of 1/support), 21.8 (Apriori from scratch matching mlxtend's 43 itemsets and supports exactly, with the downward-closure pruning that skips most of 1,048,575; 21.8.1 FP-Growth returning identical itemsets; 21.8.2 the lift-sorted table at min_support=0.01 topped entirely by rules resting on 8 baskets of 800), 21.9 (In Practice - 78 candidate rules filtered to 16 by evidence, strength, redundancy and direction; uplift translating lift 3.0 into 768 incremental jam purchases per 10,000 shoppers, and rejecting bread=&gt;milk at -248; then a frozen threshold taking the flag rate from 1.85% to 17.70% under population shift, with the median score as the diagnosis rather than the alarm) - all filled</td>
+</tr>
+<tr>
+<td>22. Imbalanced Data and Data Leakage</td>
+<td><code>[DONE]</code></td>
+<td>22.1 (four sources of imbalance with different fixes, and the ratio vs the absolute positive count), 22.2 (the constant model at 0.9673 accuracy and 0.5000 balanced accuracy, with ROC-AUC barely moving across a 500-fold change in positive rate while PR-AUC tracks it), 22.3 (SMOTE from scratch matching imbalanced-learn's balance, with 100% of synthetic points provably inside the real minority bounding box - the structural fact AND the limitation; then 24.5% of SMOTE's synthetic minority points landing in the majority core when k_neighbors exceeds the cluster size), 22.4 (the weighted cross-entropy and 'balanced' weights derived, then the comparison table where DOING NOTHING WINS on PR-AUC at 0.178 against 0.102-0.115 for every resampler, all of which nudge ROC-AUC up - resampling improving the imbalance-insensitive metric and damaging the other), 22.5 (threshold tuning: the F1 optimum at 0.131 and the cost optimum at 0.034 under a 100:1 cost ratio, plus 29.8% optimism measured from tuning the threshold on test), 22.6 (resample-then-split PR-AUC 0.7027 against 0.1454 inside the fold - a +0.557 inflation, with the wrong number the better-looking one; imblearn's Pipeline as the structural fix), 22.7 (the five leakage forms, each reproduced: cancellation_reason giving ROC-AUC 1.0000 against 0.7517; StandardScaler contamination measured at EXACTLY 0.0000 - the honest result - with the same mistake in feature selection scoring 0.8106 on 3000 pure-noise features where the honest pipeline gets 0.5012; TimeSeriesSplit 0.6788 against a shuffled 0.7555; GroupKFold 0.5248 against a random 0.9380 on coin-flip group labels; duplicates 0.9886 against 0.9288), 22.8 (the nine-item audit, with the label-shuffle test at 0.4912 for an honest pipeline and 0.9928 for a leaky one on RANDOM labels), 22.9 (In Practice - a churn model built to survive review: the feature audit by when-is-it-known as domain work rather than statistics, the whole audit run on the model as built, and a cost-minimising threshold at 0.360 contacting 47% to catch 85.8% of churners at 25.7% precision; then SMOTE's mean predicted probability at 0.3227 against a true rate of 0.0742 - Brier 0.130 against 0.042 - with identical AUC, repaired by calibration) - all filled</td>
+</tr>
+<tr>
+<td>23. Pipelines and Hyperparameter Tuning</td>
+<td><code>[DONE]</code></td>
+<td>23.1 (the manual-vs-pipeline leak measured at -0.0004 - the honest result, and the argument restated as 'one rule, no judgement call per transformer'), 23.2 (ColumnTransformer over six spellings of gender, handle_unknown='ignore' surviving an unseen city at predict time, and remainder='drop' vs 'passthrough' shown to change the output width), 23.3 (custom transformers and the <strong>init</strong> contract - a derived attribute breaking clone with AttributeError because get_params cannot read the parameter back; FeatureUnion taking 7 columns to 35), 23.4 (55 addressable hyperparameters, the step__param__subparam addressing read from the outside in), 23.5 (grid's multiplicative cost tabulated to 81,920 fits; the imputation strategy tuned alongside forest depth; randomized search over continuous ranges at the same budget), 23.6 (successive halving scoring WORST at 0.7200, with the schedule showing why - round 0 reports 0.8537 on 120 rows and 0.7200 on 360, so the elimination was on noise - and taking the same wall-clock as the grid rather than less), 23.7 (Optuna with the MODEL CHOICE in the search space, winning at 0.8106 with a logistic regression while the other three searched forests only - so the table measures the search SPACE, not the sampler, and the chapter says so), 23.8 (nested CV optimism of +0.0044 against a fold standard deviation of 0.0650 - below the noise floor, stated rather than overclaimed - then isolated on pure noise averaged over 6 independent datasets: mean 0.5011 with no selection, rising monotonically to 0.5526 at 24 configurations; 23.8.1 a paired t-test declining to separate logistic from forest at p=0.18), 23.9 (In Practice - one object from raw row to prediction, ratio features computed inside the fold, three model families searched together, a paired test at p=0.043, and a lambda inside a transformer failing to pickle where the full pipeline succeeds) - all filled</td>
+</tr>
+<tr>
+<td>24. Interpretability and Deployment</td>
+<td><code>[DONE]</code></td>
+<td>24.1 (the interpretability/accuracy trade-off MEASURED rather than conceded: the depth-3 tree wins at 0.8216 against the 200-tree forest's 0.8019 and gradient boosting's 0.7281), 24.2 (the tree printed in full as its own explanation; odds ratios; and the unscaled-vs-scaled coefficient rankings disagreeing, only one of which answers 'which feature matters most'), 24.3 (permutation importance on train vs test, with satisfaction_score positive on train and NEGATIVE on test - its use does not generalise; and a duplicated column splitting tenure's importance from 0.0967 into 0.0281 + 0.0427), 24.4 (partial dependence and ICE, the causal caveat, and the extrapolation problem quantified via r=0.76 between tenure and total_charges), 24.5 (SHAP additivity verified to 1.5e-15; the base value of 0.50 explained as an artefact of class_weight='balanced' rather than the 14% churn rate; a single prediction decomposed to sum exactly to 0.898), 24.6 (LIME's instability MEASURED and found smaller than its reputation - the same four features every run, weights varying by at most 0.012 - so the honest claim is 'reproducible in substance, not in detail'; SHAP identical to the last digit), 24.7 (the incompatible fairness criteria; the unawareness fallacy TESTED with a probe at ROC-AUC 0.4809, meaning the attribute is genuinely not recoverable here; group metrics with bootstrap intervals that overlap, so no disparity is claimed despite a selection-rate ratio of 0.786), 24.8 (joblib with metadata, a load-time validator, the unpickling-executes-code warning and a sha256 for build provenance), 24.9 (input validation before predict; data vs concept drift, with a KS statistic of 0.50 on <code>age</code> moving predictions by 0.015 while an unalarmed shift in support_tickets moves them by 0.087 - drift monitors must be weighted by importance; concept drift with IDENTICAL inputs and predictions, invisible to every input monitor; 24.9.3 a feedback loop whose labelled sample leaves the population value at round 0 and never returns), 24.10 (In Practice - the model review as a ten-question checklist, each drawing on an earlier chapter, ending in a conditional sign-off) - all filled</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><h3 id="s25-2">25.2 Cross-Reference Index</h3>
+<p>Pointers for concepts that are discussed in one chapter but looked for in another. The <strong>Documented in</strong>
+column is where the concept is actually developed; <strong>Also relevant to</strong> lists the places that depend on it or
+revisit it from a different angle.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Documented in</th>
+<th>Also relevant to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bias-variance decomposition</td>
+<td>9.2</td>
+<td>9.4 learning curves, 18.1 why averaging reduces variance, 24.1</td>
+</tr>
+<tr>
+<td>Bootstrap sampling</td>
+<td>18.3</td>
+<td>18.5 OOB scoring, 24.7 fairness intervals, 20.9.1 cluster stability</td>
+</tr>
+<tr>
+<td>Calibration of probabilities</td>
+<td>8.8</td>
+<td>13.6 logistic outputs, 22.9.3 resampling destroys it, 24.9.2</td>
+</tr>
+<tr>
+<td>Categorical encoding</td>
+<td>6.2</td>
+<td>19.5 native handling, 23.2 inside a ColumnTransformer, 15.4 for text</td>
+</tr>
+<tr>
+<td>Class imbalance</td>
+<td>22.1-22.5</td>
+<td>8.6 ROC vs PR, 17.6 class_weight, 21.5 detector evaluation</td>
+</tr>
+<tr>
+<td>Class weights</td>
+<td>22.4</td>
+<td>13.5, 16.3 SVM C, <a class="xref" href="/machine-learning/17-decision-trees/#s17-6">17.6</a>, 24.5 shifts the SHAP base value</td>
+</tr>
+<tr>
+<td>ColumnTransformer</td>
+<td>23.2</td>
+<td>6.1 mixed dtypes, 22.7.2 the structural leakage fix, 24.8 shipping it</td>
+</tr>
+<tr>
+<td>Confusion matrix</td>
+<td>8.5</td>
+<td>22.2 under imbalance, 22.9.1 at a cost-chosen threshold, 24.7 by group</td>
+</tr>
+<tr>
+<td>Convexity</td>
+<td>10.3</td>
+<td>13.3 cross-entropy, 16.2 the SVM dual, 20.3.1 k-means is NOT convex</td>
+</tr>
+<tr>
+<td>Correlation vs causation</td>
+<td>4.5</td>
+<td>11.8 coefficients, 21.9.1 association rules, 24.4 PDPs, 24.5 SHAP</td>
+</tr>
+<tr>
+<td>Cost-sensitive decisions</td>
+<td>22.5</td>
+<td>8.7 thresholds, 21.5 precision@k, <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-9-1">22.9.1</a>, 24.10.1</td>
+</tr>
+<tr>
+<td>Cross-validation strategies</td>
+<td>8.3</td>
+<td>22.6 resampling inside the fold, 22.7.3-22.7.4, 23.8 nested</td>
+</tr>
+<tr>
+<td>Curse of dimensionality</td>
+<td>7.1</td>
+<td>14.7 kNN, 20.4 clustering, 21.4 LOF and One-Class SVM</td>
+</tr>
+<tr>
+<td>Custom transformers</td>
+<td>23.3</td>
+<td>6.6 domain features, 5.3 domain rules, 24.8 the pickling hazard</td>
+</tr>
+<tr>
+<td>Decision threshold</td>
+<td>8.7</td>
+<td>13.6, 21.3 contamination, 22.5 under imbalance, 24.9.2 monitoring it</td>
+</tr>
+<tr>
+<td>Dendrogram</td>
+<td>20.5</td>
+<td>20.5.1 where to cut it, 7.5 as an alternative view of structure</td>
+</tr>
+<tr>
+<td>Distance metrics</td>
+<td>14.2</td>
+<td>20.4 k-means, 20.6 DBSCAN's eps, 21.2 Mahalanobis</td>
+</tr>
+<tr>
+<td>Drift (data vs concept)</td>
+<td>24.9.1</td>
+<td>8.3 TimeSeriesSplit, <a class="xref" href="/machine-learning/20-clustering/#s20-9-3">20.9.3</a>, <a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-9-3">21.9.3</a>, <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-9-3">22.9.3</a>, 24.9.3 retraining</td>
+</tr>
+<tr>
+<td>Duplicate rows</td>
+<td>5.4</td>
+<td>22.7.5 as leakage, 20.7.1 GMM singularities, 17.9 tree instability</td>
+</tr>
+<tr>
+<td>Elbow method</td>
+<td>20.3.2</td>
+<td>7.5 PCA scree plot, 20.8 why it is a judgement call</td>
+</tr>
+<tr>
+<td>Ensembling</td>
+<td>18.1</td>
+<td>18.2 voting, 19.1 boosting vs bagging, 19.7 stacking</td>
+</tr>
+<tr>
+<td>Entropy and information gain</td>
+<td>17.2</td>
+<td>15.1 Bayes, 20.8.2 mutual information measures</td>
+</tr>
+<tr>
+<td>Evaluation without ground truth</td>
+<td>20.8</td>
+<td>21.5 detectors, 20.8.3 cluster tendency</td>
+</tr>
+<tr>
+<td>Expectation-maximization</td>
+<td>20.7</td>
+<td>5.2 IterativeImputer, 20.7.1 singular components</td>
+</tr>
+<tr>
+<td>Feature importance</td>
+<td>17.8</td>
+<td>18.8 impurity vs permutation, 22.7.1 as a leakage probe, <a class="xref" href="/machine-learning/24-interpretability-and-deployment/#s24-3">24.3</a>, 24.5</td>
+</tr>
+<tr>
+<td>Feature scaling</td>
+<td>5.5</td>
+<td>10.7 convergence, <a class="xref" href="/machine-learning/12-regularized-linear-models/#s12-1">12.1</a>, <a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/#s14-7-1">14.7.1</a>, <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-7">16.7</a>, <a class="xref" href="/machine-learning/20-clustering/#s20-4">20.4</a>, 24.2 reading coefficients</td>
+</tr>
+<tr>
+<td>Feature selection</td>
+<td>7.2-7.4</td>
+<td>12.3 L1 sparsity, 22.7.2 leaks badly if done outside the fold</td>
+</tr>
+<tr>
+<td>Gradient descent</td>
+<td>10.4</td>
+<td>11.4 linear regression, 13.4 logistic, 19.3 gradient boosting</td>
+</tr>
+<tr>
+<td>Grid vs randomized search</td>
+<td>23.5</td>
+<td>23.6 halving, 23.7 Optuna, 23.8 the optimism each one creates</td>
+</tr>
+<tr>
+<td>Hopkins statistic</td>
+<td>20.8.3</td>
+<td>20.9.1 against a shuffled null, 21.1 anomalies vs clusters</td>
+</tr>
+<tr>
+<td>Hyperparameter vs parameter</td>
+<td>1.5</td>
+<td>23.4 addressing them in a pipeline, 9.3 what tuning is for</td>
+</tr>
+<tr>
+<td>Imputation</td>
+<td>5.2</td>
+<td>5.2.3 the missingness indicator, 19.4 native NaN handling, <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-2">23.2</a>, 23.5</td>
+</tr>
+<tr>
+<td>Interpretability</td>
+<td>24.1</td>
+<td>11.8 coefficients, 17.5 reading a tree, <a class="xref" href="/machine-learning/24-interpretability-and-deployment/#s24-2">24.2</a>, 24.5 SHAP, 24.6 LIME</td>
+</tr>
+<tr>
+<td>Kernel trick</td>
+<td>16.4</td>
+<td>7.5 kernel PCA, 21.4 One-Class SVM, 16.5 choosing a kernel</td>
+</tr>
+<tr>
+<td>Leakage</td>
+<td>22.7</td>
+<td>6.2 target encoding, <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-4">8.4</a>, <a class="xref" href="/machine-learning/20-clustering/#s20-9-3">20.9.3</a>, <a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-9-3">21.9.3</a>, <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-1">23.1</a>, <a class="xref" href="/machine-learning/23-pipelines-and-hyperparameter-tuning/#s23-8">23.8</a>, 24.9.3 feedback loops</td>
+</tr>
+<tr>
+<td>Learning curves</td>
+<td>9.4</td>
+<td>9.5 validation curves, 23.6 why halving eliminates on small samples</td>
+</tr>
+<tr>
+<td>Lift (association rules)</td>
+<td>21.7</td>
+<td>21.8.2 sorting by it, 21.9.1 translating it into units</td>
+</tr>
+<tr>
+<td>Linear separability</td>
+<td>6.4</td>
+<td>13.2 logistic boundaries, 16.1 margins, 20.4 k-means boundaries</td>
+</tr>
+<tr>
+<td>Local minima</td>
+<td>10.3</td>
+<td>20.3.1 k-means n_init, 20.7 EM initialization</td>
+</tr>
+<tr>
+<td>Loss functions</td>
+<td>10.2</td>
+<td>11.1 MSE, 13.3 cross-entropy, 16.3 hinge, 19.3 boosting's residuals</td>
+</tr>
+<tr>
+<td>Mahalanobis distance</td>
+<td>21.2</td>
+<td>2.3 covariance, 14.2 distance metrics, 21.2 masking</td>
+</tr>
+<tr>
+<td>Metrics for classification</td>
+<td>8.5</td>
+<td>8.6 ROC vs PR-AUC, 21.5 precision@k, 22.2 why accuracy lies</td>
+</tr>
+<tr>
+<td>Metrics for regression</td>
+<td>8.4</td>
+<td>11.6 R-squared and its adjusted form, 9.2 as a loss</td>
+</tr>
+<tr>
+<td>Missing data mechanisms</td>
+<td>5.1</td>
+<td>5.2 imputation strategies, 4.4 spotting them in EDA</td>
+</tr>
+<tr>
+<td>Multicollinearity</td>
+<td>11.7</td>
+<td>2.2 rank, 12.2 ridge as the fix, 24.3 splits permutation importance</td>
+</tr>
+<tr>
+<td>Nested cross-validation</td>
+<td>23.8</td>
+<td>8.2 selection optimism, 23.8.1 comparing models honestly</td>
+</tr>
+<tr>
+<td>No free lunch</td>
+<td>9.7</td>
+<td>19.8 bagging vs boosting, <a class="xref" href="/machine-learning/21-anomaly-detection-and-association-rules/#s21-9-2">21.9.2</a>, 24.1 simple models sometimes win</td>
+</tr>
+<tr>
+<td>Normal equation</td>
+<td>11.3</td>
+<td>2.2 matrix inversion, 10.6 closed form vs iterative, 12.2 ridge's form</td>
+</tr>
+<tr>
+<td>One-vs-rest and softmax</td>
+<td>13.8</td>
+<td>8.5.1 multiclass averaging, 16.6 SVM multiclass</td>
+</tr>
+<tr>
+<td>Out-of-bag scoring</td>
+<td>18.5</td>
+<td>8.3 as a CV substitute, 18.9 the hard-label trap</td>
+</tr>
+<tr>
+<td>Overfitting</td>
+<td>9.1</td>
+<td>9.3 capacity, 12.1 regularization, 17.7 pruning, 19.6 early stopping</td>
+</tr>
+<tr>
+<td>PCA</td>
+<td>7.5</td>
+<td>2.4 eigendecomposition and SVD, 7.6 LDA, 7.7 t-SNE, 20.4 reduce before clustering</td>
+</tr>
+<tr>
+<td>Paired significance tests</td>
+<td>19.9</td>
+<td>23.8.1 comparing models, <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-2">8.2</a>, 24.7 overlapping intervals</td>
+</tr>
+<tr>
+<td>Partial dependence and ICE</td>
+<td>24.4</td>
+<td>11.8 linear coefficients, 24.3 importance, 24.5 SHAP</td>
+</tr>
+<tr>
+<td>Permutation importance</td>
+<td>18.8.1</td>
+<td>24.3 on held-out data, 22.8 auditing, 24.9.1 weighting drift</td>
+</tr>
+<tr>
+<td>Pipelines</td>
+<td>23.1-23.2</td>
+<td>5.6, <a class="xref" href="/machine-learning/06-feature-engineering/#s6-7">6.7</a>, 22.6 imblearn's variant, <a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/#s22-7-2">22.7.2</a>, 24.8 what gets shipped</td>
+</tr>
+<tr>
+<td>Pruning</td>
+<td>17.7</td>
+<td>9.3 capacity, 19.6 early stopping as its boosting analogue</td>
+</tr>
+<tr>
+<td>ROC vs precision-recall</td>
+<td>8.6</td>
+<td>21.5 detectors, 22.2 across a 500-fold imbalance range</td>
+</tr>
+<tr>
+<td>Random forests</td>
+<td>18.6</td>
+<td>18.7 extra trees, 19.8 against boosting, 24.3 explaining one</td>
+</tr>
+<tr>
+<td>Regularization</td>
+<td>9.6</td>
+<td>12.1-12.4 the linear-model versions, <a class="xref" href="/machine-learning/13-logistic-regression/#s13-5">13.5</a>, <a class="xref" href="/machine-learning/16-support-vector-machines/#s16-3">16.3</a>, 20.7.1 reg_covar</td>
+</tr>
+<tr>
+<td>Reproducibility</td>
+<td>3.5</td>
+<td>0.2 seeding, 20.8.3 a seed collision that broke a statistic, 24.8</td>
+</tr>
+<tr>
+<td>Resampling for imbalance</td>
+<td>22.3</td>
+<td>22.4 against class weights, 22.6 inside the fold, 22.9.3</td>
+</tr>
+<tr>
+<td>SHAP</td>
+<td>24.5</td>
+<td>24.6 against LIME, 24.3 as a global measure, 24.10.1 in a review</td>
+</tr>
+<tr>
+<td>SMOTE</td>
+<td>22.3</td>
+<td>22.6 leakage when applied before the split, 22.9.3 destroys calibration</td>
+</tr>
+<tr>
+<td>Scikit-learn estimator API</td>
+<td>3.4</td>
+<td>23.3 the BaseEstimator contract, 23.4 get_params and clone</td>
+</tr>
+<tr>
+<td>Selection optimism</td>
+<td>8.2</td>
+<td>23.8 nested CV, 23.5 searching on the test set, 22.8 auditing</td>
+</tr>
+<tr>
+<td>Silhouette score</td>
+<td>20.8.1</td>
+<td>20.3.2 choosing k, 20.8 why it favours k-means, 20.9.1 per segment</td>
+</tr>
+<tr>
+<td>Stacking</td>
+<td>19.7</td>
+<td>18.2 voting, 19.9 the scoreboard, 8.3 out-of-fold predictions</td>
+</tr>
+<tr>
+<td>Support vectors</td>
+<td>16.1</td>
+<td>16.3 soft margin, 16.4 kernels, 21.4 One-Class SVM</td>
+</tr>
+<tr>
+<td>Target encoding</td>
+<td>6.2.3</td>
+<td>22.7.2 the worst leakage of any transformer, 23.1</td>
+</tr>
+<tr>
+<td>Temporal data</td>
+<td>6.5</td>
+<td>8.3 TimeSeriesSplit, 22.7.3 temporal leakage, 24.9.1 drift</td>
+</tr>
+<tr>
+<td>Text features</td>
+<td>6.6</td>
+<td>15.4 multinomial Naive Bayes, 7.1 dimensionality</td>
+</tr>
+<tr>
+<td>Tree construction (CART)</td>
+<td>17.3</td>
+<td>17.2 impurity, 18.6 randomized variants, 19.3 as a weak learner</td>
+</tr>
+<tr>
+<td>Underfitting</td>
+<td>9.1</td>
+<td>9.4 diagnosing it from learning curves, 9.3 capacity</td>
+</tr>
+<tr>
+<td>Validation curves</td>
+<td>9.5</td>
+<td>14.4 choosing k, 17.6 depth, 23.5 as a one-dimensional search</td>
+</tr>
+<tr>
+<td>Voronoi partition</td>
+<td>20.4</td>
+<td>14.3 kNN decision regions, 20.2 what k-means can represent</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><h3 id="s25-3">25.3 Notation</h3>
+<p>The symbols used consistently across the algorithm chapters.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(n\)</td>
+<td>number of samples (rows)</td>
+</tr>
+<tr>
+<td>\(p\)</td>
+<td>number of features (columns)</td>
+</tr>
+<tr>
+<td>\(X\)</td>
+<td>feature matrix, shape \((n, p)\)</td>
+</tr>
+<tr>
+<td>\(\mathbf{x}^{(i)}\)</td>
+<td>the \(i\)-th sample — one row of \(X\)</td>
+</tr>
+<tr>
+<td>\(x_j\)</td>
+<td>the \(j\)-th feature — one column of \(X\)</td>
+</tr>
+<tr>
+<td>\(y\)</td>
+<td>target vector, shape \((n,)\); \(y^{(i)}\) is one sample's target</td>
+</tr>
+<tr>
+<td>\(\hat{y}\)</td>
+<td>predicted target</td>
+</tr>
+<tr>
+<td>\(\mathbf{w}\), \(b\)</td>
+<td>learned weights (coefficients) and intercept (bias)</td>
+</tr>
+<tr>
+<td>\(\theta\)</td>
+<td>all learned parameters of a model, taken together</td>
+</tr>
+<tr>
+<td>\(\mathcal{L}\)</td>
+<td>loss on a single sample</td>
+</tr>
+<tr>
+<td>\(J(\theta)\)</td>
+<td>cost — the loss averaged or summed over the whole training set</td>
+</tr>
+<tr>
+<td>\(\alpha\)</td>
+<td>learning rate (<a class="xref" href="/machine-learning/10-optimization-and-gradient-descent/">Chapter 10</a>) or regularization strength (<a class="xref" href="/machine-learning/12-regularized-linear-models/">Chapter 12</a>) — the two standard uses collide, so each chapter says which it means</td>
+</tr>
+<tr>
+<td>\(\lambda\)</td>
+<td>regularization strength in the mathematics; scikit-learn spells it <code>alpha</code> (<a class="xref" href="/machine-learning/12-regularized-linear-models/#s12-1">12.1</a>)</td>
+</tr>
+<tr>
+<td>\(K\)</td>
+<td>number of clusters (<a class="xref" href="/machine-learning/20-clustering/">Chapter 20</a>) or number of CV folds (<a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-3">8.3</a>)</td>
+</tr>
+<tr>
+<td>\(k\)</td>
+<td>number of neighbors (<a class="xref" href="/machine-learning/14-k-nearest-neighbors-and-distance-metrics/">Chapter 14</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Vectors are column vectors in the mathematics and 1-D NumPy arrays in the code; the material flags the places
+where that distinction actually changes a result.</p></div>
+<div class="md"><h3 id="s25-4">25.4 Environment Notes</h3>
+<p>The versions the committed outputs were produced with. Run the cell below to compare against your own
+environment — a difference here is the first thing to check if a committed output does not reproduce.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># --- Environment check ---</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">platform</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="o">,</span><span class="w"> </span><span class="nn">pandas</span><span class="o">,</span><span class="w"> </span><span class="nn">sklearn</span><span class="o">,</span><span class="w"> </span><span class="nn">scipy</span><span class="o">,</span><span class="w"> </span><span class="nn">matplotlib</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="p">(</span><span class="n">numpy</span><span class="p">,</span> <span class="n">pandas</span><span class="p">,</span> <span class="n">sklearn</span><span class="p">,</span> <span class="n">scipy</span><span class="p">,</span> <span class="n">matplotlib</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mod</span><span class="o">.</span><span class="vm">__name__</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mod</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">3.13.2 | packaged by Anaconda, Inc. | (main, Feb  6 2025, 18:49:14) [MSC v.1929 64 bit (AMD64)]
+Windows-11-10.0.26200-SP0
+
+numpy        2.5.2
+pandas       3.0.5
+sklearn      1.9.0
+scipy        1.18.1
+matplotlib   3.11.1</pre></div></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

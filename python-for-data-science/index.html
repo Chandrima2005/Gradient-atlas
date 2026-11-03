@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Python for Data Science: Free Course | Gradient Atlas</title>
+<meta name="description" content="Learn Python for data science, from the fundamentals to OOP, generators, concurrency, databases and Pydantic. 20 free chapters with examples, flashcards…">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Python for Data Science: Free Course | Gradient Atlas">
+<meta property="og:description" content="Learn Python for data science, from the fundamentals to OOP, generators, concurrency, databases and Pydantic. 20 free chapters with examples, flashcards…">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Course", "name": "Python for Data Science", "description": "Learn Python for data science, from the fundamentals to OOP, generators, concurrency, databases and Pydantic. 20 free chapters with examples, flashcards…", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isAccessibleForFree": true, "inLanguage": "en", "offers": {"@type": "Offer", "category": "Free", "price": 0, "priceCurrency": "USD"}, "hasCourseInstance": {"@type": "CourseInstance", "courseMode": "online", "courseWorkload": "PT10H"}, "hasPart": [{"@type": "LearningResource", "name": "Python Fundamentals", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/01-python-fundamentals/"}, {"@type": "LearningResource", "name": "Objects and Data Types", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/"}, {"@type": "LearningResource", "name": "Operators and Expressions", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/03-operators-and-expressions/"}, {"@type": "LearningResource", "name": "Flow Control", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/04-flow-control/"}, {"@type": "LearningResource", "name": "Built-in Data Types: Operations and Methods", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/05-built-in-data-types-operations-and-methods/"}, {"@type": "LearningResource", "name": "Functions", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/06-functions/"}, {"@type": "LearningResource", "name": "Exception Handling", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/"}, {"@type": "LearningResource", "name": "Logging and Debugging", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/08-logging-and-debugging/"}, {"@type": "LearningResource", "name": "Modules and Packages", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/09-modules-and-packages/"}, {"@type": "LearningResource", "name": "Object-Oriented Programming: Foundations", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/10-object-oriented-programming-foundations/"}, {"@type": "LearningResource", "name": "Object Relationships", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/11-object-relationships/"}, {"@type": "LearningResource", "name": "Inheritance and Method Resolution", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/"}, {"@type": "LearningResource", "name": "Special Methods, Overloading and Overriding", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/"}, {"@type": "LearningResource", "name": "Iterators and Generators", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/"}, {"@type": "LearningResource", "name": "Regular Expressions", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/15-regular-expressions/"}, {"@type": "LearningResource", "name": "File Handling", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/"}, {"@type": "LearningResource", "name": "Concurrency: Multitasking, Threads and Processes", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/17-concurrency-multitasking-threads-and-processes/"}, {"@type": "LearningResource", "name": "Database Connectivity (PDBC)", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/18-database-connectivity-pdbc/"}, {"@type": "LearningResource", "name": "Memory Management and Garbage Collection", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/19-memory-management-and-garbage-collection/"}, {"@type": "LearningResource", "name": "Data Validation, Parsing and Type Enforcement with Pydantic", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/20-data-validation-parsing-and-type-enforcement-with-pydantic/"}]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo" data-key="py/route">
+<h1>Python for Data Science: a free course</h1>
+<p class="lead">Learn Python for data science, from the fundamentals to OOP, generators, concurrency, databases and Pydantic. 20 chapters, about 10 hours of reading. Part of the <a href="/data-science-roadmap/">data science roadmap</a>.</p>
+<h2>Basics</h2><ol class="chlist"><li><a href="/python-for-data-science/01-python-fundamentals/">Python Fundamentals</a><span>The language itself, how code is executed, and the mechanics of names and basic I/O.</span></li><li><a href="/python-for-data-science/02-objects-and-data-types/">Objects and Data Types</a><span>What a Python object is, and the built-in type categories with their defining properties.</span></li><li><a href="/python-for-data-science/03-operators-and-expressions/">Operators and Expressions</a><span>Operator categories and how expressions are evaluated.</span></li><li><a href="/python-for-data-science/04-flow-control/">Flow Control</a><span>Statements that direct execution, and the idioms and traps around them.</span></li></ol><h2>Data Types and Functions</h2><ol class="chlist"><li><a href="/python-for-data-science/05-built-in-data-types-operations-and-methods/">Built-in Data Types: Operations and Methods</a><span>The practical working surface of each built-in type — operations, methods, behaviour.</span></li><li><a href="/python-for-data-science/06-functions/">Functions</a><span>Function definition, the argument system, scope, function objects themselves, and treating functions as data (functional programming).</span></li></ol><h2>Errors and Tooling</h2><ol class="chlist"><li><a href="/python-for-data-science/07-exception-handling/">Exception Handling</a><span>How Python signals, propagates and recovers from errors.</span></li><li><a href="/python-for-data-science/08-logging-and-debugging/">Logging and Debugging</a><span>Observing and diagnosing running code.</span></li><li><a href="/python-for-data-science/09-modules-and-packages/">Modules and Packages</a><span>Splitting code across files, the import system, and running code as a program.</span></li></ol><h2>Object-Oriented Python</h2><ol class="chlist"><li><a href="/python-for-data-science/10-object-oriented-programming-foundations/">Object-Oriented Programming: Foundations</a><span>Classes, instances, and the basic mechanics of state and behaviour.</span></li><li><a href="/python-for-data-science/11-object-relationships/">Object Relationships</a><span>Ways objects relate to each other without inheritance.</span></li><li><a href="/python-for-data-science/12-inheritance-and-method-resolution/">Inheritance and Method Resolution</a><span>Type hierarchies, overriding, cooperative superclass calls and the MRO.</span></li><li><a href="/python-for-data-science/13-special-methods-overloading-and-overriding/">Special Methods, Overloading and Overriding</a><span>How user-defined classes hook into Python&#x27;s built-in behaviour.</span></li></ol><h2>Advanced Python</h2><ol class="chlist"><li><a href="/python-for-data-science/14-iterators-and-generators/">Iterators and Generators</a><span>Lazy sequential access: the protocol, custom iterators, and generators.</span></li><li><a href="/python-for-data-science/15-regular-expressions/">Regular Expressions</a><span>Pattern matching over text.</span></li><li><a href="/python-for-data-science/16-file-handling/">File Handling</a><span>Persisting and reading data on disk.</span></li><li><a href="/python-for-data-science/17-concurrency-multitasking-threads-and-processes/">Concurrency: Multitasking, Threads and Processes</a><span>Doing more than one thing at a time, and what Python actually allows.</span></li></ol><h2>Systems and Data</h2><ol class="chlist"><li><a href="/python-for-data-science/18-database-connectivity-pdbc/">Database Connectivity (PDBC)</a><span>Talking to relational databases from Python.</span></li><li><a href="/python-for-data-science/19-memory-management-and-garbage-collection/">Memory Management and Garbage Collection</a><span>Object lifetime, reference behaviour and reclamation.</span></li><li><a href="/python-for-data-science/20-data-validation-parsing-and-type-enforcement-with-pydantic/">Data Validation, Parsing and Type Enforcement with Pydantic</a><span>Turning type hints from documentation into runtime-enforced schemas, with Pydantic.</span></li></ol>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

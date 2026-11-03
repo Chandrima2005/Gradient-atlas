@@ -1,0 +1,9 @@
+{
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/python/:path*", "destination": "/python-for-data-science/:path*", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/:path((?!.*\\.).*)", "destination": "/index.html" }
+  ]
+}

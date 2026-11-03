@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Inheritance and Method Resolution – Python for Data Science Chapter 12 | Gradient Atlas</title>
+<meta name="description" content="Type hierarchies, overriding, cooperative superclass calls and the MRO.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Inheritance and Method Resolution – Python for Data Science Chapter 12 | Gradient Atlas">
+<meta property="og:description" content="Type hierarchies, overriding, cooperative superclass calls and the MRO.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Inheritance and Method Resolution", "headline": "Inheritance and Method Resolution", "description": "Type hierarchies, overriding, cooperative superclass calls and the MRO.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT34M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "Inheritance and Method Resolution", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 12</p>
+<h1>Inheritance and Method Resolution</h1>
+<p class="lead">Type hierarchies, overriding, cooperative superclass calls and the MRO.</p>
+<article class="body"><div class="md"><h3 id="s12-1">12.1 Inheritance Fundamentals</h3>
+<p><strong>Inheritance</strong> lets a new class reuse another class's attributes and methods, instead
+of rewriting them. The existing class is the <strong>base</strong> (or <strong>parent</strong>/<strong>superclass</strong>);
+the new one is the <strong>derived</strong> (or <strong>child</strong>/<strong>subclass</strong>). This is the "is-a"
+relationship — a <code>Dog</code> <em>is an</em> <code>Animal</code> — as opposed to chapter 11's "has-a"/"uses-a"
+relationships between otherwise-unrelated objects.</p>
+<p>Syntax: <code>class Derived(Base):</code>. Anything not redefined in <code>Derived</code> is simply inherited
+as-is:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> makes a sound&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">pass</span>   <span class="c1"># inherits __init__ and speak() unchanged - no need to redefine either</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">Dog</span><span class="p">(</span><span class="s2">&quot;Rex&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>      <span class="c1"># Rex -&gt; inherited attribute</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># Rex makes a sound -&gt; inherited method</span>
+</code></pre><div class="outs"><pre class="out-text">Rex
+Rex makes a sound</pre></div></div>
+<div class="md"><p>A <code>Dog</code> instance really is an <code>Animal</code> too — <code>isinstance()</code> and <code>issubclass()</code> both
+recognize the whole chain, not just the exact class:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Dog</span><span class="p">))</span>         <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Animal</span><span class="p">))</span>      <span class="c1"># True -&gt; a Dog IS an Animal too</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">Dog</span><span class="p">,</span> <span class="n">Animal</span><span class="p">))</span>   <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">True
+True
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — Django's abstract base models.</strong> A real Django project commonly
+defines <code>class TimestampedModel(models.Model): created_at = ...; updated_at = ...;
+class Meta: abstract = True</code>, then has every real model (<code>Order</code>, <code>Product</code>, <code>User</code>)
+inherit from it — the exact single-inheritance shape above, reused so every model in
+the app automatically gets the same timestamp fields without repeating them.</p></div>
+<div class="md"><h3 id="s12-2">12.2 Types of Inheritance</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Shape</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single</td>
+<td>one base, one derived</td>
+<td>a derived class has exactly one direct base</td>
+</tr>
+<tr>
+<td>Multiple</td>
+<td>several bases, one derived</td>
+<td>a derived class lists more than one base at once</td>
+</tr>
+<tr>
+<td>Multilevel</td>
+<td>a chain</td>
+<td>a derived class's base is itself derived from another base</td>
+</tr>
+<tr>
+<td>Hierarchical</td>
+<td>one base, several independent derived classes</td>
+<td>multiple unrelated classes all derive from the same base</td>
+</tr>
+<tr>
+<td>Hybrid</td>
+<td>any combination of the above</td>
+<td>mixes two or more of these shapes in one hierarchy</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Single inheritance</strong> — exactly one base class:</p>
+<pre class="fence" data-lang="text"><code>Animal
+  │
+ Dog
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;...&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Woof!&quot;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># Woof!</span>
+</code></pre><div class="outs"><pre class="out-text">Woof!</pre></div></div>
+<div class="md"><p><strong>Multiple inheritance</strong> — one class lists more than one base at once, <code>class
+Derived(Base1, Base2):</code>, and gets both:</p>
+<pre class="fence" data-lang="text"><code>Flyer   Swimmer
+   \      /
+    Duck
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Flyer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;flying&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Swimmer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">swim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;swimming&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Duck</span><span class="p">(</span><span class="n">Flyer</span><span class="p">,</span> <span class="n">Swimmer</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="n">duck</span> <span class="o">=</span> <span class="n">Duck</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">duck</span><span class="o">.</span><span class="n">fly</span><span class="p">(),</span> <span class="n">duck</span><span class="o">.</span><span class="n">swim</span><span class="p">())</span>   <span class="c1"># flying swimming -&gt; both bases&#39; methods, at once</span>
+</code></pre><div class="outs"><pre class="out-text">flying swimming</pre></div></div>
+<div class="md"><p><strong>Mixins</strong> are a specific, disciplined use of multiple inheritance: a small class that
+adds exactly one reusable, self-contained capability, is never meant to be instantiated
+on its own, and typically carries no state of its own — no <code>__init__</code>, no instance
+attributes — just methods that work purely off of whatever the class it's mixed into
+already provides. <code>Flyer</code>/<code>Swimmer</code> above are already mixin-shaped; here's the pattern
+made explicit, adding a <code>describe()</code> capability to any class that supplies a <code>name</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">DescribableMixin</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stateless mixin - adds one capability, assumes the host class provides self.name.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;This is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">DescribableMixin</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="s2">&quot;R2D2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>   <span class="c1"># This is R2D2. -&gt; describe() came from the mixin, name from Robot itself</span>
+</code></pre><div class="outs"><pre class="out-text">This is R2D2.</pre></div></div>
+<div class="md"><p>Prefer chapter 11's composition unless you're writing a stateless mixin like this — the
+moment the added behavior needs its own data or lifecycle, it stops being a mixin and
+is really a whole-part relationship (11.2/11.3) wearing a multiple-inheritance costume.</p></div>
+<div class="md callout practice"><p><strong>In practice — Django's class-based view mixins.</strong> <code>LoginRequiredMixin</code> and
+<code>PermissionRequiredMixin</code> are exactly this pattern used in a real, widely-used web
+framework: a view class like <code>class OrderListView(LoginRequiredMixin, ListView):</code>
+composes its behavior from several small, independent, stateless capability mixins
+instead of one deep single-inheritance chain.</p></div>
+<div class="md"><p><strong>Multilevel inheritance</strong> — a chain, each link derived from the one before it. A
+<code>Dog</code> gets everything <code>Mammal</code> has, which in turn already includes everything <code>Animal</code>
+has:</p>
+<pre class="fence" data-lang="text"><code>Animal
+  │
+Mammal
+  │
+ Dog
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal2</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;eating&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Mammal</span><span class="p">(</span><span class="n">Animal2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;walking&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog2</span><span class="p">(</span><span class="n">Mammal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bark</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;barking&quot;</span>
+
+<span class="n">d2</span> <span class="o">=</span> <span class="n">Dog2</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">eat</span><span class="p">(),</span> <span class="n">d2</span><span class="o">.</span><span class="n">walk</span><span class="p">(),</span> <span class="n">d2</span><span class="o">.</span><span class="n">bark</span><span class="p">())</span>   <span class="c1"># eating walking barking -&gt; all three levels reachable</span>
+</code></pre><div class="outs"><pre class="out-text">eating walking barking</pre></div></div>
+<div class="md"><p><strong>Hierarchical inheritance</strong> — several unrelated classes all derive from the same
+base, independently of each other:</p>
+<pre class="fence" data-lang="text"><code>      Animal
+      /    \
+   Dog      Cat
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal3</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;eating&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog3</span><span class="p">(</span><span class="n">Animal3</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Cat3</span><span class="p">(</span><span class="n">Animal3</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog3</span><span class="p">()</span><span class="o">.</span><span class="n">eat</span><span class="p">(),</span> <span class="n">Cat3</span><span class="p">()</span><span class="o">.</span><span class="n">eat</span><span class="p">())</span>   <span class="c1"># eating eating -&gt; same base, two independent subclasses</span>
+</code></pre><div class="outs"><pre class="out-text">eating eating</pre></div></div>
+<div class="md"><p><strong>Hybrid inheritance</strong> — any mix of the above in one hierarchy. Here, both <code>B</code> and <code>C</code>
+derive from <code>A</code> (hierarchical), and <code>D</code> combines <code>B</code> and <code>C</code> (multiple) — a <strong>diamond</strong>
+shape, since two different paths from <code>D</code> both lead back to the same <code>A</code>:</p>
+<pre class="fence" data-lang="text"><code>   A
+  / \
+ B   C
+  \ /
+   D
+</code></pre>
+<p>This shape is exactly what makes the search order genuinely ambiguous — when <code>D</code> calls
+a method it doesn't define itself, does Python check <code>B</code>'s side or <code>C</code>'s side first,
+and does it visit <code>A</code> once or twice? That question is what the rest of this chapter
+(<a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-4">12.4</a>, <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-5">12.5</a>) answers:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">20 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;a&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;b&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;c&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;d&quot;</span>
+
+<span class="n">dd</span> <span class="o">=</span> <span class="n">D</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">a</span><span class="p">(),</span> <span class="n">dd</span><span class="o">.</span><span class="n">b</span><span class="p">(),</span> <span class="n">dd</span><span class="o">.</span><span class="n">c</span><span class="p">(),</span> <span class="n">dd</span><span class="o">.</span><span class="n">d</span><span class="p">())</span>   <span class="c1"># a b c d -&gt; everything reachable, from every branch</span>
+
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>   <span class="c1"># [&#39;D&#39;, &#39;B&#39;, &#39;C&#39;, &#39;A&#39;, &#39;object&#39;] -&gt; A visited only ONCE</span>
+</code></pre><div class="outs"><pre class="out-text">a b c d
+[&#x27;D&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;A&#x27;, &#x27;object&#x27;]</pre></div></div>
+<div class="md"><h3 id="s12-3">12.3 Method Overriding</h3>
+<p><strong>Overriding</strong> is when a subclass defines a method with the same name as one it
+inherited, to replace that behavior instead of reusing it. The subclass's version wins
+completely — the parent's version is never reached through this name, unless something
+deliberately reaches back for it (which is exactly what <code>super()</code>, <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-4">12.4</a>, is for):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Some generic animal sound&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># same name - REPLACES the parent&#39;s version entirely</span>
+        <span class="k">return</span> <span class="s2">&quot;Woof!&quot;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Animal</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># Some generic animal sound</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>        <span class="c1"># Woof! -&gt; Animal&#39;s version is never reached this way</span>
+</code></pre><div class="outs"><pre class="out-text">Some generic animal sound
+Woof!</pre></div></div>
+<div class="md"><h3 id="s12-4">12.4 <code>super()</code> and Cooperative Inheritance</h3>
+<p><code>super()</code> gives access to the <em>next</em> class in line — <strong>not</strong> necessarily "my direct
+parent," but the next class after the current one in the object's method resolution
+order (its <strong>MRO</strong>, 12.5 covers exactly how that order is computed). For single
+inheritance the two happen to be the same class, which is why "<code>super()</code> means the
+parent" is a common but incomplete mental model — <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-4">12.4</a>'s third use case below shows
+exactly where it breaks down.</p>
+<p><strong>Use 1 — avoid duplicating a parent's <code>__init__</code>:</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">breed</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>   <span class="c1"># reuse Animal&#39;s setup instead of repeating &quot;self.name = name&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">breed</span> <span class="o">=</span> <span class="n">breed</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">Dog</span><span class="p">(</span><span class="s2">&quot;Rex&quot;</span><span class="p">,</span> <span class="s2">&quot;Labrador&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">breed</span><span class="p">)</span>   <span class="c1"># Rex Labrador</span>
+</code></pre><div class="outs"><pre class="out-text">Rex Labrador</pre></div></div>
+<div class="md"><p><strong>Use 2 — extend an overridden method (<a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-3">12.3</a>) instead of fully replacing it:</strong></p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Some generic animal sound&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">()</span>   <span class="c1"># get the parent&#39;s behavior first...</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">, specifically: Woof!&quot;</span>   <span class="c1"># ...then build on it, instead of discarding it</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># Some generic animal sound, specifically: Woof!</span>
+</code></pre><div class="outs"><pre class="out-text">Some generic animal sound, specifically: Woof!</pre></div></div>
+<div class="md"><p><strong>Use 3 — cooperative multiple inheritance: <code>super()</code> follows the MRO, not "my direct
+parent."</strong> In a diamond (<a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-2">12.2</a>), if every class's method calls <code>super()</code>, the calls chain
+through <em>every</em> class in the MRO exactly once — including a class that isn't its direct
+base at all:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">26 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A.greet&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;B.greet&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">greet</span><span class="p">()</span>   <span class="c1"># B&#39;s only base is A - so surely this calls A.greet()... right?</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;C.greet&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">greet</span><span class="p">()</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;D.greet&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">greet</span><span class="p">()</span>
+
+<span class="n">D</span><span class="p">()</span><span class="o">.</span><span class="n">greet</span><span class="p">()</span>
+<span class="c1"># D.greet</span>
+<span class="c1"># B.greet</span>
+<span class="c1"># C.greet   &lt;- B&#39;s super() actually reached C, not A!</span>
+<span class="c1"># A.greet</span>
+
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>   <span class="c1"># [&#39;D&#39;, &#39;B&#39;, &#39;C&#39;, &#39;A&#39;, &#39;object&#39;]</span>
+</code></pre><div class="outs"><pre class="out-text">D.greet
+B.greet
+C.greet
+A.greet
+[&#x27;D&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;A&#x27;, &#x27;object&#x27;]</pre></div></div>
+<div class="md"><p><code>super()</code> inside <code>B.greet</code> looks up <em>the actual instance's</em> MRO (<code>D</code>'s: <code>[D, B, C, A,
+object]</code>), finds <code>B</code>'s own position in it, and calls whatever comes <strong>immediately
+after</strong> — which is <code>C</code>, because <code>D</code> put it there, not because <code>B</code> knows anything about
+<code>C</code>. This is exactly what makes multiple inheritance "cooperative": every class trusts
+that calling <code>super()</code> will reach whichever class the <em>final</em> MRO says comes next, and
+that every class in between plays along by also calling <code>super()</code>.</p>
+<p><strong>Use 4 — the explicit two-argument form</strong>, which is what the zero-argument <code>super()</code>
+is shorthand for:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;...&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># explicit form: &quot;starting right after Dog, in self&#39;s MRO&quot; - super() with no</span>
+        <span class="c1"># arguments is exactly this, with Dog and self filled in automatically</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Dog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">speak</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="p">()</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># ...</span>
+</code></pre><div class="outs"><pre class="out-text">...</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — forgetting to forward arguments a class itself doesn't need through
+a cooperative <code>__init__</code> chain.</strong> The diamond above (<code>greet()</code>, all four <code>Use</code>
+examples) never had to face this, because none of its methods take arguments. Real
+cooperative multiple inheritance almost always does, and that's where multiple
+inheritance earns its bad reputation: extending <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-2">12.2</a>'s <code>D(B, C)</code> diamond (MRO
+<code>[D, B, C, A, object]</code>) with a constructor argument each class actually needs, calling
+<code>super().__init__()</code> with only <em>some</em> of them breaks the chain the moment it reaches a
+class further along the MRO that needed one that got dropped:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">29 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A.__init__ a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>   <span class="c1"># forwards only &#39;a&#39; - looks right if B were talking straight to A...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;B.__init__ b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C.__init__ c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># BUG: only passes what B&#39;s own signature wants</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;D.__init__ done&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+<span class="c1"># TypeError: C.__init__() missing 1 required positional argument: &#39;c&#39;</span>
+<span class="c1"># -&gt; B&#39;s super().__init__(a) actually reaches C next (D&#39;s MRO, 12.4 Use 3),</span>
+<span class="c1">#    not A - and C needed a &#39;c&#39; that was never forwarded</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: C.__init__() missing 1 required positional argument: &#x27;c&#x27;</pre></div></div>
+<div class="md"><p><strong>The fix — every <code>__init__</code> in the chain accepts and forwards <code>**kwargs</code> it doesn't
+personally use</strong>, via <code>super().__init__(**kwargs)</code>, instead of naming only the
+arguments its own direct base happens to want:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">24 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A.__init__ a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>   <span class="c1"># forwards whatever B itself doesn&#39;t need</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;B.__init__ b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C.__init__ c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>   <span class="c1"># pass everything as keywords; each class peels off its own</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;D.__init__ done&quot;</span><span class="p">)</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">D</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>   <span class="c1"># 1 2 3 -&gt; every class got exactly what it needed, in MRO order</span>
+</code></pre><div class="outs"><pre class="out-text">A.__init__ a=1
+C.__init__ c=3
+B.__init__ b=2
+D.__init__ done
+1 2 3</pre></div></div>
+<div class="md"><h3 id="s12-5">12.5 MRO and Resolution Rules</h3>
+<p>The <strong>Method Resolution Order (MRO)</strong> is the exact, linear order Python searches
+classes in when looking up a method or attribute — the first class in that order that
+defines the name wins. Every class exposes its own MRO:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">)</span>     <span class="c1"># (&lt;class &#39;__main__.Dog&#39;&gt;, &lt;class &#39;__main__.Animal&#39;&gt;, &lt;class &#39;object&#39;&gt;)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Dog</span><span class="o">.</span><span class="n">mro</span><span class="p">())</span>       <span class="c1"># same list, as an ordinary list instead of a tuple</span>
+</code></pre><div class="outs"><pre class="out-text">(&lt;class &#x27;__main__.Dog&#x27;&gt;, &lt;class &#x27;__main__.Animal&#x27;&gt;, &lt;class &#x27;object&#x27;&gt;)
+[&lt;class &#x27;__main__.Dog&#x27;&gt;, &lt;class &#x27;__main__.Animal&#x27;&gt;, &lt;class &#x27;object&#x27;&gt;]</pre></div></div>
+<div class="md"><p>For single inheritance, the MRO is just the obvious chain up to <code>object</code>. It only gets
+interesting for <strong>multiple inheritance</strong> — <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-2">12.2</a>'s diamond raised exactly this question:
+does <code>D(B, C)</code>'s search visit <code>B</code>'s side or <code>C</code>'s side first, and does it reach <code>A</code>
+once or twice? Python answers this with the <strong>C3 linearization</strong> algorithm:</p>
+<pre class="fence" data-lang="text"><code>L[C] = C + merge( L[B1], L[B2], ..., L[Bn], [B1, B2, ..., Bn] )
+</code></pre>
+<p>— the MRO of a class <code>C</code> is itself, followed by a <em>merge</em> of its direct bases' own
+MROs, plus one more list: the bases in the order <code>C</code> listed them. That extra list is
+what makes <code>C</code>'s own declared base order win ties.</p></div>
+<div class="md"><p><strong>The merge operation</strong> takes several lists (each already-computed in order) and
+weaves them into one, repeating this rule until every list is empty:</p>
+<ol>
+<li>Look at the <strong>head</strong> (first element) of each list, in order.</li>
+<li>Pick the first head that does <strong>not</strong> appear anywhere in the <strong>tail</strong> (every
+   element except the head) of <em>any</em> of the lists. That's a valid next element —
+   promoting it now can't strand something that still has to come before it later.</li>
+<li>Remove that element from every list (it can only ever appear as a head at this
+   point, never buried inside one), and append it to the result.</li>
+<li>If <strong>no</strong> head qualifies — every candidate is blocked by some other list's
+   requirements — the hierarchy has no consistent order at all, and Python raises
+   <code>TypeError</code> (demonstrated at the end of this section) instead of guessing.</li>
+</ol>
+<p>Two worked examples follow: a simple diamond, then the classic textbook example that
+needs several rounds of merging to resolve.</p></div>
+<div class="md"><p><strong>Example 1 — a simple diamond:</strong></p>
+<pre class="fence" data-lang="text"><code>   O
+  / \
+ A   B
+  \ /
+   C
+</code></pre>
+<p><code>class A(O)</code>, <code>class B(O)</code>, <code>class C(A, B)</code>. First, the linearizations that are already
+known (every class's MRO always starts with itself):</p>
+<pre class="fence" data-lang="text"><code>L[O] = [O, object]
+L[A] = [A, O, object]
+L[B] = [B, O, object]
+</code></pre>
+<p>Now <code>L[C] = C + merge(L[A], L[B], [A, B])</code>, worked round by round:</p>
+<pre class="fence" data-lang="text"><code>lists:  [A, O, object]   [B, O, object]   [A, B]
+
+round 1: candidate A — is A in any TAIL? [O,object]:no  [O,object]:no  [B]:no -&gt; valid
+         take A -&gt; result: [A]
+         lists:  [O, object]   [B, O, object]   [B]
+
+round 2: candidate O — is O in any tail? [object]:no  [O,object]:YES -&gt; blocked
+         candidate B — is B in any tail? [object]:no  [O,object]:no  []:no -&gt; valid
+         take B -&gt; result: [A, B]
+         lists:  [O, object]   [O, object]   []
+
+round 3: candidate O — is O in any tail? [object]:no  [object]:no -&gt; valid
+         take O -&gt; result: [A, B, O]
+         lists:  [object]   [object]
+
+round 4: candidate object — no tails left at all -&gt; valid
+         take object -&gt; result: [A, B, O, object]
+</code></pre>
+<p>So <code>L[C] = C + [A, B, O, object] = [C, A, B, O, object]</code>. Confirm against Python itself:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">O</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">O</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">C</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>
+<span class="c1"># [&#39;C&#39;, &#39;A&#39;, &#39;B&#39;, &#39;O&#39;, &#39;object&#39;] -&gt; matches the hand-worked trace exactly</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;C&#x27;, &#x27;A&#x27;, &#x27;B&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]</pre></div></div>
+<div class="md"><p><strong>Example 2 — a more complex hierarchy</strong>, with three separate multi-base classes
+combined into one. <code>A</code>–<code>E</code> each single-inherit from <code>O</code>; <code>K1</code>, <code>K2</code>, <code>K3</code> each combine a
+different subset of them (sharing <code>B</code>, <code>A</code> and <code>D</code> pairwise); <code>Z</code> combines all three.
+That triangle of shared classes can't be drawn as one flat, crossing-free picture, so
+here it is as three stages instead — exactly the three merges the computation itself
+needs to do:</p>
+<pre class="fence" data-lang="text"><code>Stage 1 — the common root:
+
+              O
+    ┌────┬────┼────┬────┐
+    A    B    C    D    E
+
+
+Stage 2 — each K combines its own subset of A-E:
+
+  K1(A, B, C)      K2(D, B, E)      K3(D, A)
+
+   A  B  C          D  B  E          D  A
+    \ | /            \ | /            \ /
+     K1                K2               K3
+
+
+Stage 3 — Z combines all three K&#39;s:
+
+   K1   K2   K3
+     \  |   /
+        Z
+</code></pre></div>
+<div class="md"><p><strong>Stage 1</strong> needs no merge at all — each of <code>A</code>–<code>E</code> single-inherits directly from <code>O</code>,
+so their linearizations are just the obvious chain:</p>
+<pre class="fence" data-lang="text"><code>L[O] = [O, object]
+L[A] = [A, O, object]     L[B] = [B, O, object]     L[C] = [C, O, object]
+L[D] = [D, O, object]     L[E] = [E, O, object]
+</code></pre>
+<p><strong>Stage 2</strong> is where the first real merges happen. <code>L[K1] = K1 + merge(L[A], L[B],
+L[C], [A, B, C])</code>, worked round by round exactly like Example 1:</p>
+<pre class="fence" data-lang="text"><code>lists:  [A, O, object]   [B, O, object]   [C, O, object]   [A, B, C]
+
+round 1: candidate A — in any tail? no, no, no, no -&gt; valid
+         take A -&gt; result: [A]
+         lists:  [O, object]   [B, O, object]   [C, O, object]   [B, C]
+
+round 2: candidate O — in any tail? no, YES (2nd list) -&gt; blocked
+         candidate B — in any tail? no, no, no -&gt; valid
+         take B -&gt; result: [A, B]
+         lists:  [O, object]   [O, object]   [C, O, object]   [C]
+
+round 3: candidate O — in any tail? no, YES (3rd list) -&gt; blocked
+         candidate C — in any tail? no, no, no -&gt; valid
+         take C -&gt; result: [A, B, C]
+         lists:  [O, object]   [O, object]   [O, object]
+
+round 4: candidate O — in any tail? no, no, no -&gt; valid
+         take O -&gt; result: [A, B, C, O]
+         lists:  [object]   [object]   [object]
+
+round 5: candidate object — no tails left -&gt; valid
+         take object -&gt; result: [A, B, C, O, object]
+</code></pre>
+<p>So <code>L[K1] = [K1, A, B, C, O, object]</code>. <code>L[K2] = K2 + merge(L[D], L[B], L[E], [D, B,
+E])</code> follows the identical shape (just relabeled — <code>B</code> is blocked in round 2 for the
+same reason <code>B</code> was blocked above, since it's <code>K2</code>'s own shared class this time):</p>
+<pre class="fence" data-lang="text"><code>lists:  [D, O, object]   [B, O, object]   [E, O, object]   [D, B, E]
+
+round 1: candidate D — in any tail? no, no, no, no -&gt; valid
+         take D -&gt; result: [D]
+         lists:  [O, object]   [B, O, object]   [E, O, object]   [B, E]
+
+round 2: candidate O — in any tail? no, YES (2nd list) -&gt; blocked
+         candidate B — in any tail? no, no, no -&gt; valid
+         take B -&gt; result: [D, B]
+         lists:  [O, object]   [O, object]   [E, O, object]   [E]
+
+round 3: candidate O — in any tail? no, YES (3rd list) -&gt; blocked
+         candidate E — in any tail? no, no, no -&gt; valid
+         take E -&gt; result: [D, B, E]
+         lists:  [O, object]   [O, object]   [O, object]
+
+round 4: candidate O — in any tail? no, no, no -&gt; valid
+         take O -&gt; result: [D, B, E, O]
+         lists:  [object]   [object]   [object]
+
+round 5: candidate object — no tails left -&gt; valid
+         take object -&gt; result: [D, B, E, O, object]
+</code></pre>
+<p>So <code>L[K2] = [K2, D, B, E, O, object]</code>. <code>L[K3] = K3 + merge(L[D], L[A], [D, A])</code> is the
+shortest, since <code>K3</code> only combines two classes:</p>
+<pre class="fence" data-lang="text"><code>lists:  [D, O, object]   [A, O, object]   [D, A]
+
+round 1: candidate D — in any tail? no, no, no -&gt; valid
+         take D -&gt; result: [D]
+         lists:  [O, object]   [A, O, object]   [A]
+
+round 2: candidate O — in any tail? no, YES (2nd list) -&gt; blocked
+         candidate A — in any tail? no, no -&gt; valid
+         take A -&gt; result: [D, A]
+         lists:  [O, object]   [O, object]
+
+round 3: candidate O — in any tail? no, no -&gt; valid
+         take O -&gt; result: [D, A, O]
+         lists:  [object]   [object]
+
+round 4: candidate object — no tails left -&gt; valid
+         take object -&gt; result: [D, A, O, object]
+</code></pre>
+<p>So <code>L[K3] = [K3, D, A, O, object]</code>.</p></div>
+<div class="md"><p><strong>Stage 3 — the main event.</strong> <code>L[Z] = Z + merge(L[K1], L[K2], L[K3], [K1, K2, K3])</code>,
+using the three results just computed:</p>
+<pre class="fence" data-lang="text"><code>lists:  [K1,A,B,C,O,object]  [K2,D,B,E,O,object]  [K3,D,A,O,object]  [K1,K2,K3]
+
+round  1: candidate K1 — in any tail? no, no, no, no -&gt; valid
+          take K1 -&gt; result: [K1]
+          lists:  [A,B,C,O,object]  [K2,D,B,E,O,object]  [K3,D,A,O,object]  [K2,K3]
+
+round  2: candidate A  — in any tail? YES (3rd list has A in its tail) -&gt; blocked
+          candidate K2 — in any tail? no, no, no, no -&gt; valid
+          take K2 -&gt; result: [K1, K2]
+          lists:  [A,B,C,O,object]  [D,B,E,O,object]  [K3,D,A,O,object]  [K3]
+
+round  3: candidate A  — in any tail? YES (3rd list) -&gt; blocked
+          candidate D  — in any tail? YES (3rd list has D in its tail too) -&gt; blocked
+          candidate K3 — in any tail? no, no, no -&gt; valid
+          take K3 -&gt; result: [K1, K2, K3]
+          lists:  [A,B,C,O,object]  [D,B,E,O,object]  [D,A,O,object]
+
+round  4: candidate A — in any tail? YES (3rd list) -&gt; blocked
+          candidate D — in any tail? no, no, no -&gt; valid
+          take D -&gt; result: [..., D]
+          lists:  [A,B,C,O,object]  [B,E,O,object]  [A,O,object]
+
+round  5: candidate A — in any tail? no, no, no -&gt; valid
+          take A -&gt; result: [..., A]
+          lists:  [B,C,O,object]  [B,E,O,object]  [O,object]
+
+round  6: candidate B — in any tail? no, no, no -&gt; valid
+          take B -&gt; result: [..., B]
+          lists:  [C,O,object]  [E,O,object]  [O,object]
+
+round  7: candidate C — in any tail? no, no, no -&gt; valid
+          take C -&gt; result: [..., C]
+          lists:  [O,object]  [E,O,object]  [O,object]
+
+round  8: candidate O — in any tail? no, YES (2nd list) -&gt; blocked
+          candidate E — in any tail? no, no, no -&gt; valid
+          take E -&gt; result: [..., E]
+          lists:  [O,object]  [O,object]  [O,object]
+
+round  9: candidate O — in any tail? no, no, no -&gt; valid
+          take O -&gt; result: [..., O]
+          lists:  [object]  [object]  [object]
+
+round 10: candidate object — no tails left -&gt; valid
+          take object -&gt; result: [K1,K2,K3,D,A,B,C,E,O,object]
+</code></pre>
+<p>So <code>L[Z] = Z + [K1,K2,K3,D,A,B,C,E,O,object] = [Z, K1, K2, K3, D, A, B, C, E, O,
+object]</code> — worked out entirely by hand, matching Python's own answer. <code>D</code> (round 4) is
+the interesting one: it's buried inside <code>K3</code>'s own list until <code>K3</code> itself is taken in
+round 3, so it can only become a valid candidate one round later. Confirm all four
+linearizations against Python directly:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K1</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K3</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Z</span><span class="p">(</span><span class="n">K1</span><span class="p">,</span> <span class="n">K2</span><span class="p">,</span> <span class="n">K3</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">K1</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>   <span class="c1"># [&#39;K1&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;O&#39;, &#39;object&#39;]</span>
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">K2</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>   <span class="c1"># [&#39;K2&#39;, &#39;D&#39;, &#39;B&#39;, &#39;E&#39;, &#39;O&#39;, &#39;object&#39;]</span>
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">K3</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>   <span class="c1"># [&#39;K3&#39;, &#39;D&#39;, &#39;A&#39;, &#39;O&#39;, &#39;object&#39;]</span>
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">Z</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">])</span>
+<span class="c1"># [&#39;Z&#39;, &#39;K1&#39;, &#39;K2&#39;, &#39;K3&#39;, &#39;D&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;E&#39;, &#39;O&#39;, &#39;object&#39;] -&gt; matches every hand-worked trace</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;K1&#x27;, &#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]
+[&#x27;K2&#x27;, &#x27;D&#x27;, &#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]
+[&#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]
+[&#x27;Z&#x27;, &#x27;K1&#x27;, &#x27;K2&#x27;, &#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]</pre></div></div>
+<div class="md"><p>All four hand traces line up exactly. That bookkeeping is also just code — here is the
+merge rule from <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-5">12.5</a> as a literal, runnable implementation, so it can be pointed at any
+hierarchy instead of redone by hand every time:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">42 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="n">lists</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span> <span class="k">if</span> <span class="n">lst</span><span class="p">]</span>   <span class="c1"># drop empty lists up front</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">round_num</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">lists</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">:</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">head</span> <span class="ow">in</span> <span class="n">other</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">):</span>   <span class="c1"># rule 2: not in any TAIL</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="n">head</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">candidate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot create a consistent MRO from </span><span class="si">{</span><span class="n">lists</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># rule 4</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;round </span><span class="si">{</span><span class="n">round_num</span><span class="si">}</span><span class="s2">: pick </span><span class="si">{</span><span class="n">candidate</span><span class="o">.</span><span class="vm">__name__</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}</span><span class="s2"> &quot;</span>
+                  <span class="sa">f</span><span class="s2">&quot;lists=</span><span class="si">{</span><span class="p">[[</span><span class="n">c</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">lst</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">lst</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">lists</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>                                      <span class="c1"># rule 3</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">lst</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">candidate</span><span class="p">]</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">]</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">lst</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span> <span class="k">if</span> <span class="n">lst</span><span class="p">]</span>
+        <span class="n">round_num</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">linearize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+    <span class="c1"># verbose is NOT passed to the recursive calls - only THIS class&#39;s own merge is traced</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">+</span> <span class="n">merge</span><span class="p">([</span><span class="n">linearize</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">)],</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">O</span><span class="p">:</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">D</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">E</span><span class="p">(</span><span class="n">O</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K1</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">K3</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span> <span class="k">pass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Z</span><span class="p">(</span><span class="n">K1</span><span class="p">,</span> <span class="n">K2</span><span class="p">,</span> <span class="n">K3</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="n">computed</span> <span class="o">=</span> <span class="n">linearize</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">([</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">computed</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">computed</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">))</span>   <span class="c1"># True -&gt; our from-scratch implementation matches Python exactly</span>
+</code></pre><div class="outs"><pre class="out-text">round 1: pick K1     lists=[[&#x27;K1&#x27;, &#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K2&#x27;, &#x27;D&#x27;, &#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K1&#x27;, &#x27;K2&#x27;, &#x27;K3&#x27;]]
+round 2: pick K2     lists=[[&#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K2&#x27;, &#x27;D&#x27;, &#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K2&#x27;, &#x27;K3&#x27;]]
+round 3: pick K3     lists=[[&#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;D&#x27;, &#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;K3&#x27;]]
+round 4: pick D      lists=[[&#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;D&#x27;, &#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;D&#x27;, &#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]]
+round 5: pick A      lists=[[&#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;A&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]]
+round 6: pick B      lists=[[&#x27;B&#x27;, &#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;B&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;O&#x27;, &#x27;object&#x27;]]
+round 7: pick C      lists=[[&#x27;C&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;O&#x27;, &#x27;object&#x27;]]
+round 8: pick E      lists=[[&#x27;O&#x27;, &#x27;object&#x27;], [&#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;], [&#x27;O&#x27;, &#x27;object&#x27;]]
+round 9: pick O      lists=[[&#x27;O&#x27;, &#x27;object&#x27;], [&#x27;O&#x27;, &#x27;object&#x27;], [&#x27;O&#x27;, &#x27;object&#x27;]]
+round 10: pick object lists=[[&#x27;object&#x27;], [&#x27;object&#x27;], [&#x27;object&#x27;]]
+[&#x27;Z&#x27;, &#x27;K1&#x27;, &#x27;K2&#x27;, &#x27;K3&#x27;, &#x27;D&#x27;, &#x27;A&#x27;, &#x27;B&#x27;, &#x27;C&#x27;, &#x27;E&#x27;, &#x27;O&#x27;, &#x27;object&#x27;]
+True</pre></div></div>
+<div class="md"><p>Reading the trace: <code>K1</code>, <code>K2</code>, <code>K3</code> are taken immediately (rounds 1–3) since <code>Z</code>
+listed them in that order and nothing blocks it yet. <code>D</code> (round 4) has to wait one
+round — it's buried inside <code>K3</code>'s list on round 3 (behind <code>K3</code> itself), so it only
+becomes a valid head once <code>K3</code> is removed. From there the merge threads through <code>A</code>,
+<code>B</code>, <code>C</code>, <code>E</code> in the order their positions force, and <code>O</code>/<code>object</code> bring up the rear,
+since every list still needs them last.</p>
+<p><strong>When no consistent order exists</strong>, the merge rule's step 4 kicks in — Python detects
+this and refuses to guess:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">X</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Y</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Z2</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>   <span class="c1"># X listed before Y, but Y already requires X to come before IT</span>
+        <span class="k">pass</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+<span class="c1"># TypeError: Cannot create a consistent method resolution order (MRO) for bases X, Y</span>
+
+<span class="c1"># our own merge() agrees, for the same reason - no head is ever valid:</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">merge</span><span class="p">([</span><span class="n">linearize</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">linearize</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">]])</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;raised:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>   <span class="c1"># raised: TypeError</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: Cannot create a consistent method resolution order (MRO) for bases X, Y
+raised: TypeError</pre></div></div>
+<div class="md"><p><strong>Practical summary.</strong> Everything from <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-5">12.5</a>'s formula down through the
+<code>merge()</code>/<code>linearize()</code> implementation is the actual algorithm — worth tracing by hand
+once, so "the MRO" stops being a black box. Day to day, nobody re-derives C3
+linearization at the keyboard: when a multiple-inheritance hierarchy behaves
+unexpectedly, check <code>Cls.__mro__</code> (or <code>Cls.mro()</code>) directly and read off the order
+Python already computed for you — you almost never need to compute it by hand
+yourself.</p></div>
+<div class="md"><h3 id="s12-6">12.6 Abstract Classes and Interfaces</h3>
+<p>A plain "template" base class only enforces its contract by convention — nothing stops
+someone from instantiating it directly, or from a subclass forgetting to implement the
+method it promised:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Shape</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;subclasses must implement area()&quot;</span><span class="p">)</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Shape</span><span class="p">()</span>   <span class="c1"># succeeds - nothing stops direct instantiation of a &quot;template&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">area</span><span class="p">()</span>   <span class="c1"># the mistake only surfaces here, if/when area() is actually called</span>
+<span class="k">except</span> <span class="ne">NotImplementedError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NotImplementedError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">NotImplementedError: subclasses must implement area()</pre></div></div>
+<div class="md"><p>The <code>abc</code> module makes this an <strong>actual, enforced rule</strong> instead of a comment: inherit
+from <code>ABC</code> and mark required methods with <code>@abstractmethod</code>. Python then refuses to
+create an instance of the class itself, or of any subclass that hasn't implemented
+every abstract method — the mistake is caught immediately, not on first use:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ShapeABC</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>   <span class="c1"># no body - just a required signature every subclass must fill in</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ShapeABC</span><span class="p">()</span>   <span class="c1"># the class itself can never be instantiated</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Incomplete</span><span class="p">(</span><span class="n">ShapeABC</span><span class="p">):</span>
+    <span class="k">pass</span>   <span class="c1"># forgot to implement area()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Incomplete</span><span class="p">()</span>   <span class="c1"># caught immediately, before any method is ever called</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: Can&#x27;t instantiate abstract class ShapeABC without an implementation for abstract method &#x27;area&#x27;
+TypeError: Can&#x27;t instantiate abstract class Incomplete without an implementation for abstract method &#x27;area&#x27;</pre></div></div>
+<div class="md"><p>A subclass that implements every abstract method behaves like any ordinary class — this
+is what makes <code>ShapeABC</code> effectively an <strong>interface</strong>: a contract other classes commit
+to, rather than something ever used on its own:</p></div>
+<div class="md callout practice"><p><strong>In practice — a swappable-backend/strategy architecture.</strong> A <code>StorageBackend</code> ABC
+with <code>LocalStorage</code>/<code>S3Storage</code>/<code>GCSStorage</code> subclasses, or a <code>PaymentProcessor</code> ABC
+with <code>StripeProcessor</code>/<code>PaypalProcessor</code> subclasses, is exactly this pattern used to
+build real, swappable infrastructure: application code depends only on the abstract
+interface, so adding a new backend later means writing one new subclass, not touching
+any of the code that already uses the interface.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Circle</span><span class="p">(</span><span class="n">ShapeABC</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># implements the required method - now instantiable</span>
+        <span class="k">return</span> <span class="mf">3.14159</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">area</span><span class="p">())</span>   <span class="c1"># 12.56636</span>
+</code></pre><div class="outs"><pre class="out-text">12.56636</pre></div></div>
+<div class="md"><p><strong>Abstract properties</strong> — <code>@property</code> (<a class="xref" href="/python-for-data-science/10-object-oriented-programming-foundations/#s10-6">10.6</a>) and <code>@abstractmethod</code> stack together, to
+require not just a method but a specific <em>attribute-like</em> piece of the interface:</p></div>
+<div class="md"><p><strong>Note — decorator order matters here.</strong> Decorators apply bottom-up, so
+<code>@property</code> has to be the <em>outermost</em> (topmost) one: it needs to wrap the
+already-abstract method and turn the whole thing into a property descriptor,
+propagating the "still abstract" flag onto itself in the process. Reversed
+(<code>@abstractmethod</code> on top of <code>@property</code>), <code>abstractmethod()</code> would instead try to mark
+an already-built <code>property</code> object as abstract directly, which raises an
+<code>AttributeError</code> — property objects don't allow that attribute to be set after the
+fact.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">23 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">NamedShape</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Square</span><span class="p">(</span><span class="n">NamedShape</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">side</span> <span class="o">=</span> <span class="n">side</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Square&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">side</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">sq</span> <span class="o">=</span> <span class="n">Square</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sq</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sq</span><span class="o">.</span><span class="n">area</span><span class="p">())</span>   <span class="c1"># Square 16</span>
+</code></pre><div class="outs"><pre class="out-text">Square 16</pre></div></div>
+<div class="md"><p><strong>Going deeper — <code>ABC</code> inheritance is the <em>nominal</em> answer to "interface"; Python also
+has a <em>structural</em> one.</strong> Requiring <code>ShapeABC</code>/<code>NamedShape</code> as an explicit base class
+only recognizes objects that formally opted in through inheritance. A lot of idiomatic
+Python instead leans on <strong>duck typing</strong> ("if it walks like a duck and quacks like a
+duck...") — trusting any object with the right methods, inheritance or not.
+<code>typing.Protocol</code> makes that checkable without demanding real
+inheritance: a <code>Protocol</code> subclass just describes the required shape, and static type
+checkers (plus <code>isinstance()</code>, for protocols marked <code>@runtime_checkable</code>) can confirm
+an unrelated class satisfies it structurally. <code>ABC.register()</code> sits in between — it
+retroactively declares an already-existing, unrelated class a "virtual subclass" of an
+<code>ABC</code> (so <code>isinstance()</code>/<code>issubclass()</code> say yes) without touching that class's actual
+inheritance at all. In a lot of real-world code, one of these is the more idiomatic
+answer to "interface" than writing a fresh <code>ABC</code> hierarchy from scratch.</p></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

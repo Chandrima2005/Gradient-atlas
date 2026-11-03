@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>How to Use This Material – Machine Learning Chapter 0 | Gradient Atlas</title>
+<meta name="description" content="Scope, the per-concept template, numbering rules, datasets and determinism, reading order">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/00-how-to-use-this-material/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="How to Use This Material – Machine Learning Chapter 0 | Gradient Atlas">
+<meta property="og:description" content="Scope, the per-concept template, numbering rules, datasets and determinism, reading order">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/00-how-to-use-this-material/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "How to Use This Material", "headline": "How to Use This Material", "description": "Scope, the per-concept template, numbering rules, datasets and determinism, reading order", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/00-how-to-use-this-material/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT6M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "How to Use This Material", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/00-how-to-use-this-material/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 0</p>
+<h1>How to Use This Material</h1>
+
+<article class="body"><div class="md"><p>This chapter is the only part of the material that is not machine-learning content. It documents the
+conventions that keep the structure stable while the chapters are filled in.</p></div>
+<div class="md"><h3 id="s0-1">0.1 Purpose and Scope</h3>
+<p>A single, complete classical-ML reference — deep enough to learn from the first time, and structured enough to
+look something up in later.</p>
+<ul>
+<li>The chapter list (top level) is meant to stay <strong>stable</strong>.</li>
+<li>Sub-sections are meant to be <strong>split, renamed and deepened</strong> as chapters are written.</li>
+<li>Nothing here is a syllabus to be raced through — it is a set of containers to be filled properly.</li>
+</ul></div>
+<div class="md"><h3 id="s0-2">0.2 What This Material Covers, and What It Does Not</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>In scope</th>
+<th>Out of scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supervised learning on tabular data — regression and classification</td>
+<td>Neural networks, backpropagation, CNNs, RNNs, transformers</td>
+</tr>
+<tr>
+<td>Unsupervised learning — clustering, anomaly detection, association rules</td>
+<td>Computer vision and audio</td>
+</tr>
+<tr>
+<td>The full data pipeline — EDA, preprocessing, feature engineering, selection</td>
+<td>Large-scale NLP and language models</td>
+</tr>
+<tr>
+<td>Evaluation, validation, tuning, interpretability, deployment basics</td>
+<td>Reinforcement learning beyond a one-paragraph definition (<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-3">1.3</a>)</td>
+</tr>
+<tr>
+<td>The mathematics each algorithm actually needs (<a class="xref" href="/machine-learning/02-mathematical-foundations/">Chapter 2</a>)</td>
+<td>Distributed / big-data training (Spark, Dask)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Where a deep-learning method is the honest answer to a problem, the material says so and points at it rather
+than pretending a classical model is better (<a class="xref" href="/machine-learning/01-machine-learning-fundamentals/#s1-7">1.7</a>).</p></div>
+<div class="md"><h3 id="s0-3">0.3 Per-Concept Documentation Template</h3>
+<p>Full style guide: the repository style guide. Summary — every concept is <strong>explanation + runnable demo, never
+one alone</strong>:</p>
+<ol>
+<li>A markdown cell with a real explanation — not a one-liner. Use whatever fits best: a small table (metrics,
+   kernels, encoders, linkage criteria), a short "why it matters" note, a named callout for a nuance or gotcha
+   (<code>**Common mistake** — ...</code>), or a contrast with a related/confusable concept.</li>
+<li>One or more <strong>actual code cells</strong> (not fenced <code>```python</code> blocks inside markdown), each minimal and
+   focused on one thing, with an inline <code>#</code> comment on the lines whose output matters.</li>
+<li>A concept-specific gotcha or a second angle worth showing gets its own small markdown note + its own small
+   code cell, rather than one giant cell for everything.</li>
+</ol>
+<p>Make abstract ideas tangible. For every algorithm the order is fixed:</p>
+<pre class="fence" data-lang="text"><code>the objective, written out  -&gt;  a from-scratch NumPy implementation  -&gt;  the scikit-learn equivalent
+                            -&gt;  an assertion that the two agree
+</code></pre>
+<p>The from-scratch version is what makes the mechanism visible; the scikit-learn version is what gets used
+everywhere afterwards. Neither one alone is enough.</p></div>
+<div class="md"><h3 id="s0-4">0.4 Cell Rhythm for Each Concept</h3>
+<p>The cell sequence when a concept is written up:</p>
+<pre class="fence" data-lang="text"><code>Markdown  -&gt;  explanation (table / prose / &quot;why it matters&quot;)
+Code      -&gt;  minimal runnable demo, inline # comments on the lines that matter
+Markdown  -&gt;  (optional) a named gotcha or second angle
+Code      -&gt;  (optional) its own small demo cell
+</code></pre>
+<p>Repeat per concept/sub-concept. Each chapter ends with a scratch cell for ad-hoc experiments — promote
+anything worth keeping into a proper section instead of leaving it there.</p>
+<p><strong>Every chapter's last numbered section is <code>In Practice</code></strong>, and it always has the same three parts:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A worked case</td>
+<td>A concretely stated problem solved end to end with the chapter's tools, on <code>data/*.csv</code> or a bundled dataset</td>
+</tr>
+<tr>
+<td>When to reach for this — and when not to</td>
+<td>A decision table, including the honest rows about when the technique is the wrong choice</td>
+</tr>
+<tr>
+<td>What goes wrong in production</td>
+<td>The failures that appear after deployment rather than during fitting</td>
+</tr>
+</tbody>
+</table></div>
+<p>For the foundations chapters (1–3) and the theory chapters (9–10), where a case study would be artificial,
+the first part becomes <em>where this actually shows up in real work</em> instead. The section is a landing, not a
+summary — it introduces no new techniques.</p></div>
+<div class="md"><h3 id="s0-5">0.5 Numbering and Insertion Rules</h3>
+<p>Conventions that avoid renumbering everything every time something is added:</p>
+<ol>
+<li><strong>Chapter numbers are frozen.</strong> New major domains are appended, never inserted.</li>
+<li><strong>The last numbered section of every chapter is <code>In Practice</code></strong> (0.4). New sub-sections are appended
+   <em>before</em> it, never after.</li>
+<li><strong>Deeper levels are free-form.</strong> <code>17.3.2</code>, <code>17.3.3</code> etc. can be created and reordered without touching
+   anything above them.</li>
+<li><strong>Moving, renaming or removing a section</strong> means fixing every pointer that referenced the old location — in
+   other chapters and in the Appendix (<a class="xref" href="/machine-learning/25-appendix/#s25-1">§25.1</a>, <a class="xref" href="/machine-learning/25-appendix/#s25-2">§25.2</a>) — rather than leaving it dangling.</li>
+</ol></div>
+<div class="md"><h3 id="s0-6">0.6 Running the Notebooks</h3>
+<p>Dependencies are managed with <a href="https://docs.astral.sh/uv/">uv</a>; <code>pyproject.toml</code> and <code>uv.lock</code> are committed,
+so the environment is reproducible exactly.</p>
+<pre class="fence" data-lang="bash"><code>uv<span class="w"> </span>sync<span class="w">                      </span><span class="c1"># create .venv and install the locked dependency set</span>
+uv<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>lab<span class="w">           </span><span class="c1"># open the notebooks</span>
+</code></pre>
+<p>To re-execute a chapter from a terminal:</p>
+<pre class="fence" data-lang="bash"><code>uv<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>nbconvert<span class="w"> </span>--to<span class="w"> </span>notebook<span class="w"> </span>--execute<span class="w"> </span>--inplace<span class="w"> </span>11_linear_regression.ipynb
+</code></pre>
+<p>Every notebook in this repository is committed <strong>with its outputs</strong>, so plots and tables render on GitHub
+without running anything. Every stochastic call is seeded (0.7), so re-executing a chapter reproduces the
+committed output rather than a slightly different one.</p></div>
+<div class="md"><h3 id="s0-7">0.7 Datasets and Determinism</h3>
+<p>No notebook downloads anything. Data comes from exactly three places:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Used for</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sklearn.datasets</code> bundled loaders</td>
+<td>Realistic small problems</td>
+<td><code>load_iris</code>, <code>load_wine</code>, <code>load_breast_cancer</code>, <code>load_diabetes</code>, <code>load_digits</code></td>
+</tr>
+<tr>
+<td><code>sklearn.datasets</code> generators</td>
+<td>Controlled shapes where the right answer is known</td>
+<td><code>make_classification</code>, <code>make_regression</code>, <code>make_blobs</code>, <code>make_moons</code>, <code>make_circles</code></td>
+</tr>
+<tr>
+<td><code>data/</code> in this repository</td>
+<td>Messy realistic tabular data for <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapters 4</a>–6</td>
+<td><code>customers.csv</code>, <code>transactions.csv</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Determinism.</strong> Every split, generator, resampler, initializer and optimizer that can take a seed is given
+one — the constant <code>RANDOM_STATE = 42</code> is defined at the top of each chapter that needs it. Two consequences:
+a committed output can be trusted as the output the code actually produced, and any difference on re-execution
+is a real change, not noise.</p></div>
+<div class="md"><h3 id="s0-8">0.8 File Layout</h3>
+<pre class="fence" data-lang="text"><code>00_index.ipynb    this file — Chapter 0 conventions, Chapter 25 Appendix
+NN_&lt;slug&gt;.ipynb   one notebook per chapter, 01–24
+CLAUDE.md         the full style guide
+README.md         repository overview and chapter table
+pyproject.toml    dependency declaration (uv)
+uv.lock           the exact locked dependency set
+data/             small CSVs used by Chapters 4–6
+</code></pre>
+<p>In-notebook <code>see also</code> pointers (e.g. "see <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/#s8-3">8.3</a>") refer to a <strong>section number</strong>, not a file path; resolve them
+by chapter number to the matching <code>NN_*.ipynb</code>.</p></div>
+<div class="md"><h3 id="s0-9">0.9 Reading Order</h3>
+<p>The chapters are written to be read in order — each one assumes the vocabulary of the ones before it. Two
+useful shortcuts for a reader who already knows some of this:</p>
+<ul>
+<li><strong>Already comfortable with NumPy/pandas and the maths?</strong> Start at <a class="xref" href="/machine-learning/04-data-and-exploratory-data-analysis/">Chapter 4</a>. <a class="xref" href="/machine-learning/02-mathematical-foundations/">Chapters 2</a> and 3 exist to be
+  referred back to, not necessarily read first.</li>
+<li><strong>Only want a specific algorithm?</strong> <a class="xref" href="/machine-learning/11-linear-regression/">Chapters 11</a>–21 are individually readable, but each one reports its
+  results using <a class="xref" href="/machine-learning/08-model-evaluation-and-validation/">Chapter 8</a>'s metrics and reasons about fit using <a class="xref" href="/machine-learning/09-bias-variance-and-regularization/">Chapter 9</a>'s vocabulary. Read those two first.</li>
+</ul>
+<p><a class="xref" href="/machine-learning/22-imbalanced-data-and-data-leakage/">Chapters 22</a>–24 are the ones that turn a working notebook into a trustworthy result; they are the easiest to
+skip and the most expensive to have skipped.</p></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

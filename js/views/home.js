@@ -2,18 +2,19 @@
 import { $, $$, esc, css } from '../core.js';
 import { curView, go } from '../router.js';
 import { TRACKS } from '../tracks.js';
+import { toPath } from '../paths.js';
 
-const hrefOf = t => t.status === 'live' ? t.href : `#route-${t.id}`;
+const hrefOf = t => toPath(t.status === 'live' ? t.href : `route-${t.id}`);
 
 
 /* ======================= FOUR-TOOLS NETWORK ======================= */
 const FeatViz = {
   // the four bold hubs: hover to see what each one is, click to go there
   F: [
-    { h: '#route', t: 'Pathway', d: 'The five stages, from Python to generative AI.', v: '--p1' },
-    { h: '#py/ch1', t: 'Chapters', d: 'Clear notes with short examples you can run.', v: '--p2' },
-    { h: '#py/recall', t: 'Flashcards & quizzes', d: 'Practise so it sticks.', v: '--p3' },
-    { h: '#console', t: 'Search', d: 'Type any topic to find it in both courses.', v: '--p5' },
+    { h: 'route', t: 'Pathway', d: 'The five stages, from Python to generative AI.', v: '--p1' },
+    { h: 'py/ch1', t: 'Chapters', d: 'Clear notes with short examples you can run.', v: '--p2' },
+    { h: 'py/recall', t: 'Flashcards & quizzes', d: 'Practise so it sticks.', v: '--p3' },
+    { h: 'console', t: 'Search', d: 'Type any topic to find it in both courses.', v: '--p5' },
   ],
   init() {
     const cv = $('#featViz'); if (!cv) return; this.cv = cv;
@@ -28,13 +29,13 @@ const FeatViz = {
     this.edges = [];
     for (let i = 0; i < 320; i++) { const A = Math.floor(rnd() * this.nodes.length), B = Math.floor(rnd() * this.nodes.length); if (this.nodes[A].k !== this.nodes[B].k || rnd() < .15) this.edges.push([A, B]); }
     this.hov = -1;
-    $('#fvLegend').innerHTML = this.F.map((f, k) => `<a href="${f.h}" data-k="${k}" style="--pc:var(${f.v})"><i></i>${f.t}</a>`).join('');
+    $('#fvLegend').innerHTML = this.F.map((f, k) => `<a href="${toPath(f.h)}" data-k="${k}" style="--pc:var(${f.v})"><i></i>${f.t}</a>`).join('');
     $('#fvLegend').addEventListener('mouseover', e => { const a = e.target.closest('[data-k]'); this.hov = a ? +a.dataset.k : -1; });
     $('#fvLegend').addEventListener('mouseleave', () => this.hov = -1);
     const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
     cv.addEventListener('pointermove', e => { const [x, y] = pos(e); this.setHov(this.hit(x, y)); });
     cv.addEventListener('pointerleave', () => this.setHov(-1));
-    cv.addEventListener('click', e => { const [x, y] = pos(e); const k = this.hit(x, y); if (k >= 0) go(this.F[k].h.slice(1)); });
+    cv.addEventListener('click', e => { const [x, y] = pos(e); const k = this.hit(x, y); if (k >= 0) go(this.F[k].h); });
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const loop = t => { this.draw(reduce ? 0 : t); if (!reduce) requestAnimationFrame(loop); else setTimeout(() => requestAnimationFrame(loop), 500); };
     requestAnimationFrame(loop);

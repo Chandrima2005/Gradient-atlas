@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Iterators and Generators – Python for Data Science Chapter 14 | Gradient Atlas</title>
+<meta name="description" content="Lazy sequential access: the protocol, custom iterators, and generators.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Iterators and Generators – Python for Data Science Chapter 14 | Gradient Atlas">
+<meta property="og:description" content="Lazy sequential access: the protocol, custom iterators, and generators.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Iterators and Generators", "headline": "Iterators and Generators", "description": "Lazy sequential access: the protocol, custom iterators, and generators.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT21M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "Iterators and Generators", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 14</p>
+<h1>Iterators and Generators</h1>
+<p class="lead">Lazy sequential access: the protocol, custom iterators, and generators.</p>
+<article class="body"><div class="md"><h3 id="s14-1">14.1 Iterables and Iterators</h3>
+<p>Two related but distinct ideas get conflated constantly:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Iterable</strong></td>
+<td>Anything you can loop over with <code>for</code> — something you can <em>get</em> an iterator from</td>
+<td>implements <code>__iter__()</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>)</td>
+</tr>
+<tr>
+<td><strong>Iterator</strong></td>
+<td>The object that actually produces items one at a time, remembering where it is</td>
+<td>implements both <code>__iter__()</code> (returning itself) and <code>__next__()</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>list</code>, <code>str</code>, <code>tuple</code>, <code>dict</code>, and <code>set</code> are all iterables — but none of them is its own
+iterator. Calling <code>iter()</code> on one hands back a <em>separate</em> iterator object that does the
+actual work:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>             <span class="c1"># a fresh iterator, separate from the list itself</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">nums</span><span class="p">))</span>   <span class="c1"># &lt;class &#39;list&#39;&gt;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>        <span class="c1"># &lt;class &#39;list_iterator&#39;&gt;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>   <span class="c1"># 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>   <span class="c1"># 2</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>   <span class="c1"># 3</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>   <span class="c1"># nothing left - the iterator raises StopIteration to signal &quot;done&quot;</span>
+<span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;StopIteration raised - iterator exhausted&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;list&#x27;&gt;
+&lt;class &#x27;list_iterator&#x27;&gt;
+1
+2
+3
+StopIteration raised - iterator exhausted</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — assuming a list and its iterator behave the same way.</strong> An
+<em>iterable</em> like a list can be looped over as many times as you like, because each <code>for</code>
+gets a brand-new iterator. An <em>iterator</em>, once exhausted, stays exhausted forever — even
+if you still hold a reference to it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span>   <span class="c1"># works again - the list handed out a NEW iterator this time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>   <span class="c1"># 1 2 3</span>
+
+<span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+<span class="nb">list</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>              <span class="c1"># consumes the iterator fully</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>   <span class="c1"># [] - this exact iterator object is now permanently exhausted</span>
+</code></pre><div class="outs"><pre class="out-text">1 2 3 
+[]</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — Django's <code>QuerySet</code> is lazy in exactly this way.</strong> Writing
+<code>User.objects.filter(active=True)</code> doesn't touch the database at all — it builds up a
+description of the query, the same way a generator function builds a paused computation
+without running it. The actual <code>SELECT</code> only fires once the queryset is iterated (a
+<code>for</code> loop, <code>list(...)</code>, etc.), which is why chaining several <code>.filter()</code>/<code>.exclude()</code>
+calls together costs nothing extra until the moment the results are actually consumed.</p></div>
+<div class="md"><h3 id="s14-2">14.2 The Iterator Protocol</h3>
+<p>A <code>for</code> loop is syntax sugar — it never inspects the object's type directly. It calls
+<code>iter(obj)</code> once to get an iterator, then calls <code>next()</code> on that iterator repeatedly
+until a <code>StopIteration</code> exception tells it to stop (7.4 — <code>StopIteration</code> is a plain
+built-in exception, caught exactly like any other). <code>iter(obj)</code> and <code>next(it)</code> are
+themselves just syntax for the dunder calls <code>type(obj).__iter__(obj)</code> and
+<code>type(it).__next__(it)</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>'s <code>a + b</code> → <code>__add__</code> mechanism, applied here). Writing
+the loop out by hand makes the whole mechanism visible:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+
+<span class="c1"># exactly what &quot;for value in nums:&quot; does under the hood</span>
+<span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>   <span class="c1"># 10 20 30 - same result as a plain for loop</span>
+</code></pre><div class="outs"><pre class="out-text">10
+20
+30</pre></div></div>
+<div class="md"><h3 id="s14-3">14.3 Custom Iterators</h3>
+<p>Any class can plug into <code>for</code> loops the same way built-ins do — implement <code>__iter__</code>
+(returning <code>self</code>, since the object <em>is</em> its own iterator here) and <code>__next__</code>
+(returning the next value, or raising <code>StopIteration</code> when there's nothing left):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Countdown</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">start</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>   <span class="c1"># this object is its own iterator</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Countdown</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># 3 2 1</span>
+</code></pre><div class="outs"><pre class="out-text">3
+2
+1</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — treating a custom iterator like a reusable iterable.</strong> Because
+<code>__iter__</code> returns <code>self</code> instead of a fresh object, a <code>Countdown</code> instance <em>is</em> its own
+iterator — so once it's exhausted, it's exhausted for good, exactly like the bare
+<code>list_iterator</code> in <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-1">14.1</a>'s gotcha, and unlike the <code>Countdown</code> <em>class</em> itself (each new
+<code>Countdown(3)</code> call still starts fresh):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">c</span> <span class="o">=</span> <span class="n">Countdown</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>   <span class="c1"># [3, 2, 1] -&gt; first pass, consumes it fully</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>   <span class="c1"># [] -&gt; self.current is already 0, same object, nothing left</span>
+</code></pre><div class="outs"><pre class="out-text">[3, 2, 1]
+[]</pre></div></div>
+<div class="md"><p><strong>A more reusable pattern — <code>__iter__</code> returning a fresh iterator.</strong> <code>Countdown</code> above
+<em>is</em> its own iterator (<code>__iter__</code> returns <code>self</code>), which is why it can only be looped
+over once. Most real-world iterables — <code>range</code>, <code>list</code>, <code>dict</code> — instead give <code>__iter__</code>
+a body that produces a <strong>brand-new</strong> iterator (or generator) on every call, keeping no
+shared state on the object itself. That's what lets the same object be iterated over
+repeatedly, exactly like the <code>list</code> in <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-1">14.1</a>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">CountdownReusable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+        <span class="k">while</span> <span class="n">current</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>   <span class="c1"># a fresh generator each call - no shared state to exhaust</span>
+            <span class="k">yield</span> <span class="n">current</span>
+            <span class="n">current</span> <span class="o">-=</span> <span class="mi">1</span>
+
+<span class="n">reusable</span> <span class="o">=</span> <span class="n">CountdownReusable</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">reusable</span><span class="p">))</span>   <span class="c1"># [3, 2, 1] -&gt; first pass</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">reusable</span><span class="p">))</span>   <span class="c1"># [3, 2, 1] -&gt; works again, unlike the single-use Countdown</span>
+</code></pre><div class="outs"><pre class="out-text">[3, 2, 1]
+[3, 2, 1]</pre></div></div>
+<div class="md"><h3 id="s14-4">14.4 Generator Functions</h3>
+<p>Writing a custom iterator class (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-3">14.3</a>) by hand is a lot of boilerplate just to remember
+"where was I." A <strong>generator function</strong> — any function containing a <code>yield</code> statement —
+gets the compiler to write that class for you. Calling it doesn't run the function body
+at all; it immediately returns a <strong>generator object</strong> (an iterator that already has
+<code>__iter__</code>/<code>__next__</code> built in). The body only starts running on the first <code>next()</code>
+call, and it runs <em>up to</em> the next <code>yield</code>, then <strong>pauses</strong> there — with every local
+variable and its exact position frozen — and hands back the yielded value. The next
+<code>next()</code> call resumes exactly where it left off. When the function finally returns (or
+just runs off the end), Python raises <code>StopIteration</code> automatically, the same signal a
+custom <code>__next__</code> raises by hand:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">count_up_to</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting&quot;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">i</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+
+<span class="n">gen</span> <span class="o">=</span> <span class="n">count_up_to</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># &lt;class &#39;generator&#39;&gt; -&gt; body hasn&#39;t run at all yet</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># starting \n 1   -&gt; runs up to the first yield, then pauses</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># 2                    -&gt; resumes right after that yield</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># 3</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>   <span class="c1"># nothing left to yield -&gt; runs the rest of the body, then StopIteration</span>
+<span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;StopIteration&quot;</span><span class="p">)</span>   <span class="c1"># done \n StopIteration</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;generator&#x27;&gt;
+starting
+1
+2
+3
+done
+StopIteration</pre></div></div>
+<div class="md"><p><strong>Rule of thumb.</strong> In practice, almost all custom iteration is written as a generator
+function like the one above; the hand-written class form from <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-3">14.3</a>
+(<code>__iter__</code>/<code>__next__</code> implemented directly) matters mainly for understanding the
+mechanism a generator function desugars to, not as the everyday tool.</p></div>
+<div class="md"><p><strong>List vs. generator — the whole point of <code>yield</code>.</strong> A function that <code>return</code>s a <code>list</code>
+builds the <em>entire</em> result in memory before handing it back. A generator function
+builds nothing — it produces one value at a time, on demand, and the generator object
+itself stays essentially the same tiny size no matter how many values it will
+eventually yield:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">squares_list</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>        <span class="c1"># eager - builds the whole list right now</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">squares_gen</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>          <span class="c1"># lazy - computes each square only when asked</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">i</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">big_list</span> <span class="o">=</span> <span class="n">squares_list</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">)</span>
+<span class="n">big_gen</span> <span class="o">=</span> <span class="n">squares_gen</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">big_list</span><span class="p">))</span>   <span class="c1"># 8448728 -&gt; one full million-item array, already built</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">big_gen</span><span class="p">))</span>     <span class="c1"># 200 -&gt; just the paused-function bookkeeping, that&#39;s all</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">big_gen</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">big_list</span><span class="p">))</span>   <span class="c1"># True -&gt; holds no matter how large n gets</span>
+</code></pre><div class="outs"><pre class="out-text">8448728
+200
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — processing a multi-gigabyte log or CSV export.</strong> A data-engineering
+script that scans a huge log file for a pattern, or streams a large CSV export row by
+row into a database, is exactly this trade-off in action: reading the whole file into a
+<code>list</code> first could exhaust memory long before processing even starts, while a generator
+(or the file object's own line-by-line iteration, <a class="xref" href="/python-for-data-science/16-file-handling/#s16-5">16.5</a>) processes one row at a time and
+uses roughly the same small amount of memory whether the file is 10MB or 10GB.</p></div>
+<div class="md"><p><strong>Caveat.</strong> The exact byte counts above (8448728, 200) are specific to this CPython
+version and build — they'll differ on other versions or interpreters (PyPy, etc.), so
+don't treat them as fixed constants. What's guaranteed, not just observed here, is the
+<em>shape</em> of the relationship: the generator's size stays constant regardless of <code>n</code>,
+while the list's grows with it.</p></div>
+<div class="md"><p><strong>Fibonacci via <code>yield</code></strong> is the classic showcase, because it makes the laziness
+concrete: a plain function would have to decide up front how many terms to compute and
+build a whole list of them, but a generator can produce terms one at a time forever,
+using a fixed, tiny amount of state (<code>a</code>, <code>b</code>) no matter how far it's asked to go:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">fibonacci</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>   <span class="c1"># the first n Fibonacci numbers - a bounded generator</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">a</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fibonacci</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span>   <span class="c1"># [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</span>
+</code></pre><div class="outs"><pre class="out-text">[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</pre></div></div>
+<div class="md"><p>Drop the bound entirely (<code>while True</code> instead of <code>for _ in range(n)</code>) and it becomes an
+<strong>infinite</strong> generator — something a <code>list</code>-returning function could never be, since
+building an infinite list would never finish. <code>itertools.islice</code> (<a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-6">9.6</a>) pulls off just
+as many terms as needed and stops, without the generator ever knowing it was "infinite":</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">fibonacci_infinite</span><span class="p">():</span>   <span class="c1"># never returns - would hang forever if you tried list(...)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">a</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="n">first_eight</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">fibonacci_infinite</span><span class="p">(),</span> <span class="mi">8</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">first_eight</span><span class="p">)</span>   <span class="c1"># [0, 1, 1, 2, 3, 5, 8, 13] -&gt; only 8 terms were ever computed</span>
+</code></pre><div class="outs"><pre class="out-text">[0, 1, 1, 2, 3, 5, 8, 13]</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a paginated API client.</strong> Consuming a REST API that returns results a
+page at a time is a very common real use of exactly this pattern: a generator function
+fetches and <code>yield</code>s one page's worth of items, then transparently fetches the <em>next</em>
+page only when the caller asks for more — the caller just loops over it like any other
+iterable, never needing to know or care how many pages exist or manage the pagination
+tokens itself.</p></div>
+<div class="md"><h3 id="s14-5">14.5 Generator Expressions</h3>
+<p>A <strong>generator expression</strong> is to a generator function what a list comprehension (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-1-3">5.1.3</a>)
+is to a <code>for</code> loop with <code>.append()</code> — the same <code>for ... in ...</code> shape, but with <code>()</code>
+instead of <code>[]</code>, and lazy instead of eager. Swapping the brackets is the entire
+difference — one builds a <code>list</code> immediately, the other builds a paused generator that
+computes nothing until it's consumed:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">squares_list_comp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>   <span class="c1"># eager - the list exists right now</span>
+<span class="n">squares_gen_expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>       <span class="c1"># lazy - nothing computed yet</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">squares_list_comp</span><span class="p">)</span>   <span class="c1"># [0, 1, 4, 9, 16]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">squares_gen_expr</span><span class="p">)</span>     <span class="c1"># &lt;generator object &lt;genexpr&gt; at 0x...&gt;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">squares_gen_expr</span><span class="p">))</span>   <span class="c1"># [0, 1, 4, 9, 16] -&gt; NOW it runs, once</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">squares_gen_expr</span><span class="p">))</span>   <span class="c1"># [] -&gt; already exhausted, just like any other generator</span>
+</code></pre><div class="outs"><pre class="out-text">[0, 1, 4, 9, 16]
+&lt;generator object &lt;genexpr&gt; at 0x7f2de798e670&gt;
+[0, 1, 4, 9, 16]
+[]</pre></div></div>
+<div class="md"><p>A generator expression that's the <em>only</em> argument to a function doesn't even need its
+own parentheses — <code>sum(x ** 2 for x in range(...))</code> is idiomatic, and never builds an
+intermediate list at all, no matter how large the range:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">))</span>   <span class="c1"># no intermediate list of a million squares</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>   <span class="c1"># 333332833333500000</span>
+</code></pre><div class="outs"><pre class="out-text">333332833333500000</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a reporting/aggregation query over records.</strong> <code>sum(order.total for
+order in orders if order.paid)</code>-style aggregation directly over a stream of records
+(rows from a database cursor, <a class="xref" href="/python-for-data-science/18-database-connectivity-pdbc/#s18-3">18.3</a>, or lines from a log file) is a common shape in
+analytics code — the generator expression never materializes the intermediate list of
+matching orders, it just feeds <code>sum()</code> one value at a time.</p></div>
+<div class="md"><h3 id="s14-6">14.6 Advanced Generator Behaviour</h3>
+<p><code>yield</code> isn't only a way to send values <em>out</em> — it's also an <strong>expression</strong>, which
+means a value can be sent <em>in</em> at the same point the generator paused, via
+<code>generator.send(value)</code>. <code>send()</code> resumes the generator exactly like <code>next()</code> does, but
+whatever was sent becomes the result of the <code>yield</code> expression itself inside the
+function. <code>generator.close()</code> stops it early, raising <code>GeneratorExit</code> inside and then
+making it permanently exhausted:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">running_total</span><span class="p">():</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">total</span>   <span class="c1"># pauses here; &quot;value&quot; becomes whatever send() provides</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">value</span>
+
+<span class="n">acc</span> <span class="o">=</span> <span class="n">running_total</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">acc</span><span class="p">))</span>         <span class="c1"># 0 -&gt; must &quot;prime&quot; it once to reach the first yield</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>    <span class="c1"># 10 -&gt; value=10 resumes the loop, total becomes 10, then pauses again</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>       <span class="c1"># 15 -&gt; value=5, total becomes 15</span>
+
+<span class="n">acc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>   <span class="c1"># stops the generator for good</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;StopIteration - generator closed&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">0
+10
+15
+StopIteration - generator closed</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — calling <code>.send()</code> before priming the generator.</strong> A freshly-created
+generator hasn't started running yet — it hasn't reached its first <code>yield</code>, so there's
+no paused <code>yield</code> expression for a sent value to become. The first call has to be
+<code>next(gen)</code> (or the equivalent <code>gen.send(None)</code>) to <em>prime</em> it up to that first <code>yield</code>;
+only after that can <code>.send(value)</code> deliver a real value in:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">running_total</span><span class="p">():</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">total</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">value</span>
+
+<span class="n">fresh</span> <span class="o">=</span> <span class="n">running_total</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">fresh</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>   <span class="c1"># no yield reached yet - nothing to send a value INTO</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># can&#39;t send non-None value to a just-started generator</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: can&#x27;t send non-None value to a just-started generator</pre></div></div>
+<div class="md"><p><strong><code>yield from</code></strong> delegates to another iterable, yielding all of its values as if they
+were yielded directly — the tool for composing generators without writing a manual
+inner loop:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">():</span>
+    <span class="k">yield</span> <span class="mi">1</span>
+    <span class="k">yield</span> <span class="mi">2</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">outer</span><span class="p">():</span>
+    <span class="k">yield</span> <span class="s2">&quot;start&quot;</span>
+    <span class="k">yield from</span> <span class="n">inner</span><span class="p">()</span>   <span class="c1"># equivalent to &quot;for v in inner(): yield v&quot;</span>
+    <span class="k">yield</span> <span class="s2">&quot;end&quot;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outer</span><span class="p">()))</span>   <span class="c1"># [&#39;start&#39;, 1, 2, &#39;end&#39;]</span>
+</code></pre><div class="outs"><pre class="out-text">[&#x27;start&#x27;, 1, 2, &#x27;end&#x27;]</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — letting <code>StopIteration</code> escape from inside a generator's body.</strong>
+A <code>StopIteration</code> raised <em>inside</em> a generator — as opposed to the one Python raises
+automatically when the generator finishes — is not allowed to propagate out silently.
+Python converts it into a <code>RuntimeError</code> instead, because an uncaught <code>StopIteration</code>
+looks exactly like "this generator is done," and letting it leak would silently and
+incorrectly terminate whatever <code>for</code> loop or <code>yield from</code> chain is consuming the
+generator. The usual way this bites: calling <code>next()</code> on an <em>inner</em> iterator without
+catching the <code>StopIteration</code> it raises once exhausted:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">broken_generator</span><span class="p">():</span>
+    <span class="n">inner</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="nb">next</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>   <span class="c1"># once `inner` is exhausted, this raises StopIteration...</span>
+
+<span class="n">gen</span> <span class="o">=</span> <span class="n">broken_generator</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>   <span class="c1"># 2</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>   <span class="c1"># ...which Python converts into a RuntimeError, not StopIteration</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RuntimeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># generator raised StopIteration</span>
+</code></pre><div class="outs"><pre class="out-text">1
+2
+RuntimeError: generator raised StopIteration</pre></div></div>
+<div class="md"><p><strong>Going deeper.</strong> This same send/close/<code>yield from</code> machinery — priming, resuming with a
+value, propagating <code>GeneratorExit</code> on <code>close()</code> — is exactly what powers
+<code>@contextlib.contextmanager</code> (<a class="xref" href="/python-for-data-science/16-file-handling/#s16-6">16.6</a>) under the hood: it wraps a single-<code>yield</code> generator
+function so it can double as a context manager, translating <code>with</code> block entry/exit into
+<code>send()</code>/<code>close()</code>/<code>throw()</code> calls on that generator. In everyday code you'll reach for
+that decorator constantly and only rarely write raw <code>.send()</code>/<code>.close()</code> calls yourself.</p></div>
+<div class="md"><h3 id="s14-7">14.7 Laziness, Memory and Performance</h3>
+<p>Pulling the chapter's comparisons together — when to reach for a <code>list</code> (or a list
+comprehension) versus a generator (function or expression):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>list</code> (eager)</th>
+<th>Generator (lazy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory</td>
+<td>O(n) — every item exists at once (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-4">14.4</a>)</td>
+<td>O(1) — one item's worth of state, regardless of n</td>
+</tr>
+<tr>
+<td>Speed to first item</td>
+<td>Waits for the whole collection to build</td>
+<td>Immediate — only the first item is computed</td>
+</tr>
+<tr>
+<td>Re-iterable?</td>
+<td>Yes, as many times as you like (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-1">14.1</a>)</td>
+<td>No — single-use, exhausted after one pass (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-1">14.1</a>, <a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-3">14.3</a>)</td>
+</tr>
+<tr>
+<td><code>len()</code>, indexing (<code>x[i]</code>), slicing</td>
+<td>Supported</td>
+<td>Not supported (below)</td>
+</tr>
+<tr>
+<td>Works with infinite sequences?</td>
+<td>No — would never finish building</td>
+<td>Yes (<a class="xref" href="/python-for-data-science/14-iterators-and-generators/#s14-4">14.4</a>'s <code>fibonacci_infinite</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A generator's laziness is also its biggest limitation: since items aren't stored
+anywhere, there's no way to ask "how many?" or "give me item 3" without consuming the
+whole thing to find out — so neither operation is supported at all:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">gen</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># object of type &#39;generator&#39; has no len()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">gen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># &#39;generator&#39; object is not subscriptable</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: object of type &#x27;generator&#x27; has no len()
+TypeError: &#x27;generator&#x27; object is not subscriptable</pre></div></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

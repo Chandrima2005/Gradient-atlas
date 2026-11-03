@@ -2,28 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://gradient-atlas.chandrima-das.com/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/data-science-roadmap/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-libraries/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/01-python-fundamentals/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/02-objects-and-data-types/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/03-operators-and-expressions/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/04-flow-control/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/05-built-in-data-types-operations-and-methods/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/06-functions/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/07-exception-handling/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/08-logging-and-debugging/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/09-modules-and-packages/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/10-object-oriented-programming-foundations/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/11-object-relationships/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/12-inheritance-and-method-resolution/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/13-special-methods-overloading-and-overriding/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/14-iterators-and-generators/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/15-regular-expressions/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/16-file-handling/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/17-concurrency-multitasking-threads-and-processes/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/18-database-connectivity-pdbc/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/19-memory-management-and-garbage-collection/</loc><lastmod>2026-11-03</lastmod></url>
-  <url><loc>https://gradient-atlas.chandrima-das.com/python/20-data-validation-parsing-and-type-enforcement-with-pydantic/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/deep-learning/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/generative-ai/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/01-python-fundamentals/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/03-operators-and-expressions/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/04-flow-control/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/05-built-in-data-types-operations-and-methods/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/06-functions/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/08-logging-and-debugging/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/09-modules-and-packages/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/10-object-oriented-programming-foundations/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/11-object-relationships/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/12-inheritance-and-method-resolution/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/14-iterators-and-generators/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/15-regular-expressions/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/16-file-handling/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/17-concurrency-multitasking-threads-and-processes/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/18-database-connectivity-pdbc/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/19-memory-management-and-garbage-collection/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/python-for-data-science/20-data-validation-parsing-and-type-enforcement-with-pydantic/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/00-how-to-use-this-material/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/01-machine-learning-fundamentals/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/02-mathematical-foundations/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/03-the-python-machine-learning-stack/</loc><lastmod>2026-11-03</lastmod></url>
@@ -48,4 +52,5 @@
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/22-imbalanced-data-and-data-leakage/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/23-pipelines-and-hyperparameter-tuning/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/24-interpretability-and-deployment/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://gradient-atlas.chandrima-das.com/machine-learning/25-appendix/</loc><lastmod>2026-11-03</lastmod></url>
 </urlset>

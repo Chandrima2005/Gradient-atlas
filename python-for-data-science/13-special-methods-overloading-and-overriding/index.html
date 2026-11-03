@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Special Methods, Overloading and Overriding – Python for Data Science Chapter 13 | Gradient Atlas</title>
+<meta name="description" content="How user-defined classes hook into Python&#x27;s built-in behaviour.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Special Methods, Overloading and Overriding – Python for Data Science Chapter 13 | Gradient Atlas">
+<meta property="og:description" content="How user-defined classes hook into Python&#x27;s built-in behaviour.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Special Methods, Overloading and Overriding", "headline": "Special Methods, Overloading and Overriding", "description": "How user-defined classes hook into Python's built-in behaviour.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT29M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "Special Methods, Overloading and Overriding", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/13-special-methods-overloading-and-overriding/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 13</p>
+<h1>Special Methods, Overloading and Overriding</h1>
+<p class="lead">How user-defined classes hook into Python&#x27;s built-in behaviour.</p>
+<article class="body"><div class="md"><h3 id="s13-1">13.1 Special (Dunder) Method Concepts</h3>
+<p><strong>Dunder methods</strong> ("double underscore," also called <strong>magic methods</strong>) are methods
+named <code>__like_this__</code> that Python calls <em>automatically</em>, in response to built-in syntax
+or built-in functions — never by writing <code>obj.__add__(...)</code> directly. <code>a + b</code> is really
+<code>type(a).__add__(a, b)</code> under the hood; <code>print(obj)</code> is really <code>type(obj).__str__(obj)</code>;
+<code>len(obj)</code> is really <code>type(obj).__len__(obj)</code>. Defining the right dunder method is how a
+user-defined class plugs into that built-in syntax.</p>
+<p><strong>The full catalog, grouped by what each group hooks into</strong> — not just a handful of
+examples, but every commonly used one:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Dunders</th>
+<th>Hooked into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Construction / destruction</td>
+<td><code>__init__</code>, <code>__new__</code>, <code>__del__</code></td>
+<td><code>ClassName(...)</code> (<a class="xref" href="/python-for-data-science/10-object-oriented-programming-foundations/#s10-4">10.4</a>), garbage collection</td>
+</tr>
+<tr>
+<td>Representation</td>
+<td><code>__str__</code>, <code>__repr__</code></td>
+<td><code>print()</code>/<code>str()</code>, the REPL/<code>repr()</code></td>
+</tr>
+<tr>
+<td>Arithmetic — normal</td>
+<td><code>__add__</code> <code>__sub__</code> <code>__mul__</code> <code>__truediv__</code> <code>__floordiv__</code> <code>__mod__</code> <code>__pow__</code> <code>__matmul__</code></td>
+<td><code>+ - * / // % ** @</code></td>
+</tr>
+<tr>
+<td>Arithmetic — reflected</td>
+<td><code>__radd__</code> <code>__rsub__</code> <code>__rmul__</code> <code>__rtruediv__</code> <code>__rfloordiv__</code> <code>__rmod__</code> <code>__rpow__</code> <code>__rmatmul__</code></td>
+<td>same operators, operands swapped (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-2">13.2</a>)</td>
+</tr>
+<tr>
+<td>Arithmetic — in-place</td>
+<td><code>__iadd__</code> <code>__isub__</code> <code>__imul__</code> <code>__itruediv__</code> <code>__ifloordiv__</code> <code>__imod__</code> <code>__ipow__</code> <code>__imatmul__</code></td>
+<td><code>+= -= *= /= //= %= **= @=</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-2">13.2</a>)</td>
+</tr>
+<tr>
+<td>Comparison</td>
+<td><code>__eq__</code> <code>__ne__</code> <code>__lt__</code> <code>__le__</code> <code>__gt__</code> <code>__ge__</code></td>
+<td><code>== != &lt; &lt;= &gt; &gt;=</code></td>
+</tr>
+<tr>
+<td>Hashing</td>
+<td><code>__hash__</code></td>
+<td><code>hash()</code>, use as a <code>dict</code>/<code>set</code> key (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-3-1">5.3.1</a>, <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4-6">5.4.6</a>)</td>
+</tr>
+<tr>
+<td>Container</td>
+<td><code>__len__</code> <code>__getitem__</code> <code>__setitem__</code> <code>__delitem__</code> <code>__contains__</code></td>
+<td><code>len()</code>, <code>obj[i]</code>, <code>obj[i] = x</code>, <code>del obj[i]</code>, <code>in</code></td>
+</tr>
+<tr>
+<td>Iteration</td>
+<td><code>__iter__</code>, <code>__next__</code></td>
+<td><code>for</code> loops, <code>iter()</code>/<code>next()</code></td>
+</tr>
+<tr>
+<td>Callable</td>
+<td><code>__call__</code></td>
+<td><code>obj(...)</code></td>
+</tr>
+<tr>
+<td>Context manager</td>
+<td><code>__enter__</code>, <code>__exit__</code></td>
+<td><code>with obj:</code></td>
+</tr>
+<tr>
+<td>Attribute access</td>
+<td><code>__getattr__</code> <code>__setattr__</code> <code>__delattr__</code> <code>__getattribute__</code></td>
+<td><code>obj.attr</code>, <code>obj.attr = x</code>, <code>del obj.attr</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-4">13.4</a>)</td>
+</tr>
+<tr>
+<td>Truthiness</td>
+<td><code>__bool__</code></td>
+<td><code>if obj:</code>, <code>bool(obj)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Only implement the dunders a class actually needs — a plain data class might only ever
+need <code>__init__</code>, <code>__repr__</code>, and <code>__eq__</code>; the rest of this catalog exists to be reached
+for exactly when the matching syntax is genuinely useful on that class.</p>
+<p>A class that defines <code>__str__</code> and <code>__len__</code> immediately gets <code>print()</code> and <code>len()</code>
+support, with no other change needed:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="n">contents</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Box(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">Box</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>          <span class="c1"># Box([1, 2, 3]) -&gt; print() called __str__() automatically</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>   <span class="c1"># 3 -&gt; len() called __len__() automatically</span>
+</code></pre><div class="outs"><pre class="out-text">Box([1, 2, 3])
+3</pre></div></div>
+<div class="md"><p><strong><code>__repr__</code> vs. <code>__str__</code>.</strong> <code>__str__</code> is for a readable, user-facing display — what
+<code>print()</code>/<code>str()</code> use. <code>__repr__</code> is for an unambiguous, developer-facing one — what
+the REPL and <code>repr()</code> use, ideally something that looks like valid Python that could
+recreate the object. The fallback relationship between them is <strong>one-directional</strong>: if
+only <code>__repr__</code> is defined (as with <code>Vector</code> in <a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-2">13.2</a>), <code>str()</code> automatically falls back
+to it — but if only <code>__str__</code> is defined, <code>repr()</code> does <strong>not</strong> fall back to it; it
+falls back to <code>object</code>'s default <code>&lt;Box object at 0x...&gt;</code>-style text instead. And a
+<code>list</code> containing the object always calls <code>repr()</code> on each element, even when the
+object has a perfectly good <code>__str__</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="n">contents</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Box with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span><span class="si">}</span><span class="s2"> item(s)&quot;</span>   <span class="c1"># readable, user-facing</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Box(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="si">!r}</span><span class="s2">)&quot;</span>                       <span class="c1"># unambiguous, developer-facing</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">Box</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>          <span class="c1"># Box with 3 item(s)   -&gt; print() calls __str__</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>   <span class="c1"># Box([1, 2, 3])          -&gt; repr() calls __repr__, ignores __str__ entirely</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">b</span><span class="p">])</span>         <span class="c1"># [Box([1, 2, 3])]        -&gt; a list prints repr() of its elements, even though __str__ exists</span>
+</code></pre><div class="outs"><pre class="out-text">Box with 3 item(s)
+Box([1, 2, 3])
+[Box([1, 2, 3])]</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — this is what makes a stack trace actually useful.</strong> When an
+<code>Order</code> or <code>User</code> object shows up in a log line or an unhandled exception's traceback,
+seeing <code>Order(id=42, status='paid')</code> instead of <code>&lt;Order object at 0x7f3a1c&gt;</code> is the
+difference between debugging a production incident in seconds versus having to go
+add print statements and reproduce it again — a useful <code>__repr__</code> on every domain
+class is a small, cheap habit with an outsized payoff during an outage.</p></div>
+<div class="md"><p><strong>Comparison dunders</strong> work the same way — <code>==</code> calls <code>__eq__</code>, <code>&lt;</code> calls <code>__lt__</code>, and
+so on. By default, <code>==</code> compares <em>identity</em> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-4">2.4</a>) — defining <code>__eq__</code> replaces that with
+whatever comparison actually makes sense for the class:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Money</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span>   <span class="c1"># compare values, not identity</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">Money</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">Money</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Money</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># True -&gt; calls a.__eq__(b), compares amounts</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>     <span class="c1"># False -&gt; still two separate objects (2.4)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">c</span><span class="p">)</span>      <span class="c1"># True -&gt; calls a.__lt__(c)</span>
+</code></pre><div class="outs"><pre class="out-text">True
+False
+True</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — assuming the other comparisons come for free.</strong> Comparison operators
+pair up as <em>reflections</em> of each other — <code>&lt;</code>/<code>&gt;</code>, <code>&lt;=</code>/<code>&gt;=</code>, and <code>==</code>/<code>!=</code> (each its own
+reflection) — so <code>a &gt; c</code> actually tries <code>a.__gt__(c)</code> first, and only because that's
+missing does Python fall back to the reflected form, <code>c.__lt__(a)</code>. <code>&lt;=</code> has <strong>no</strong>
+such relationship to <code>__lt__</code> at all — it's paired with <code>__ge__</code> instead — so it fails
+outright unless defined:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">&gt;</span> <span class="n">c</span><span class="p">)</span>   <span class="c1"># False -&gt; no __gt__ defined, so Python tries c.__lt__(a) instead: 20 &lt; 10 is False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">a</span> <span class="o">&lt;=</span> <span class="n">c</span>   <span class="c1"># &lt;= has nothing to do with __lt__ - it needs __le__ (or __ge__ on the other side)</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># &#39;&lt;=&#39; not supported between instances of &#39;Money&#39; and &#39;Money&#39;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">!=</span> <span class="n">c</span><span class="p">)</span>   <span class="c1"># True -&gt; __ne__ wasn&#39;t defined either, but Python auto-inverts __eq__ for it</span>
+</code></pre><div class="outs"><pre class="out-text">False
+TypeError: &#x27;&lt;=&#x27; not supported between instances of &#x27;Money&#x27; and &#x27;Money&#x27;
+True</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — defining <code>__eq__</code> silently makes instances unhashable.</strong> Python's
+default <code>object.__hash__</code> assumes equal objects hash the same, which the
+identity-based default can no longer promise once a class defines its own value-based
+<code>__eq__</code> — so Python responds by setting that class's <code>__hash__</code> to <code>None</code>
+automatically. That breaks anything needing a hash: <code>hash()</code> directly, or using the
+object as a <code>dict</code> key/<code>set</code> member (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-3-1">5.3.1</a>, <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4-6">5.4.6</a>):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="nb">hash</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>   <span class="c1"># a = Money(10), from above - __eq__ was defined, so Python set Money.__hash__ = None</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># unhashable type: &#39;Money&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="p">{</span><span class="n">a</span><span class="p">}</span>   <span class="c1"># a set needs to hash its members too</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># unhashable type: &#39;Money&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: unhashable type: &#x27;Money&#x27;
+TypeError: unhashable type: &#x27;Money&#x27;</pre></div></div>
+<div class="md"><p><strong>The fix — define <code>__hash__</code> explicitly, alongside <code>__eq__</code>,</strong> so that objects
+considered equal also hash identically (a hard requirement for correct <code>dict</code>/<code>set</code>
+behavior):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Money</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>             <span class="c1"># must be re-defined explicitly - not inherited automatically</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>     <span class="c1"># equal Money objects now hash identically too</span>
+
+<span class="n">m1</span> <span class="o">=</span> <span class="n">Money</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">Money</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">m1</span> <span class="o">==</span> <span class="n">m2</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">m2</span><span class="p">))</span>   <span class="c1"># True True -&gt; equal objects, equal hashes, as hashing requires</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">({</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">}))</span>                            <span class="c1"># 1 -&gt; the set correctly treats them as duplicates</span>
+</code></pre><div class="outs"><pre class="out-text">True True
+1</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — value objects like <code>Money</code> or a geographic <code>Coordinate</code>.</strong> A real
+billing system routinely needs to deduplicate or group transactions by amount, and a
+mapping/geospatial system needs to use coordinates as dict keys or set members for
+fast lookup — both require exactly the correctly-paired <code>__eq__</code>/<code>__hash__</code> shown
+above; getting only one of the two defined is a real, easy-to-hit bug in this kind of
+code.</p></div>
+<div class="md"><p><strong>What's allowed: overloading vs. overriding, at a glance.</strong> Two ideas get confused
+constantly — "redefining the same name more than once <em>in one class</em>" (overloading) and
+"redefining a name <em>a parent class already gave a class</em>" (overriding) are entirely
+different mechanisms, with entirely different levels of support:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Allowed in Python?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Operator overloading</strong></td>
+<td>✅ yes</td>
+<td>implement the matching dunder (<code>__add__</code>, <code>__eq__</code>, ...) — this whole section is about exactly that</td>
+</tr>
+<tr>
+<td><strong>Method overloading</strong></td>
+<td>❌ no</td>
+<td>a class body just runs top to bottom; a second <code>def greet(...)</code> replaces the first, it doesn't add a second signature</td>
+</tr>
+<tr>
+<td><strong>Constructor overloading</strong></td>
+<td>❌ no</td>
+<td><code>__init__</code> is just a method — the same replace-not-add rule applies to it too</td>
+</tr>
+<tr>
+<td><strong>Method overriding</strong></td>
+<td>✅ yes</td>
+<td>a <em>subclass</em> redefining a method its parent already had — this is routine, everyday inheritance (<a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-3">12.3</a>)</td>
+</tr>
+<tr>
+<td><strong>Constructor overriding</strong></td>
+<td>✅ yes</td>
+<td>a subclass redefining <code>__init__</code> — also routine, typically paired with <code>super().__init__(...)</code> (<a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-4">12.4</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The next two sections dive into each half of that table in detail: 13.2 covers operator
+overloading (the "yes" case above involving operators specifically), and <a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-3">13.3</a> covers
+why method/constructor overloading fails and confirms that overriding, by contrast,
+works exactly as expected.</p></div>
+<div class="md"><h3 id="s13-2">13.2 Operator Overloading</h3>
+<p>Python doesn't let you change what <code>+</code> does for built-in types, but <strong>operator
+overloading is fully supported for your own classes</strong>: implement the matching dunder
+method, and that operator works on your objects too. <code>v1 + v2</code> calls
+<code>v1.__add__(v2)</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Vector(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<span class="n">v1</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">)</span>   <span class="c1"># Vector(4, 6) -&gt; calls v1.__add__(v2)</span>
+</code></pre><div class="outs"><pre class="out-text">Vector(4, 6)</pre></div></div>
+<div class="md"><p><strong>Reflected methods</strong> handle the operator with the operand order flipped. <code>5 + v1</code>
+first tries <code>(5).__add__(v1)</code> — but <code>int</code> has no idea what a <code>Vector</code> is, so it backs
+off (returns <code>NotImplemented</code>), and Python then tries <code>v1.__radd__(5)</code> instead. Without
+<code>__radd__</code> defined, both sides give up and it's a <code>TypeError</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="mi">5</span> <span class="o">+</span> <span class="n">v1</span>   <span class="c1"># int.__add__(5, v1) -&gt; NotImplemented, and Vector has no __radd__ either</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># unsupported operand type(s) for +: &#39;int&#39; and &#39;Vector&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: unsupported operand type(s) for +: &#x27;int&#x27; and &#x27;Vector&#x27;</pre></div></div>
+<div class="md"><p>This is exactly why <strong><code>sum()</code> silently fails on a list of custom objects</strong> — <code>sum()</code>
+always starts from <code>0</code> and computes <code>0 + first_item</code> before adding the rest, which hits
+this exact <code>int + Vector</code> case:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">Vector</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>   <span class="c1"># internally: 0 + Vector(1,1) + Vector(2,2) + Vector(3,3)</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># unsupported operand type(s) for +: &#39;int&#39; and &#39;Vector&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">TypeError: unsupported operand type(s) for +: &#x27;int&#x27; and &#x27;Vector&#x27;</pre></div></div>
+<div class="md"><p>The fix: implement <code>__radd__</code> and special-case <code>0</code> — the one value <code>sum()</code> will ever
+add from the left that isn't a real <code>Vector</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>   <span class="c1"># called for &quot;other + self&quot; when other&#39;s __add__ gave up</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>                 <span class="c1"># handles sum()&#39;s implicit &quot;0 + first_item&quot; start</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Vector(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<span class="n">vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">Vector</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Vector</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">vectors</span><span class="p">))</span>   <span class="c1"># Vector(6, 6) -&gt; works now</span>
+</code></pre><div class="outs"><pre class="out-text">Vector(6, 6)</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — this is literally how NumPy arrays support <code>+</code>/<code>*</code>.</strong> Writing
+<code>array1 + array2</code> to add two NumPy arrays element-wise, or <code>Money(10) + Money(5)</code> in a
+billing system so <code>+</code> respects currency rules, works through exactly this mechanism —
+a library or domain class implementing <code>__add__</code>/<code>__radd__</code> (and friends) so its
+objects behave naturally with Python's own arithmetic syntax instead of needing a
+separate <code>.add()</code> method call.</p></div>
+<div class="md callout mistake"><p><strong>Common mistake — confusing <code>NotImplemented</code> with <code>NotImplementedError</code>.</strong> They read
+almost identically but are entirely different things. <code>NotImplemented</code> (returned
+above, in <code>__radd__</code>) is a <strong>sentinel object</strong> — returning it tells Python's operator
+dispatch to try the other operand instead, exactly how <code>5 + v1</code> above ended up trying
+<code>v1.__radd__(5)</code>. <code>NotImplementedError</code> (raised in <a class="xref" href="/python-for-data-science/12-inheritance-and-method-resolution/#s12-6">12.6</a>'s <code>Shape.area</code>) is an ordinary
+<strong>exception</strong> — raising it stops execution immediately, signaling "this method
+genuinely isn't written yet." Returning <code>NotImplementedError</code> instead of
+<code>NotImplemented</code> (or raising <code>NotImplemented</code> instead of <code>NotImplementedError</code>) is a
+real, easy-to-make mix-up that silently breaks the mechanism each one is meant to
+support:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Oops</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ne">NotImplementedError</span>   <span class="c1"># BUG: the EXCEPTION CLASS, not the NotImplemented sentinel</span>
+
+<span class="n">o</span> <span class="o">=</span> <span class="n">Oops</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">o</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># &lt;class &#39;NotImplementedError&#39;&gt; -&gt; no error at all, just garbage output instead of a clean TypeError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="bp">NotImplemented</span>   <span class="c1"># BUG: NotImplemented is a plain object, not an exception - it can&#39;t be raised</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># exceptions must derive from BaseException</span>
+</code></pre><div class="outs"><pre class="out-text">&lt;class &#x27;NotImplementedError&#x27;&gt;
+TypeError: exceptions must derive from BaseException</pre></div></div>
+<div class="md"><p><strong>In-place methods</strong> handle the augmented form directly — <code>obj += x</code> calls
+<code>obj.__iadd__(x)</code> if it exists, and unlike <code>__add__</code> it's expected to <strong>mutate the
+object itself</strong> and return it, rather than building a new one:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Basket</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>   <span class="c1"># mutate in place...</span>
+        <span class="k">return</span> <span class="bp">self</span>                       <span class="c1"># ...and return self, instead of a new object</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Basket(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<span class="n">basket</span> <span class="o">=</span> <span class="n">Basket</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">original_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">basket</span><span class="p">)</span>
+<span class="n">basket</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>   <span class="c1"># calls basket.__iadd__([3, 4])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">basket</span><span class="p">)</span>                             <span class="c1"># Basket([1, 2, 3, 4])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">basket</span><span class="p">)</span> <span class="o">==</span> <span class="n">original_id</span><span class="p">)</span>   <span class="c1"># True -&gt; same object, mutated in place</span>
+</code></pre><div class="outs"><pre class="out-text">Basket([1, 2, 3, 4])
+True</pre></div></div>
+<div class="md"><p>Without <code>__iadd__</code>, <code>+=</code> just falls back to <code>obj = obj.__add__(x)</code> — which builds a
+<strong>new</strong> object and rebinds the name to it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">15 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">NoInPlace</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">NoInPlace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">+</span> <span class="n">other</span><span class="p">)</span>   <span class="c1"># always builds a NEW object</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;NoInPlace(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">NoInPlace</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">original_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>   <span class="c1"># no __iadd__ -&gt; falls back to n = n + [3, 4]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                             <span class="c1"># NoInPlace([1, 2, 3, 4])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">==</span> <span class="n">original_id</span><span class="p">)</span>   <span class="c1"># False -&gt; a different object now</span>
+</code></pre><div class="outs"><pre class="out-text">NoInPlace([1, 2, 3, 4])
+False</pre></div></div>
+<div class="md"><p><strong>The full arithmetic operator family</strong> — every operator follows the same three-part
+pattern just demonstrated (normal, reflected, in-place):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Normal</th>
+<th>Reflected</th>
+<th>In-place</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td><code>__add__</code></td>
+<td><code>__radd__</code></td>
+<td><code>__iadd__</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td><code>__sub__</code></td>
+<td><code>__rsub__</code></td>
+<td><code>__isub__</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td><code>__mul__</code></td>
+<td><code>__rmul__</code></td>
+<td><code>__imul__</code></td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td><code>__truediv__</code></td>
+<td><code>__rtruediv__</code></td>
+<td><code>__itruediv__</code></td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td><code>__floordiv__</code></td>
+<td><code>__rfloordiv__</code></td>
+<td><code>__ifloordiv__</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td><code>__mod__</code></td>
+<td><code>__rmod__</code></td>
+<td><code>__imod__</code></td>
+</tr>
+<tr>
+<td><code>**</code></td>
+<td><code>__pow__</code></td>
+<td><code>__rpow__</code></td>
+<td><code>__ipow__</code></td>
+</tr>
+<tr>
+<td><code>@</code> (matrix multiplication, <a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>)</td>
+<td><code>__matmul__</code></td>
+<td><code>__rmatmul__</code></td>
+<td><code>__imatmul__</code></td>
+</tr>
+<tr>
+<td><code>&amp;</code></td>
+<td><code>__and__</code></td>
+<td><code>__rand__</code></td>
+<td><code>__iand__</code></td>
+</tr>
+<tr>
+<td><code>\|</code></td>
+<td><code>__or__</code></td>
+<td><code>__ror__</code></td>
+<td><code>__ior__</code></td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td><code>__xor__</code></td>
+<td><code>__rxor__</code></td>
+<td><code>__ixor__</code></td>
+</tr>
+<tr>
+<td><code>&lt;&lt;</code></td>
+<td><code>__lshift__</code></td>
+<td><code>__rlshift__</code></td>
+<td><code>__ilshift__</code></td>
+</tr>
+<tr>
+<td><code>&gt;&gt;</code></td>
+<td><code>__rshift__</code></td>
+<td><code>__rrshift__</code></td>
+<td><code>__irshift__</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Only implement the ones an operation actually makes sense for — <code>Vector</code> above only
+needed <code>__add__</code>/<code>__radd__</code>/<code>__iadd__</code>; a class with no sensible <code>%</code> or <code>&lt;&lt;</code> behavior
+simply leaves those dunders undefined, and Python raises <code>TypeError</code> for that operator
+on its own, exactly like it did for <code>5 + v1</code> above.</p></div>
+<div class="md"><h3 id="s13-3">13.3 Method Overloading Behaviour in Python</h3>
+<p><strong>Overloading</strong> — defining multiple versions of the same name, distinguished by
+signature (different parameter counts/types) — is <strong>not supported</strong> in Python, for
+either ordinary methods or constructors. A class body just executes top to bottom
+(<a class="xref" href="/python-for-data-science/09-modules-and-packages/#s9-1">9.1</a>'s "code that runs" idea, applied to a class, per <a class="xref" href="/python-for-data-science/10-object-oriented-programming-foundations/#s10-4">10.4</a>): a second <code>def</code> with the
+same name doesn't add an overload, it simply <strong>replaces</strong> the first definition, which
+is now gone entirely:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Greeter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>                <span class="c1"># this definition...</span>
+        <span class="k">return</span> <span class="s2">&quot;Hello!&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>        <span class="c1"># ...is completely replaced by this one</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Greeter</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">greet</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">))</span>   <span class="c1"># Hello, Ada! -&gt; only the one-argument version exists at all now</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">greet</span><span class="p">()</span>   <span class="c1"># the zero-argument version is simply gone</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># Greeter.greet() missing 1 required positional argument: &#39;name&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">Hello, Ada!
+TypeError: Greeter.greet() missing 1 required positional argument: &#x27;name&#x27;</pre></div></div>
+<div class="md"><p>The exact same thing happens to <code>__init__</code> — it's just another method name, with no
+special exemption (10.4 first showed this exact gotcha):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>          <span class="c1"># this constructor...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>     <span class="c1"># ...is completely replaced by this one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>   <span class="c1"># 1 2 -&gt; only the two-argument version exists at all</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># the one-argument version is simply gone</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># Point.__init__() missing 1 required positional argument: &#39;y&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">1 2
+TypeError: Point.__init__() missing 1 required positional argument: &#x27;y&#x27;</pre></div></div>
+<div class="md"><p><strong>The idiomatic alternative</strong> is a single method with default/variable arguments (<a class="xref" href="/python-for-data-science/06-functions/#s6-2">6.2</a>)
+— one definition that handles every call shape, instead of several competing
+definitions:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Greeter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   <span class="c1"># one method, optional parameter, instead of two overloads</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Hello!&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Greeter</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">greet</span><span class="p">())</span>          <span class="c1"># Hello!</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">greet</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">))</span>   <span class="c1"># Hello, Ada!</span>
+</code></pre><div class="outs"><pre class="out-text">Hello!
+Hello, Ada!</pre></div></div>
+<div class="md"><p><strong>Going deeper</strong> — default/variable arguments (above) handle one function with
+optional pieces, but that's not true type-based dispatch. For genuinely different logic
+per <em>type</em> of argument, <code>functools.singledispatch</code> (for plain functions) and
+<code>functools.singledispatchmethod</code> (for methods) are the standard-library, real-world way
+professional Python code gets overload-like behavior — registering one implementation
+per type instead of branching manually inside a single function body.</p></div>
+<div class="md"><p><strong>Overriding is a completely different thing, and it <em>is</em> fully supported</strong> — both for
+ordinary methods and for <code>__init__</code>. The distinction:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Overloading</th>
+<th>Overriding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where</td>
+<td>same class, same name, different signatures</td>
+<td>parent and child class, same name</td>
+</tr>
+<tr>
+<td>Supported in Python?</td>
+<td><strong>no</strong> — later definition just replaces the earlier one</td>
+<td><strong>yes</strong> — this is routine, everyday inheritance</td>
+</tr>
+<tr>
+<td>Covered in</td>
+<td>this section</td>
+<td>12.3 (methods), 12.4/10.4 (<code>__init__</code>, via <code>super()</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A subclass redefining <code>__init__</code> or any other method — in a <em>different</em> class from
+where it was first defined — works exactly as expected, with no ambiguity at all:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;some sound&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">breed</span><span class="p">):</span>   <span class="c1"># overriding __init__ - a DIFFERENT class, allowed</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">breed</span> <span class="o">=</span> <span class="n">breed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>                       <span class="c1"># overriding speak() - allowed</span>
+        <span class="k">return</span> <span class="s2">&quot;Woof!&quot;</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">Dog</span><span class="p">(</span><span class="s2">&quot;Rex&quot;</span><span class="p">,</span> <span class="s2">&quot;Labrador&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">breed</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">speak</span><span class="p">())</span>   <span class="c1"># Rex Labrador Woof!</span>
+</code></pre><div class="outs"><pre class="out-text">Rex Labrador Woof!</pre></div></div>
+<div class="md"><h3 id="s13-4">13.4 Getter and Setter Methods</h3>
+<p>The classic OOP pattern from other languages — a plain <code>get_x()</code>/<code>set_x()</code> method pair
+guarding a "private" field — works fine in Python too:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>             <span class="c1"># traditional getter method</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>   <span class="c1"># traditional setter method</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name cannot be empty&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">value</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>      <span class="c1"># Ada</span>
+<span class="n">p</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="s2">&quot;Grace&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>      <span class="c1"># Grace</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># name cannot be empty</span>
+</code></pre><div class="outs"><pre class="out-text">Ada
+Grace
+ValueError: name cannot be empty</pre></div></div>
+<div class="md"><p>This works, but it's not the idiomatic Python style — <code>@property</code> (<a class="xref" href="/python-for-data-science/10-object-oriented-programming-foundations/#s10-6">10.6</a>) does the same
+job while keeping the caller-facing syntax as plain attribute access (<code>p.name</code>, not
+<code>p.get_name()</code>). Both <code>get_name()</code>/<code>set_name()</code> and a <code>@property</code> handle <strong>one named
+attribute</strong>. The dunders below are different in kind: each one intercepts <strong>every</strong>
+attribute on the object at once, generically.</p>
+<p><strong><code>__getattr__</code></strong> is a <em>fallback</em> — it only runs when normal attribute lookup already
+<strong>failed</strong>. It's the tool for attributes that don't really exist as stored data, but can
+be computed on demand:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">18 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Circle</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="c1"># only called when normal lookup FAILS - &quot;radius&quot; itself never reaches here</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;area&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">3.14159</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;Circle&#39; object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>   <span class="c1"># 2 -&gt; found normally, __getattr__ never even runs</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>      <span class="c1"># 12.56636 -&gt; &quot;area&quot; lookup failed, __getattr__ computed it on the fly</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">diameter</span>
+<span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AttributeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># &#39;Circle&#39; object has no attribute &#39;diameter&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">2
+12.56636
+AttributeError: &#x27;Circle&#x27; object has no attribute &#x27;diameter&#x27;</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — lazy-loading related data, the way an ORM does.</strong> An ORM object
+representing a database row often defers fetching a related record (e.g. an <code>Order</code>'s
+<code>customer</code>) until the attribute is actually accessed for the first time —
+implemented with exactly this <code>__getattr__</code> fallback, running the extra query only
+when the data is genuinely needed instead of eagerly loading everything up front.</p></div>
+<div class="md"><p><strong><code>__setattr__</code></strong> is not a fallback — it runs on <strong>every single</strong> attribute assignment,
+letting one method act like a setter for the whole object at once:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Logged</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;setting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>   <span class="c1"># delegate to the real assignment</span>
+
+<span class="n">l</span> <span class="o">=</span> <span class="n">Logged</span><span class="p">()</span>
+<span class="n">l</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>        <span class="c1"># setting x = 10</span>
+<span class="n">l</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>   <span class="c1"># setting y = &#39;hello&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>   <span class="c1"># {&#39;x&#39;: 10, &#39;y&#39;: &#39;hello&#39;}</span>
+</code></pre><div class="outs"><pre class="out-text">setting x = 10
+setting y = &#x27;hello&#x27;
+{&#x27;x&#x27;: 10, &#x27;y&#x27;: &#x27;hello&#x27;}</pre></div></div>
+<div class="md"><p><strong>Going deeper</strong> — everything above assumes instances keep their attributes in a
+per-instance <code>__dict__</code>, which is exactly what <code>vars(obj)</code> reads (<code>vars()</code> is literally
+shorthand for <code>obj.__dict__</code>). A class built with <code>__slots__</code> (<a class="xref" href="/python-for-data-science/10-object-oriented-programming-foundations/#s10-2">10.2</a>) has <strong>no</strong>
+instance <code>__dict__</code> at all: <code>vars()</code> raises <code>TypeError</code> on such an instance, and a
+<code>__getattr__</code> fallback can't lean on scanning a dict that was never created.</p></div>
+<div class="md callout mistake"><p><strong>Common mistake — infinite recursion.</strong> <code>self.x = value</code> inside <code>__setattr__</code> would
+call <code>__setattr__</code> again to perform that very assignment — forever. The
+<code>super().__setattr__(name, value)</code> call above is what actually stores it, by reaching
+past this override to the real, underlying assignment mechanism:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>   <span class="c1"># fail fast for this demo, instead of hanging</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Broken</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>   <span class="c1"># BUG: this assignment calls __setattr__ again -&gt; infinite recursion</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">broken</span> <span class="o">=</span> <span class="n">Broken</span><span class="p">()</span>
+    <span class="n">broken</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">except</span> <span class="ne">RecursionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RecursionError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># maximum recursion depth exceeded</span>
+</code></pre><div class="outs"><pre class="out-text">RecursionError: maximum recursion depth exceeded</pre></div></div>
+<div class="md"><p><strong><code>__delattr__</code></strong> is the same idea, for <code>del obj.attr</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-5">2.5</a>) — and needs the same
+<code>super()</code> delegation to avoid the same recursion trap:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">LoggedDelete</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;deleting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+<span class="n">ld</span> <span class="o">=</span> <span class="n">LoggedDelete</span><span class="p">()</span>
+<span class="n">ld</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">del</span> <span class="n">ld</span><span class="o">.</span><span class="n">x</span>   <span class="c1"># deleting x</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">ld</span><span class="p">))</span>   <span class="c1"># {}</span>
+</code></pre><div class="outs"><pre class="out-text">deleting x
+{}</pre></div></div>
+<div class="md"><p><strong><code>__getattribute__</code></strong> is the most powerful — and most dangerous — of the four. Unlike
+<code>__getattr__</code>, it runs on <strong>every</strong> attribute read, even ones that already exist, which
+means it's rarely overridden directly; almost any use of <code>self.anything</code> inside it would
+trigger itself again. Delegating to <code>super().__getattribute__(name)</code> for the actual
+lookup is what keeps it from recursing:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Watched</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;accessing </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>   <span class="c1"># delegate to the real lookup, avoid recursion</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">Watched</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+<span class="c1"># accessing &#39;x&#39;   -&gt; printed even though x already exists - __getattribute__ runs for EVERY access</span>
+<span class="c1"># 5</span>
+</code></pre><div class="outs"><pre class="out-text">accessing &#x27;x&#x27;
+5</pre></div></div>
+<div class="md"><h3 id="s13-5">13.5 Container and Callable Protocols</h3>
+<p><a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>'s catalog table listed the <strong>container protocol</strong> (<code>__len__</code> <code>__getitem__</code>
+<code>__setitem__</code> <code>__delitem__</code> <code>__contains__</code>) and the <strong>callable protocol</strong> (<code>__call__</code>)
+without ever actually implementing most of them — <code>Box</code> (<a class="xref" href="/python-for-data-science/13-special-methods-overloading-and-overriding/#s13-1">13.1</a>) only defined <code>__str__</code>
+and <code>__len__</code> so far. Filling in the rest turns it into something that supports
+<code>box[i]</code>, <code>box[i] = x</code>, <code>del box[i]</code> and <code>x in box</code>, exactly like a <code>list</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">30 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Box(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>          <span class="c1"># len(box)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>         <span class="c1"># box[i]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>        <span class="c1"># box[i] = value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>            <span class="c1"># del box[i]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contents</span>        <span class="c1"># item in box</span>
+
+<span class="n">box</span> <span class="o">=</span> <span class="n">Box</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">box</span><span class="p">))</span>              <span class="c1"># 3           -&gt; __len__</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>                  <span class="c1"># 2           -&gt; __getitem__</span>
+<span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">99</span>                   <span class="c1"># __setitem__</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>                  <span class="c1"># 99</span>
+<span class="k">del</span> <span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                     <span class="c1"># __delitem__</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">box</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>          <span class="c1"># [99, 3]</span>
+<span class="nb">print</span><span class="p">(</span><span class="mi">99</span> <span class="ow">in</span> <span class="n">box</span><span class="p">,</span> <span class="mi">5</span> <span class="ow">in</span> <span class="n">box</span><span class="p">)</span>   <span class="c1"># True False  -&gt; __contains__</span>
+</code></pre><div class="outs"><pre class="out-text">3
+2
+99
+[99, 3]
+True False</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a paginated API results wrapper.</strong> A class wrapping one page of API
+results so callers can write <code>len(results)</code>, <code>results[0]</code>, and <code>"item-42" in results</code>
+exactly as if it were a plain <code>list</code> — while it might actually be lazily fetching more
+pages behind the scenes — is a very common real use of the container protocol,
+alongside game-development classes like a <code>Deck</code> of cards or a <code>Hand</code> of tiles.</p></div>
+<div class="md"><p><strong>The callable protocol</strong> — <code>__call__</code> makes instances directly callable with
+<code>obj(...)</code>, just like a function. A minimal example: a <code>Multiplier</code> whose instances
+remember a factor and apply it when called:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">Multiplier</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">=</span> <span class="n">factor</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+
+<span class="n">double</span> <span class="o">=</span> <span class="n">Multiplier</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">double</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>          <span class="c1"># 10 -&gt; double(5) is really double.__call__(5)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">callable</span><span class="p">(</span><span class="n">double</span><span class="p">))</span>   <span class="c1"># True -&gt; callable() checks whether __call__ exists</span>
+</code></pre><div class="outs"><pre class="out-text">10
+True</pre></div></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

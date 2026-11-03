@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Exception Handling – Python for Data Science Chapter 7 | Gradient Atlas</title>
+<meta name="description" content="How Python signals, propagates and recovers from errors.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Exception Handling – Python for Data Science Chapter 7 | Gradient Atlas">
+<meta property="og:description" content="How Python signals, propagates and recovers from errors.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Exception Handling", "headline": "Exception Handling", "description": "How Python signals, propagates and recovers from errors.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT40M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "Exception Handling", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/07-exception-handling/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 7</p>
+<h1>Exception Handling</h1>
+<p class="lead">How Python signals, propagates and recovers from errors.</p>
+<article class="body"><div class="md"><h3 id="s7-1">7.1 Errors versus Exceptions</h3>
+<p>"Error" is the umbrella term; Python code can go wrong in three different ways, only one
+of which this chapter's <code>try</code>/<code>except</code> machinery can do anything about:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Detected</th>
+<th>Crashes the program?</th>
+<th>Catchable with <code>try</code>/<code>except</code>?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntax error</strong></td>
+<td><em>before</em> execution starts, while parsing</td>
+<td>yes, immediately</td>
+<td>no — the code never even starts running</td>
+</tr>
+<tr>
+<td><strong>Logical error</strong></td>
+<td>never automatically — code runs, gives the <em>wrong</em> answer</td>
+<td>no</td>
+<td>n/a — no exception is ever raised</td>
+</tr>
+<tr>
+<td><strong>Exception</strong></td>
+<td><em>during</em> execution, when an operation can't complete</td>
+<td>only if nothing catches it</td>
+<td>yes — this is what the rest of chapter 7 covers</td>
+</tr>
+</tbody>
+</table></div>
+<p>A syntax error means the parser rejects the code outright — a missing <code>:</code> is invalid
+Python, not a runtime event:</p></div>
+<div class="md"><p><strong>Note</strong> — <code>compile(source, filename, mode)</code> is used here only to trigger a
+<code>SyntaxError</code> in a way that's safe to catch: <code>filename</code> is just a label attached to the
+error message (there's no real file being read — <code>"&lt;test&gt;"</code> is a conventional
+placeholder), and <code>mode="exec"</code> means "treat this as a full program" (as opposed to a
+single expression). It's a convenient way to check whether a string of code parses,
+without actually running it.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># compile() parses without running -&gt; demonstrates the SyntaxError without a broken cell</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;if True</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>   <span class="c1"># missing &#39;:&#39; after True</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SyntaxError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># SyntaxError: expected &#39;:&#39; (&lt;test&gt;, line 1)</span>
+</code></pre><div class="outs"><pre class="out-text">SyntaxError: expected &#x27;:&#x27; (&lt;test&gt;, line 1)</pre></div></div>
+<div class="md"><p>A logical error is the opposite extreme — the code is perfectly valid and runs to
+completion, it just computes the wrong thing. Nothing raises, nothing crashes, so
+<code>try</code>/<code>except</code> has nothing to catch — the only way to find this bug is to notice the
+output is wrong:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">average</span><span class="p">(</span><span class="n">nums</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>   <span class="c1"># bug: that trailing &quot;- 1&quot; shouldn&#39;t be there</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">average</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]))</span>   <span class="c1"># 3.0 -&gt; wrong (should be 4.0), but runs fine, no exception at all</span>
+</code></pre><div class="outs"><pre class="out-text">3.0</pre></div></div>
+<div class="md"><p>An exception sits in between: the code is syntactically valid, and <em>most</em> of the time it
+runs fine, but a specific input at runtime makes an operation impossible to complete —
+and unlike a logical error, Python notices and raises an object describing exactly what
+went wrong. This is the only category <code>try</code>/<code>except</code> can act on, and it's the subject of
+the rest of this chapter:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">average</span><span class="p">(</span><span class="n">nums</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>   <span class="c1"># correct formula, but len(nums) can be 0</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">average</span><span class="p">([]))</span>
+<span class="k">except</span> <span class="ne">ZeroDivisionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ZeroDivisionError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># ZeroDivisionError: division by zero -&gt; caught and recoverable</span>
+</code></pre><div class="outs"><pre class="out-text">ZeroDivisionError: division by zero</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — an API client retrying a failed request.</strong> Catching
+<code>requests.exceptions.Timeout</code> or <code>ConnectionError</code> around an HTTP call and retrying
+(often with a short delay) is one of the most common real uses of <code>try</code>/<code>except</code> in
+backend code — networks fail transiently far more often than most other operations,
+and a client that doesn't handle this ends up far less reliable than one that does.</p></div>
+<div class="md"><h3 id="s7-2">7.2 Handling Syntax and Semantics</h3>
+<p><code>try</code>/<code>except</code> lets a program catch a runtime error and recover from it instead of
+crashing outright. If nothing catches an exception, it keeps propagating upward — out of
+the function that raised it, out of whatever called that function, and so on — until
+either something catches it or it reaches the top and stops the program (7.3 covers this
+propagation in depth).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">/</span> <span class="mi">0</span>
+<span class="k">except</span> <span class="ne">ZeroDivisionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caught:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># Caught: division by zero -&gt; the crash was intercepted</span>
+</code></pre><div class="outs"><pre class="out-text">Caught: division by zero</pre></div></div>
+<div class="md"><p><strong>Multiple <code>except</code> blocks</strong> — a single <code>try</code> can be followed by several <code>except</code>
+blocks, each targeting a different exception type. Python checks them <strong>top to bottom</strong>
+and runs only the <strong>first</strong> one that matches:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">safe_divide</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot divide by zero&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Both arguments must be numbers&quot;</span><span class="p">)</span>
+
+<span class="n">safe_divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>     <span class="c1"># Cannot divide by zero</span>
+<span class="n">safe_divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>     <span class="c1"># Both arguments must be numbers</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">safe_divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>   <span class="c1"># 5.0 -&gt; no exception at all, the return value comes straight through</span>
+</code></pre><div class="outs"><pre class="out-text">Cannot divide by zero
+Both arguments must be numbers
+5.0</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — order matters. <code>ZeroDivisionError</code> is a subclass of <code>Exception</code>
+(7.4 covers the full hierarchy), so a broad <code>except Exception</code> listed <em>first</em> matches
+before a narrower one below it ever gets a chance — the specific block becomes dead
+code:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="mi">1</span> <span class="o">/</span> <span class="mi">0</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caught by broad Exception&quot;</span><span class="p">)</span>          <span class="c1"># this one wins</span>
+<span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caught by specific ZeroDivisionError&quot;</span><span class="p">)</span>   <span class="c1"># unreachable — never runs</span>
+</code></pre><div class="outs"><pre class="out-text">Caught by broad Exception</pre></div></div>
+<div class="md"><p>Several exception types can also share <strong>one</strong> <code>except</code> block, by grouping them in a
+<code>tuple</code> (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-5">5.5</a>):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">parse_and_divide</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">ZeroDivisionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>   <span class="c1"># either type lands here</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">parse_and_divide</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>     <span class="c1"># ValueError: invalid literal for int() with base 10: &#39;x&#39;</span>
+<span class="n">parse_and_divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>        <span class="c1"># ZeroDivisionError: division by zero</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">parse_and_divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>   <span class="c1"># 5.0</span>
+</code></pre><div class="outs"><pre class="out-text">ValueError: invalid literal for int() with base 10: &#x27;x&#x27;
+ZeroDivisionError: division by zero
+5.0</pre></div></div>
+<div class="md"><p><strong><code>try</code>/<code>except</code>/<code>else</code></strong> — 4.4 already introduced this: <code>else</code> runs only if the <code>try</code>
+block completed with <strong>no</strong> exception raised at all. Another example, this time looking
+something up in a <code>dict</code> (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4">5.4</a>):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">get_score</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> scored </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># only runs if the lookup above didn&#39;t raise</span>
+
+<span class="n">get_score</span><span class="p">({</span><span class="s2">&quot;alice&quot;</span><span class="p">:</span> <span class="mi">90</span><span class="p">},</span> <span class="s2">&quot;alice&quot;</span><span class="p">)</span>   <span class="c1"># alice scored 90</span>
+<span class="n">get_score</span><span class="p">({</span><span class="s2">&quot;alice&quot;</span><span class="p">:</span> <span class="mi">90</span><span class="p">},</span> <span class="s2">&quot;bob&quot;</span><span class="p">)</span>       <span class="c1"># bob not found</span>
+</code></pre><div class="outs"><pre class="out-text">alice scored 90
+bob not found</pre></div></div>
+<div class="md"><p><strong><code>finally</code></strong> — also introduced in <a class="xref" href="/python-for-data-science/04-flow-control/#s4-4">4.4</a>: it runs <strong>no matter what</strong>. That includes when
+the <code>try</code> or <code>except</code> block contains a <code>return</code> — <code>finally</code> still runs <em>before</em> the
+function actually hands control back to the caller:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cleanup runs even though we&#39;re already returning&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">())</span>   <span class="c1"># cleanup runs even though we&#39;re already returning / 1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">g</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;boom&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;handled&quot;</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;g&#39;s cleanup always runs too&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">())</span>   <span class="c1"># g&#39;s cleanup always runs too / handled</span>
+</code></pre><div class="outs"><pre class="out-text">cleanup runs even though we&#x27;re already returning
+1
+g&#x27;s cleanup always runs too
+handled</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — the example above is relatively benign: <code>f()</code>'s <code>return 1</code> still
+wins over <code>finally</code>'s <code>print()</code>. But a <code>return</code> <strong>inside <code>finally</code> itself</strong> is far more
+dangerous — it doesn't just run alongside a pending exception, it silently <strong>replaces</strong>
+it. The <code>ValueError</code> below is raised, but never propagates anywhere, and nothing ever
+sees it — no traceback, no <code>except</code> block, nothing:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">sneaky</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;boom&quot;</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;oops&quot;</span>   <span class="c1"># this return swallows the exception entirely</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">sneaky</span><span class="p">())</span>   <span class="c1"># oops -&gt; the ValueError never makes it out; it&#39;s simply gone, uncaught anywhere</span>
+</code></pre><div class="outs"><pre class="out-text">oops</pre></div></div>
+<div class="md"><p><strong>The structural rules</strong> — not every combination of these four keywords is legal. The
+valid order is always <code>try</code> → <code>except</code> (one or more) → <code>else</code> → <code>finally</code>, and:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>try</code> must be followed by <code>except</code>, <code>finally</code>, or both</td>
+</tr>
+<tr>
+<td>2</td>
+<td>a bare <code>try</code> with none of <code>except</code>/<code>else</code>/<code>finally</code> is a <code>SyntaxError</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>else</code> is optional, but <code>try</code>/<code>else</code> with <strong>no</strong> <code>except</code> at all is invalid</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>try</code> can be followed by <strong>multiple</strong> <code>except</code> blocks</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>else</code> without at least one <code>except</code> is invalid (same rule as 3, from the other direction)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>try</code>/<code>except</code>/<code>else</code>/<code>finally</code> can be <strong>nested</strong> inside any of their own blocks</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>try</code> itself is always mandatory; beyond that, what's actually required is <strong>at least
+one <code>except</code>, or a <code>finally</code>, or both</strong> — <code>else</code> is never enough on its own. Confirmed
+directly against the parser:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="c1"># compile() just parses the code without running it — enough to prove/disprove validity</span>
+<span class="c1"># without actually executing a SyntaxError-laden statement at the top level of a cell</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;try:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>   <span class="c1"># try with NOTHING after it</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;try alone -&gt; SyntaxError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;try:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">else:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>   <span class="c1"># try/else, no except</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;try + else (no except) -&gt; SyntaxError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">try alone -&gt; SyntaxError: expected &#x27;except&#x27; or &#x27;finally&#x27; block (&lt;test&gt;, line 2)
+try + else (no except) -&gt; SyntaxError: expected &#x27;except&#x27; or &#x27;finally&#x27; block (&lt;test&gt;, line 3)</pre></div></div>
+<div class="md"><p><code>finally</code> on its own — with no <code>except</code> at all — is perfectly valid, since rule 1 only
+needs <code>except</code> <strong>or</strong> <code>finally</code>. Likewise, <code>except</code>/<code>else</code> with no <code>finally</code> is fine too:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;try:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">finally:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;try + finally, no except at all -&gt; compiles fine&quot;</span><span class="p">)</span>
+
+<span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;try:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">except Exception:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">else:</span><span class="se">\n</span><span class="s2">    pass</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;try + except + else, no finally -&gt; compiles fine&quot;</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">try + finally, no except at all -&gt; compiles fine
+try + except + else, no finally -&gt; compiles fine</pre></div></div>
+<div class="md"><p><strong>Nesting</strong> — a full <code>try</code>/<code>except</code>/<code>else</code>/<code>finally</code> can be placed inside any block of
+an outer one (its <code>try</code>, an <code>except</code>, the <code>else</code>, or the <code>finally</code>). Each level handles
+whatever it can; anything it doesn't catch keeps propagating out to the level above:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">outer_op</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+        <span class="k">try</span><span class="p">:</span>                                   <span class="c1"># nested try, inside the outer try</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">/</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;inner: cannot divide by c=0&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;outer: cannot divide by b=0&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no exceptions at all, result =&quot;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;outer_op finished&quot;</span><span class="p">)</span>
+
+<span class="n">outer_op</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>   <span class="c1"># inner: cannot divide by c=0 / outer_op finished</span>
+<span class="n">outer_op</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>   <span class="c1"># outer: cannot divide by b=0 / outer_op finished</span>
+<span class="n">outer_op</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>   <span class="c1"># no exceptions at all, result = 1.0 / outer_op finished</span>
+</code></pre><div class="outs"><pre class="out-text">inner: cannot divide by c=0
+no exceptions at all, result = 5.0
+outer_op finished
+outer: cannot divide by b=0
+outer_op finished
+no exceptions at all, result = 1.0
+outer_op finished</pre></div></div>
+<div class="md"><h3 id="s7-3">7.3 Raising and Re-raising</h3>
+<p>Everything so far reacted to exceptions the interpreter raised on its own (division by
+zero, a bad index, ...). <code>raise</code> lets <em>your own</em> code signal a problem the same way —
+useful the moment a function detects a rule violation that isn't already a built-in
+error (7.5 covers wrapping this in a custom exception type):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">set_age</span><span class="p">(</span><span class="n">age</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age cannot be negative: </span><span class="si">{</span><span class="n">age</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># explicitly signal the problem</span>
+    <span class="k">return</span> <span class="n">age</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">set_age</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># caught: age cannot be negative: -1</span>
+</code></pre><div class="outs"><pre class="out-text">caught: age cannot be negative: -1</pre></div></div>
+<div class="md"><p><strong>Re-raising</strong> — sometimes an <code>except</code> block wants to react to an exception (log it,
+clean something up) without actually handling it, and let it keep propagating to
+whoever called this code. A bare <code>raise</code> — with no exception after it — inside an
+<code>except</code> block does exactly that: it re-raises the exception currently being handled,
+unchanged:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">10</span> <span class="o">/</span> <span class="n">x</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;logging: division by zero happened&quot;</span><span class="p">)</span>   <span class="c1"># react, but don&#39;t swallow it</span>
+        <span class="k">raise</span>   <span class="c1"># bare raise -&gt; re-raises the SAME exception, unchanged</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">process</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ZeroDivisionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caller caught it too:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="c1"># logging: division by zero happened</span>
+    <span class="c1"># caller caught it too: division by zero</span>
+</code></pre><div class="outs"><pre class="out-text">logging: division by zero happened
+caller caught it too: division by zero</pre></div></div>
+<div class="md"><p><strong>Note</strong> — the <code>print("logging: ...")</code> line above stands in for real logging,
+kept as a plain <code>print()</code> so this example doesn't depend on the <code>logging</code> module. In
+real code, <code>logging.exception(...)</code> or <code>logging.error(..., exc_info=True)</code> (8 covers the
+<code>logging</code> module), called from inside an <code>except</code> block, is what actually captures and
+records a full traceback in a log — not a one-line <code>print()</code> like this.</p></div>
+<div class="md"><p><strong>A quick comparison before the three variants below</strong> — each one wires up exception
+chaining slightly differently:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>How it happens</th>
+<th>Attribute set</th>
+<th>Traceback wording</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Implicit chaining</td>
+<td>a new exception is raised while an <code>except</code> block is still handling another</td>
+<td><code>__context__</code></td>
+<td>"During handling of the above exception, another exception occurred"</td>
+</tr>
+<tr>
+<td>Explicit chaining (<code>raise ... from e</code>)</td>
+<td>deliberately wrapping one exception in another</td>
+<td><code>__cause__</code> (and <code>__context__</code> too)</td>
+<td>"The above exception was the direct cause of the following exception"</td>
+</tr>
+<tr>
+<td>Suppressed chaining (<code>raise ... from None</code>)</td>
+<td>deliberately hiding the original exception</td>
+<td><code>__cause__</code> is <code>None</code>, <code>__suppress_context__</code> is <code>True</code></td>
+<td>the original exception is omitted from the traceback entirely</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md"><p><strong>Implicit chaining</strong> — if a <em>new</em>, different exception is raised while an <code>except</code>
+block is still handling one, Python doesn't discard the original. It attaches it to the
+new exception's <code>__context__</code>, and an uncaught traceback shows both, joined by "During
+handling of the above exception, another exception occurred":</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">17 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>   <span class="c1"># a different, unrelated exception raised while handling the first</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__context__</span><span class="p">)</span>   <span class="c1"># division by zero -&gt; the original exception, kept automatically</span>
+
+    <span class="c1"># reconstructing what an uncaught traceback would print:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__context__</span><span class="p">),</span> <span class="n">e</span><span class="o">.</span><span class="n">__context__</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;During handling of the above exception, another exception occurred:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="c1"># ZeroDivisionError: division by zero</span>
+    <span class="c1"># During handling of the above exception, another exception occurred:</span>
+    <span class="c1"># ValueError: invalid literal for int() with base 10: &#39;x&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">division by zero
+ZeroDivisionError: division by zero
+During handling of the above exception, another exception occurred:
+ValueError: invalid literal for int() with base 10: &#x27;x&#x27;</pre></div></div>
+<div class="md"><p><strong>Explicit chaining — <code>raise ... from ...</code></strong> — this is the deliberate version of the
+same idea: wrapping a low-level exception in a more meaningful custom one (<a class="xref" href="/python-for-data-science/07-exception-handling/#s7-5">7.5</a>), while
+recording <em>why</em>. It sets <code>__cause__</code> instead of <code>__context__</code>, and the traceback wording
+changes to "The above exception was the direct cause of the following exception":</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">14 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">&quot;config value must be an integer&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>   <span class="c1"># explicit cause</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">load_config</span><span class="p">(</span><span class="s2">&quot;not-a-number&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>                      <span class="c1"># caught: config value must be an integer</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caused by:&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__cause__</span><span class="p">))</span>   <span class="c1"># caused by: ValueError(&quot;invalid literal for int() with base 10: &#39;not-a-number&#39;&quot;)</span>
+</code></pre><div class="outs"><pre class="out-text">caught: config value must be an integer
+caused by: ValueError(&quot;invalid literal for int() with base 10: &#x27;not-a-number&#x27;&quot;)</pre></div></div>
+<div class="md"><p><strong>Suppressing chaining — <code>raise ... from None</code></strong> — when the original exception is
+internal noise a caller shouldn't need to see (an implementation detail, not useful
+context), <code>from None</code> drops it entirely instead of just hiding it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_quiet</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">&quot;config value must be an integer&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>   <span class="c1"># suppress the cause</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">load_config_quiet</span><span class="p">(</span><span class="s2">&quot;not-a-number&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>                          <span class="c1"># caught: config value must be an integer</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cause:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__cause__</span><span class="p">)</span>                   <span class="c1"># cause: None</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;suppressed:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__suppress_context__</span><span class="p">)</span>   <span class="c1"># suppressed: True -&gt; traceback won&#39;t show the ValueError either</span>
+</code></pre><div class="outs"><pre class="out-text">caught: config value must be an integer
+cause: None
+suppressed: True</pre></div></div>
+<div class="md"><h3 id="s7-4">7.4 The Exception Hierarchy</h3>
+<p>Every built-in exception is a <strong>class</strong>, and every one of them inherits from
+<code>BaseException</code>. Almost all of them actually inherit from its subclass <code>Exception</code> —
+the few direct <code>BaseException</code> subclasses (<code>SystemExit</code>, <code>KeyboardInterrupt</code>,
+<code>GeneratorExit</code>) are meant to signal the program shutting down, not everyday errors, so
+they're deliberately kept <em>outside</em> <code>Exception</code> — catching <code>Exception</code> never
+accidentally swallows a <code>Ctrl+C</code>.</p>
+<p>A simplified view of the tree, showing the exceptions used earlier in this chapter:</p>
+<pre class="fence" data-lang="text"><code>BaseException
+ ├── SystemExit, KeyboardInterrupt, GeneratorExit   (not errors — left alone)
+ └── Exception
+      ├── ArithmeticError
+      │    └── ZeroDivisionError
+      ├── LookupError
+      │    ├── IndexError
+      │    └── KeyError
+      ├── TypeError
+      ├── ValueError
+      ├── AttributeError
+      ├── NameError
+      ├── OSError
+      │    └── FileNotFoundError
+      └── RuntimeError
+           └── RecursionError
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">,</span> <span class="ne">ArithmeticError</span><span class="p">))</span>   <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="ne">ArithmeticError</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">))</span>              <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="ne">BaseException</span><span class="p">))</span>                 <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">))</span>              <span class="c1"># False -&gt; deliberately outside Exception</span>
+</code></pre><div class="outs"><pre class="out-text">True
+True
+True
+False</pre></div></div>
+<div class="md"><p>Because <code>except</code> matches by class <strong>or any of its subclasses</strong>, catching a base class
+like <code>ArithmeticError</code> also catches every specific error under it — including ones
+raised by code you haven't seen:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="mi">1</span> <span class="o">/</span> <span class="mi">0</span>   <span class="c1"># raises ZeroDivisionError specifically</span>
+<span class="k">except</span> <span class="ne">ArithmeticError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>   <span class="c1"># catches it anyway, since it&#39;s a subclass</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught via ArithmeticError:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>   <span class="c1"># caught via ArithmeticError: ZeroDivisionError</span>
+</code></pre><div class="outs"><pre class="out-text">caught via ArithmeticError: ZeroDivisionError</pre></div></div>
+<div class="md"><p><strong>Common built-in exceptions</strong> — a quick reference for the ones you'll hit constantly:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Raised when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ZeroDivisionError</code></td>
+<td>dividing by zero</td>
+</tr>
+<tr>
+<td><code>ValueError</code></td>
+<td>right type, but an invalid value (e.g. <code>int("x")</code>)</td>
+</tr>
+<tr>
+<td><code>IndexError</code></td>
+<td>sequence index out of range</td>
+</tr>
+<tr>
+<td><code>KeyError</code></td>
+<td>dict lookup with a missing key</td>
+</tr>
+<tr>
+<td><code>AttributeError</code></td>
+<td>accessing an attribute/method that doesn't exist on the object</td>
+</tr>
+<tr>
+<td><code>TypeError</code></td>
+<td>operation applied to an object of the wrong type</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">19 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IndexError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># IndexError: list index out of range</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;KeyError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># KeyError: &#39;b&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kc">None</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AttributeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># AttributeError: &#39;NoneType&#39; object has no attribute &#39;upper&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="s2">&quot;2&quot;</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># TypeError: can only concatenate str (not &quot;int&quot;) to str</span>
+</code></pre><div class="outs"><pre class="out-text">IndexError: list index out of range
+KeyError: &#x27;b&#x27;
+AttributeError: &#x27;NoneType&#x27; object has no attribute &#x27;upper&#x27;
+TypeError: can only concatenate str (not &quot;int&quot;) to str</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — a bare <code>except:</code> (no exception type at all) matches
+<code>BaseException</code>, not <code>Exception</code>. That means it also swallows <code>SystemExit</code> and
+<code>KeyboardInterrupt</code> — so <code>sys.exit()</code> silently fails to exit, and <code>Ctrl+C</code> can't stop the
+program either. Always write <code>except Exception:</code> (or a specific type) instead of a bare
+<code>except:</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">SystemExit</span>   <span class="c1"># normally this would end the program</span>
+<span class="k">except</span><span class="p">:</span>                  <span class="c1"># bare except -&gt; catches it anyway</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bare except caught SystemExit too&quot;</span><span class="p">)</span>   <span class="c1"># bare except caught SystemExit too</span>
+</code></pre><div class="outs"><pre class="out-text">bare except caught SystemExit too</pre></div></div>
+<div class="md"><h3 id="s7-5">7.5 Custom Exceptions</h3>
+<p>Built-in exceptions only go so far — <code>ValueError</code> doesn't tell a caller <em>which</em> rule was
+violated, and catching one from your own code can't be told apart from one raised by a
+library doing something unrelated. A custom exception fixes both: it names the failure
+precisely, and callers can catch it specifically without touching everything else that
+happens to also raise <code>ValueError</code>.</p>
+<p>Defining one is just subclassing <code>Exception</code> — no body needed at all:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">NegativeAgeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>   <span class="c1"># the name alone is the whole point — no extra behavior needed</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">set_age</span><span class="p">(</span><span class="n">age</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NegativeAgeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age cannot be negative: </span><span class="si">{</span><span class="n">age</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">age</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">set_age</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">NegativeAgeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NegativeAgeError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># NegativeAgeError: age cannot be negative: -5</span>
+</code></pre><div class="outs"><pre class="out-text">NegativeAgeError: age cannot be negative: -5</pre></div></div>
+<div class="md"><p>A custom exception can also override <code>__init__</code> to carry structured data along with it —
+not just a message string, but attributes the <code>except</code> block can read back out:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">16 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">InsufficientFundsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">balance</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot withdraw </span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2">, only </span><span class="si">{</span><span class="n">balance</span><span class="si">}</span><span class="s2"> available&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">withdraw</span><span class="p">(</span><span class="n">balance</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="n">balance</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InsufficientFundsError</span><span class="p">(</span><span class="n">balance</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">balance</span> <span class="o">-</span> <span class="n">amount</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">withdraw</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">InsufficientFundsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>                                <span class="c1"># cannot withdraw 150, only 100 available</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;short by&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">amount</span> <span class="o">-</span> <span class="n">e</span><span class="o">.</span><span class="n">balance</span><span class="p">)</span>   <span class="c1"># short by 50 -&gt; extra attributes, not just text</span>
+</code></pre><div class="outs"><pre class="out-text">cannot withdraw 150, only 100 available
+short by 50</pre></div></div>
+<div class="md"><p><strong>Custom exception hierarchies</strong> — just as the built-ins form a tree (<a class="xref" href="/python-for-data-science/07-exception-handling/#s7-4">7.4</a>), your own
+exceptions can too. Define one base class for "anything that can go wrong in this app,"
+then specific subclasses under it — callers can catch broadly via the base, or narrowly
+via a specific subclass, exactly like with built-in exceptions:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">class</span><span class="w"> </span><span class="nc">AppError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>   <span class="c1"># base class for every error this app raises on purpose</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ValidationError</span><span class="p">(</span><span class="n">AppError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NotFoundError</span><span class="p">(</span><span class="n">AppError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">lookup</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">valid</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid id: </span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">NotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no record for id: </span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">record_id</span><span class="p">,</span> <span class="n">valid</span> <span class="ow">in</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lookup</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">valid</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">AppError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>   <span class="c1"># catches ValidationError and NotFoundError both</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># ValidationError: invalid id: -1</span>
+        <span class="c1"># NotFoundError: no record for id: 42</span>
+</code></pre><div class="outs"><pre class="out-text">ValidationError: invalid id: -1
+NotFoundError: no record for id: 42</pre></div></div>
+<div class="md"><p><strong>The real payoff of a hierarchy</strong> — an API boundary usually wants to catch broadly
+(turn <em>any</em> application error into a generic error response) while code closer to a
+specific failure might want to react differently to just one subclass. Catching
+<code>AppError</code> covers <code>ValidationError</code> and <code>NotFoundError</code> alike with one handler, while
+catching <code>NotFoundError</code> specifically lets that one case produce a distinct outcome
+(e.g. a 404 instead of a generic 500) — order matters here exactly as in <a class="xref" href="/python-for-data-science/07-exception-handling/#s7-2">7.2</a>, the
+specific <code>except</code> has to come before the broader one:</p></div>
+<div class="md callout practice"><p><strong>In practice — this is exactly how real libraries structure their exceptions.</strong> The
+<code>requests</code> library defines <code>requests.exceptions.RequestException</code> as a base class with
+specific subclasses (<code>Timeout</code>, <code>ConnectionError</code>, <code>HTTPError</code>, ...) underneath it — the
+same <code>AppError</code>/<code>ValidationError</code>/<code>NotFoundError</code> shape used here, so callers can catch
+broadly (<code>except RequestException</code>) or narrowly (<code>except Timeout</code>) depending on what
+they actually need to react to differently.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">api_handler</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">valid</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lookup</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">valid</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span>   <span class="c1"># a distinct outcome for this ONE specific case</span>
+    <span class="k">except</span> <span class="n">AppError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span>   <span class="c1"># every OTHER application error, handled generically</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">api_handler</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>    <span class="c1"># {&#39;status&#39;: 404, &#39;error&#39;: &#39;no record for id: 42&#39;}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">api_handler</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>     <span class="c1"># {&#39;status&#39;: 500, &#39;error&#39;: &#39;invalid id: -1&#39;}</span>
+</code></pre><div class="outs"><pre class="out-text">{&#x27;status&#x27;: 404, &#x27;error&#x27;: &#x27;no record for id: 42&#x27;}
+{&#x27;status&#x27;: 500, &#x27;error&#x27;: &#x27;invalid id: -1&#x27;}</pre></div></div>
+<div class="md"><h3 id="s7-6">7.6 Exception Handling Practices</h3>
+<p><strong>Catch specific exceptions, not everything blindly.</strong> A bare <code>except:</code> (<a class="xref" href="/python-for-data-science/07-exception-handling/#s7-4">7.4</a>) or an
+overly broad <code>except Exception:</code> can hide bugs that have nothing to do with what you
+were actually guarding against. Catch only the exception type(s) the risky line can
+actually raise.</p>
+<p><strong>Never silently swallow an exception.</strong> An empty <code>except: pass</code> makes a failure vanish
+without a trace — the program looks fine, but something inside it quietly broke:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">risky</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad input&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">risky</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>   <span class="c1"># bug disappears without a trace — at minimum, log or print it</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;program continues, nobody knows risky() failed&quot;</span><span class="p">)</span>   <span class="c1"># program continues, nobody knows risky() failed</span>
+</code></pre><div class="outs"><pre class="out-text">program continues, nobody knows risky() failed</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a real production incident shape.</strong> A bare <code>except: pass</code> (or
+<code>except Exception: pass</code>) inside a background worker or scheduled job is a genuinely
+common way real incidents happen: the job keeps "succeeding" from the outside while
+silently failing to do its actual work — sending emails, syncing data, processing
+payments — sometimes for weeks, until someone notices the downstream effect rather than
+the failure itself.</p></div>
+<div class="md"><p><strong>Keep the <code>try</code> block as small as possible.</strong> Wrap only the line(s) that can actually
+raise, so an unrelated bug elsewhere in the same block doesn't get mistakenly caught and
+misreported as "bad data":</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="s2">&quot;5&quot;</span><span class="p">}</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">])</span>   <span class="c1"># only the conversion can actually fail here</span>
+<span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bad data:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>   <span class="c1"># 10 -&gt; the rest of the logic stays outside try, so it&#39;s obviously not the risky part</span>
+</code></pre><div class="outs"><pre class="out-text">10</pre></div></div>
+<div class="md"><p><strong>EAFP vs. LBYL.</strong> Python idiom generally favors <strong>EAFP</strong> ("Easier to Ask Forgiveness
+than Permission" — try it, handle the failure) over <strong>LBYL</strong> ("Look Before You Leap" —
+check first, then act). LBYL can also race: the condition can become false <em>between</em> the
+check and the action; EAFP has no such gap because the check and the action are the same
+step:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+<span class="c1"># LBYL - check membership first, then access</span>
+<span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;b missing (LBYL)&quot;</span><span class="p">)</span>   <span class="c1"># b missing (LBYL)</span>
+
+<span class="c1"># EAFP - just try the access, handle the failure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;b missing (EAFP)&quot;</span><span class="p">)</span>   <span class="c1"># b missing (EAFP)</span>
+</code></pre><div class="outs"><pre class="out-text">b missing (LBYL)
+b missing (EAFP)</pre></div></div>
+<div class="md"><p><strong>A real race, not just a sequential example</strong> — the dict lookup above is deterministic
+(nothing else touches <code>d</code> between the check and the access), so it can't actually race.
+A genuine <strong>TOCTOU</strong> ("time-of-check-to-time-of-use") race needs something that can
+change out from under you between the check and the action — a file another process
+deletes is the classic case. The gap between <code>os.path.exists(path)</code> and <code>open(path)</code> is
+exactly that gap; here it's forced deliberately, standing in for what another process
+could do at that same moment in real code:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">13 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/tmp/toctou_demo.txt&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>          <span class="c1"># CHECK: passes, the file exists right now...</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>                 <span class="c1"># ...simulating another process deleting it in that exact gap</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>         <span class="c1"># USE: the check above is already stale by the time this runs</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FileNotFoundError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># the file existed a moment ago -&gt; the check gave no guarantee</span>
+</code></pre><div class="outs"><pre class="out-text">FileNotFoundError: [Errno 2] No such file or directory: &#x27;/tmp/toctou_demo.txt&#x27;</pre></div></div>
+<div class="md"><p><strong>Always release resources, even on failure.</strong> If a function opens something (a file, a
+lock, a connection) and then raises partway through, that resource still has to be
+cleaned up — <code>finally</code> (<a class="xref" href="/python-for-data-science/07-exception-handling/#s7-2">7.2</a>) guarantees the cleanup line runs whether the body succeeded
+or not:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;something went wrong while using the file&quot;</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;file closed no matter what&quot;</span><span class="p">)</span>   <span class="c1"># file closed no matter what</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">process_file</span><span class="p">(</span><span class="s2">&quot;/etc/hostname&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># caught: something went wrong while using the file</span>
+</code></pre><div class="outs"><pre class="out-text">file closed no matter what
+caught: something went wrong while using the file</pre></div></div>
+<div class="md"><p><strong>In real code, prefer <code>with</code></strong> — the manual <code>try</code>/<code>finally</code> above demonstrates the
+underlying mechanics, but idiomatic Python would open the file with
+<code>with open(path) as f:</code> instead (16.6 covers the <code>with</code> statement / context managers in
+depth). It calls <code>f.close()</code> automatically, even on an exception, with no explicit
+<code>finally</code> block needed at all.</p></div>
+<div class="md"><h3 id="s7-7">7.7 Exception Groups (<code>except*</code>)</h3>
+<p>Every exception so far has been one object, and a <code>try</code> can only be in the middle of
+handling one at a time. Some operations, though, can genuinely fail in <strong>several,
+independent ways at once</strong> — a batch job where 3 of 10 records each raise a different
+error, or several concurrently-running tasks (<a class="xref" href="/python-for-data-science/17-concurrency-multitasking-threads-and-processes/#s17-6">17.6</a>) each failing on their own.
+<strong><code>ExceptionGroup</code></strong> is a container that bundles multiple exceptions together as a
+single object that can itself be raised and caught, and <strong><code>except*</code></strong> is the matching
+syntax to catch and react to the specific exception types bundled inside it,
+individually.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ExceptionGroup</span><span class="p">(</span><span class="s2">&quot;multiple failures&quot;</span><span class="p">,</span> <span class="p">[</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad value&quot;</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad type&quot;</span><span class="p">)])</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+<span class="c1"># ExceptionGroup (ValueError(&#39;bad value&#39;), TypeError(&#39;bad type&#39;))</span>
+</code></pre><div class="outs"><pre class="out-text">ExceptionGroup (ValueError(&#x27;bad value&#x27;), TypeError(&#x27;bad type&#x27;))</pre></div></div>
+<div class="md"><p>An <code>ExceptionGroup</code> can still be caught with a plain <code>except</code> (as above) — it's an
+ordinary exception object underneath, with a <code>.message</code> and an <code>.exceptions</code> tuple. The
+real point of <code>except*</code> is reacting to <em>each kind</em> of exception inside the group
+separately, instead of getting the whole bundle at once:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">11 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ExceptionGroup</span><span class="p">(</span>
+        <span class="s2">&quot;multiple failures&quot;</span><span class="p">,</span>
+        <span class="p">[</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad value&quot;</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad type&quot;</span><span class="p">),</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;another bad value&quot;</span><span class="p">)],</span>
+    <span class="p">)</span>
+<span class="k">except</span><span class="o">*</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">eg</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught ValueErrors:&quot;</span><span class="p">,</span> <span class="n">eg</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+<span class="k">except</span><span class="o">*</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">eg</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught TypeErrors:&quot;</span><span class="p">,</span> <span class="n">eg</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+<span class="c1"># caught ValueErrors: (ValueError(&#39;bad value&#39;), ValueError(&#39;another bad value&#39;))</span>
+<span class="c1"># caught TypeErrors: (TypeError(&#39;bad type&#39;),)</span>
+</code></pre><div class="outs"><pre class="out-text">caught ValueErrors: (ValueError(&#x27;bad value&#x27;), ValueError(&#x27;another bad value&#x27;))
+caught TypeErrors: (TypeError(&#x27;bad type&#x27;),)</pre></div></div>
+<div class="md"><p>Each <code>except*</code> clause runs <strong>at most once</strong>, receiving a <em>sub-group</em> containing only
+the exceptions that matched its type — <code>eg</code> above is itself a smaller <code>ExceptionGroup</code>,
+not a single exception. Any exception in the original group that no <code>except*</code> clause
+claims keeps propagating upward afterward, exactly like an unmatched exception would
+with plain <code>except</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExceptionGroup</span><span class="p">(</span><span class="s2">&quot;mixed&quot;</span><span class="p">,</span> <span class="p">[</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">),</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">)])</span>
+    <span class="k">except</span><span class="o">*</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">eg</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;handled ValueError:&quot;</span><span class="p">,</span> <span class="n">eg</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+<span class="k">except</span><span class="o">*</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">remaining</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;still propagating:&quot;</span><span class="p">,</span> <span class="n">remaining</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+<span class="c1"># handled ValueError: (ValueError(&#39;v&#39;),)</span>
+<span class="c1"># still propagating: (KeyError(&#39;k&#39;),)</span>
+</code></pre><div class="outs"><pre class="out-text">handled ValueError: (ValueError(&#x27;v&#x27;),)
+still propagating: (KeyError(&#x27;k&#x27;),)</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake — mixing plain <code>except</code> and <code>except*</code> on the same <code>try</code>.</strong> A single
+<code>try</code> statement must use one style or the other consistently; combining them is a
+<code>SyntaxError</code>, caught before the code even runs:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">12 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">bad_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">try:</span>
+<span class="s2">    pass</span>
+<span class="s2">except ValueError:</span>
+<span class="s2">    pass</span>
+<span class="s2">except* TypeError:</span>
+<span class="s2">    pass</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">compile</span><span class="p">(</span><span class="n">bad_code</span><span class="p">,</span> <span class="s2">&quot;&lt;test&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SyntaxError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># cannot have both &#39;except&#39; and &#39;except*&#39; on the same &#39;try&#39; </span>
+</code></pre><div class="outs"><pre class="out-text">SyntaxError: cannot have both &#x27;except&#x27; and &#x27;except*&#x27; on the same &#x27;try&#x27; (&lt;test&gt;, line 6)</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — <code>asyncio.TaskGroup</code>.</strong> <code>asyncio.TaskGroup</code> (<a class="xref" href="/python-for-data-science/17-concurrency-multitasking-threads-and-processes/#s17-6">17.6</a>) is the modern way to
+run several coroutines together: if more than one of its child tasks fails, it raises a
+single <code>ExceptionGroup</code> bundling all of them, instead of raising only the first failure
+and silently discarding the rest — <code>except*</code> is the tool built specifically to handle
+exactly this multi-task-failure case, reacting to each kind of failure on its own:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [36]</span><span class="cell-lines">21 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fail_a</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;task A failed&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fail_b</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;task B failed&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+            <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fail_a</span><span class="p">())</span>
+            <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fail_b</span><span class="p">())</span>
+    <span class="k">except</span><span class="o">*</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">eg</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError group:&quot;</span><span class="p">,</span> <span class="n">eg</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+    <span class="k">except</span><span class="o">*</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">eg</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TypeError group:&quot;</span><span class="p">,</span> <span class="n">eg</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+<span class="c1"># ValueError group: (ValueError(&#39;task A failed&#39;),)</span>
+<span class="c1"># TypeError group: (TypeError(&#39;task B failed&#39;),)</span>
+</code></pre><div class="outs"><pre class="out-text">ValueError group: (ValueError(&#x27;task A failed&#x27;),)
+TypeError group: (TypeError(&#x27;task B failed&#x27;),)</pre></div></div>
+<div class="md"><h3 id="s7-9">7.9 Additional Exception Handling Concepts From Notes</h3>
+<p>Overflow bucket for this chapter — small or unclassified items that clearly belong to
+this domain but not yet to a specific section above.</p>
+<p><strong>The <code>assert</code> statement</strong> — a sanity check, not general error handling: <code>assert
+condition, message</code> raises <code>AssertionError(message)</code> if <code>condition</code> is falsy. It's meant
+for catching <em>programmer</em> mistakes (an invariant that should never be false) during
+development, not for validating user input — asserts can be stripped out entirely when
+Python runs with the <code>-O</code> optimization flag, so input validation must never rely on
+them:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [37]</span><span class="cell-lines">10 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">def</span><span class="w"> </span><span class="nf">set_temperature</span><span class="p">(</span><span class="n">celsius</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">celsius</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">273.15</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;temperature below absolute zero: </span><span class="si">{</span><span class="n">celsius</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">celsius</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">set_temperature</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>   <span class="c1"># 20</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">set_temperature</span><span class="p">(</span><span class="o">-</span><span class="mi">300</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AssertionError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># AssertionError: temperature below absolute zero: -300</span>
+</code></pre><div class="outs"><pre class="out-text">20
+AssertionError: temperature below absolute zero: -300</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a sanity check in a data pipeline.</strong> A data-processing script asserting
+that a loaded DataFrame has the expected columns, or that a batch has the expected row
+count, before running expensive downstream computation on it, is a common real use of
+<code>assert</code> as a fail-fast guard — distinct from validating untrusted external input
+(<a class="xref" href="/python-for-data-science/20-data-validation-parsing-and-type-enforcement-with-pydantic/#s20-1">20.1</a>), which needs a real, non-strippable check instead.</p></div>
+<div class="md"><p><strong>Inside the exception object</strong> — every exception stores its constructor arguments in
+<code>.args</code>. <code>str(e)</code> renders it for humans (just the message), while <code>repr(e)</code> renders it
+as Python-like code, including the class name — useful when logging, since it says
+<em>which</em> exception type it was, not just its message:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [38]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad value&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>   <span class="c1"># (&#39;bad value&#39;, 42)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>     <span class="c1"># (&#39;bad value&#39;, 42) -&gt; str() of a multi-arg exception is its args tuple</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>   <span class="c1"># ValueError(&#39;bad value&#39;, 42) -&gt; includes the class name</span>
+</code></pre><div class="outs"><pre class="out-text">(&#x27;bad value&#x27;, 42)
+(&#x27;bad value&#x27;, 42)
+ValueError(&#x27;bad value&#x27;, 42)</pre></div></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

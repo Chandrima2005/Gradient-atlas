@@ -1,6 +1,7 @@
 // guided tour
 import { $, $$, store, typeset, G, SECS, NODE, done } from './core.js';
 import { curView, route, go } from './router.js';
+import { toKey } from './paths.js';
 import { Home } from './views/home.js';
 import { Recall } from './views/recall.js';
 
@@ -12,7 +13,7 @@ const Tour = (() => {
   const W = () => innerWidth, H = () => innerHeight, mobile = () => innerWidth < 760;
 
   /* ---------- helpers that put the site into the state a step needs ---------- */
-  const page = h => { if (location.hash !== '#' + h) go(h); };
+  const page = h => { if (toKey() !== h) go(h); };
   const goGoals = () => go('route');
   const el = s => () => { const e = typeof s === 'function' ? s() : $(s); return e && e.getClientRects().length ? e : null; };
   // the tour visits real pages; remember what it may overwrite and put it back afterwards

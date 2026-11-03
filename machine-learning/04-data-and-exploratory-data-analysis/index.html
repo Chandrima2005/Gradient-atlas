@@ -3,6 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
 <title>Data and Exploratory Data Analysis – Machine Learning Chapter 4 | Gradient Atlas</title>
 <meta name="description" content="Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.">
 <link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/">
@@ -13,32 +36,58 @@
 <meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/">
 <meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Data and Exploratory Data Analysis", "headline": "Data and Exploratory Data Analysis", "description": "Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT39M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Data and Exploratory Data Analysis", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/"}]}]}</script>
+<!-- seo:end -->
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#2563eb">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
-<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
 <link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
 <link rel="stylesheet" href="/css/static.css">
 <script src="/js/mathjax-config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Data and Exploratory Data Analysis", "headline": "Data and Exploratory Data Analysis", "description": "Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT39M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Data and Exploratory Data Analysis", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/04-data-and-exploratory-data-analysis/"}]}]}</script>
+<script type="module" src="/js/main.js"></script>
 </head>
-<body class="static">
-<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
-<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
-<main class="sdoc">
-<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 4</p>
-<h1><small>Machine Learning · Chapter 4</small>Data and Exploratory Data Analysis</h1>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 4</p>
+<h1>Data and Exploratory Data Analysis</h1>
 <p class="lead">Where data comes from, what kinds of variables it holds, and how to interrogate it before a single model is fitted.</p>
-<p class="cta"><a class="sbtn" href="/#ch4">Read in the interactive reader, with quizzes and flashcards →</a></p>
-<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s4-1">4.1 Kinds of Data and Kinds of Variables</a></li><li class="l3"><a href="#s4-2">4.2 Getting Data: bundled datasets, synthetic generators and files</a></li><li class="l3"><a href="#s4-3">4.3 First Contact: shape, dtypes and the summary triage</a></li><li class="l3"><a href="#s4-4">4.4 Univariate Analysis</a></li><li class="l3"><a href="#s4-5">4.5 Bivariate Analysis</a></li><li class="l3"><a href="#s4-6">4.6 Multivariate Analysis and Correlation Structure</a></li><li class="l3"><a href="#s4-7">4.7 Target Analysis</a></li><li class="l3"><a href="#s4-8">4.8 What EDA Is Really For</a></li><li class="l3"><a href="#s4-9">4.9 In Practice</a></li></ol></nav>
 <article class="body"><div class="md"><p>Exploratory data analysis is the step everyone is tempted to skip and nobody who has been burned skips
 twice. Its purpose is not to produce charts. It is to answer, before any model exists:</p>
 <ul>
@@ -239,7 +288,7 @@ may be encoded as ordered integers, and <a class="xref" href="/machine-learning/
 </code></pre><div class="outs"><pre class="out-text">plan  -&gt; {&#x27;Basic&#x27;: 0, &#x27;Standard&#x27;: 1, &#x27;Premium&#x27;: 2}
 city  -&gt; {&#x27;Bengaluru&#x27;: 0, &#x27;Chennai&#x27;: 1, &#x27;Delhi&#x27;: 2, &#x27;Hyderabad&#x27;: 3, &#x27;Jaipur&#x27;: 4, &#x27;Kolkata&#x27;: 5, &#x27;Mumbai&#x27;: 6, &#x27;Pune&#x27;: 7}</pre></div></div>
 <div class="md"><h3 id="s4-2">4.2 Getting Data: bundled datasets, synthetic generators and files</h3>
-<p>Three sources, three purposes. Nothing in this material downloads anything (<a class="xref" href="/#s0-7">§0.7</a>).</p>
+<p>Three sources, three purposes. Nothing in this material downloads anything (<a class="xref" href="/machine-learning/00-how-to-use-this-material/#s0-7">§0.7</a>).</p>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -1146,12 +1195,9 @@ is not a one-off.</strong> Run it on every batch of incoming data, store the out
 column whose missingness jumps from 5% to 60%, or whose mean moves three standard deviations, is a
 production incident that no model metric will surface until the damage is done. 24.9 turns this into
 monitoring.</p></div></article>
-<nav class="spn"><a href="/machine-learning/03-the-python-machine-learning-stack/">← The Python Machine Learning Stack</a><a href="/machine-learning/05-data-preprocessing/">Data Preprocessing →</a></nav>
+</section>
+<!-- page:end -->
 </main>
-<footer class="sfoot">
-<span>© 2026 Gradient Atlas. All rights reserved.</span>
-<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
-</footer>
-<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+<div class="toast" id="toast" hidden></div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 // chapter reader
 import { $, $$, esc, store, PV, pad2, chLabel, toast, typeset, M, byN, NODE, chCache, done, seen, saveSeen, saveDone, isRead, COURSES, C, L, LC, K, inCourse } from '../core.js';
-import { curView, route, go, goC } from '../router.js';
+import { curView, route, go, goC, setTitle } from '../router.js';
+import { toPath, isKey } from '../paths.js';
 import { Metro } from './metro.js';
 
 /* ======================= copy ======================= */
@@ -30,7 +31,7 @@ const Reader = {
       inner.innerHTML = `<header class="rhead"><div class="crumb"><span class="sw"></span>${C.name}<span>·</span>${c.part === '0' ? 'Before you start' : c.part === 'A' ? 'Reference' : 'Part ' + c.part + ' · ' + part.name}<span>·</span><span>~${c.minutes} min</span><span>·</span><span>${c.code} examples</span></div>
         <h1 class="h-display"><span class="cn">${C.id === 'ml' && n === 25 ? 'APPENDIX' : 'CHAPTER ' + pad2(n)}</span>${esc(c.title)}</h1>${c.scope ? `<p class="scope">${c.scope}</p>` : ''}
         <div class="racts">${real ? `<a class="btn small" href="${L('route-' + n)}">Plan a route here</a><a class="btn small" href="${L('quiz-' + n)}">Quiz me</a>` : ''}</div></header>
-        <div class="body" id="body">${d.html}</div>
+        <div class="body" id="body">${d.html.replace(/src="img\//g, 'src="/img/')}</div>
         <div class="rend">
           ${real ? `<div class="box"><p>Finished? Marking it complete fills in its station on the route map.</p><div class="acts"><button class="btn" type="button" id="doneBtn"></button><a class="btn" href="${L('quiz-' + n)}">Take the quiz</a></div></div>` : ''}
           <nav class="pn">${prev ? `<a href="${L('ch' + prev.n)}"><small>← ${chLabel(prev.n)}</small><span>${esc(prev.title)}</span></a>` : ''}${next ? `<a class="next" href="${L('ch' + next.n)}"><small>${chLabel(next.n)} →</small><span>${esc(next.title)}</span></a>` : ''}</nav>
@@ -43,7 +44,8 @@ const Reader = {
       const db = $('#doneBtn');
       if (db) { const paint = () => { db.textContent = done.has(n) ? '✓ Completed' : 'Mark as complete'; db.classList.toggle('is-done', done.has(n)); }; paint();
         db.onclick = () => { done.has(n) ? done.delete(n) : done.add(n); saveDone(); paint(); if (Metro.built) Metro.render(); toast(done.has(n) ? `${chLabel(n)} marked complete` : `${chLabel(n)} unmarked`); }; }
-      document.title = `${chLabel(n)} · ${c.title} — Gradient Atlas`;
+      // same title as the page tools/build_seo.py writes for this chapter
+      setTitle(`${c.title} – ${C.id === 'py' ? 'Python for Data Science' : 'Machine Learning'} Chapter ${n} | Gradient Atlas`);
     }
     requestAnimationFrame(() => {
       if (target) { const el = document.getElementById(target); if (el) { const d = el.closest('details.sec'); if (d) d.open = true; (el.classList.contains('anchor') && d ? d : el).scrollIntoView({ block: 'start' }); return; } }
@@ -51,6 +53,8 @@ const Reader = {
     });
   },
   decorate(body) {
+    // the notes link with #keys; give them real URLs
+    $$('a[href^="#"]', body).forEach(a => { const k = a.getAttribute('href').slice(1); if (isKey(k)) a.setAttribute('href', toPath(k)); });
     $$('h3[id],h4[id],h5[id]', body).forEach(h => {
       const m = h.textContent.match(/^\s*(\d+(?:\.\d+)*)\s/);
       if (m) h.innerHTML = h.innerHTML.replace(m[1], `<span class="hn">${m[1]}</span>`);

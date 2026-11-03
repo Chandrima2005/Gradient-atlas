@@ -1,4 +1,5 @@
 // shared helpers, course data and reading progress
+import { toPath } from './paths.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -18,22 +19,22 @@ function typeset(el) { if (!el) return; const go = () => window.MathJax.typesetP
 // ML keeps the original unprefixed links (#ch11, #route-15) so old bookmarks still work.
 const COURSES = {
   py: {
-    id: 'py', name: 'Python', stage: 1, dir: 'data/py/', pfx: 'py/', first: 1, last: 20,
+    id: 'py', name: 'Python', stage: 1, dir: '/data/py/', pfx: 'py/', first: 1, last: 20,
     quick: [[6, 'Functions'], [10, 'OOP'], [7, 'Exceptions'], [14, 'Generators'], [17, 'Concurrency'], [20, 'Pydantic']],
     intro: 'Each station is a chapter. Pick the chapter you want to reach and the map shows only the chapters you need first, in order.',
     // programming builds on itself, so any single reference counts and the Basics come first
     rule: { direct: 1, background: 2, advised: t => t >= 5 ? [1, 2, 3, 4].map(n => [n, 'the Python basics everything builds on']) : [] },
   },
   ml: {
-    id: 'ml', name: 'Machine learning', stage: 3, dir: 'data/', pfx: '', first: 1, last: 24,
+    id: 'ml', name: 'Machine learning', stage: 3, dir: '/data/', pfx: '', first: 1, last: 24,
     quick: [[19, 'Gradient boosting'], [16, 'SVMs'], [20, 'Clustering'], [23, 'Hyperparameter tuning'], [24, 'SHAP & deployment'], [13, 'Logistic regression']],
     intro: 'Each station is a chapter. Pick the chapter you want to reach and the map shows only the chapters you need first, in order.',
     rule: { direct: 2, background: 4, advised: t => t >= 11 && t <= 21 ? [[8, 'the book says read first (0.9)'], [9, 'the book says read first (0.9)']] : [] },
   },
 };
 let C = COURSES.ml;
-const L = p => '#' + C.pfx + p;                       // link inside the current course
-const LC = (id, p) => '#' + COURSES[id].pfx + p;      // link inside a given course
+const L = p => toPath(C.pfx + p);                     // link inside the current course
+const LC = (id, p) => toPath(COURSES[id].pfx + p);    // link inside a given course
 const K = k => C.id === 'ml' ? k : C.id + '.' + k;    // storage key for the current course
 const chLabel = n => C.id === 'ml' && n === 25 ? 'Appendix' : n === 0 ? 'Ch 0' : 'Ch ' + n;
 const inCourse = n => n >= C.first && n <= C.last;

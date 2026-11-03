@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
+<title>Objects and Data Types – Python for Data Science Chapter 2 | Gradient Atlas</title>
+<meta name="description" content="What a Python object is, and the built-in type categories with their defining properties.">
+<link rel="canonical" href="https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gradient Atlas">
+<meta property="og:title" content="Objects and Data Types – Python for Data Science Chapter 2 | Gradient Atlas">
+<meta property="og:description" content="What a Python object is, and the built-in type categories with their defining properties.">
+<meta property="og:url" content="https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/">
+<meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Objects and Data Types", "headline": "Objects and Data Types", "description": "What a Python object is, and the built-in type categories with their defining properties.", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT42M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Python for Data Science", "url": "https://gradient-atlas.chandrima-das.com/python-for-data-science/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Python for Data Science", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/"}, {"@type": "ListItem", "position": 4, "name": "Objects and Data Types", "item": "https://gradient-atlas.chandrima-das.com/python-for-data-science/02-objects-and-data-types/"}]}]}</script>
+<!-- seo:end -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
+<link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/static.css">
+<script src="/js/mathjax-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/python-for-data-science/">Python for Data Science</a> › Chapter 2</p>
+<h1>Objects and Data Types</h1>
+<p class="lead">What a Python object is, and the built-in type categories with their defining properties.</p>
+<article class="body"><div class="md"><h3 id="s2-1">2.1 Overview of Built-in Data Types</h3>
+<p><strong>Object</strong> — every value in Python is an object. Every object has an <strong>identity</strong>
+(<code>id()</code>), a <strong>type</strong> (<code>type()</code>) and a <strong>value</strong>; each data type below is simply a built-in
+category of object, with its own value representation and behaviour.</p>
+<p><strong>Basic Data Types</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Definition</th>
+<th>Declaration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code></td>
+<td>Whole numbers of arbitrary precision.</td>
+<td><code>x = 10</code></td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td>Decimal / floating-point numbers.</td>
+<td><code>x = 10.5</code></td>
+</tr>
+<tr>
+<td><code>complex</code></td>
+<td>Numbers with a real and an imaginary part.</td>
+<td><code>x = 2 + 3j</code></td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td>Boolean truth value — <code>True</code> or <code>False</code>.</td>
+<td><code>x = True</code></td>
+</tr>
+<tr>
+<td><code>str</code></td>
+<td>Sequence of Unicode characters (text).</td>
+<td><code>x = "hello"</code></td>
+</tr>
+<tr>
+<td><code>NoneType</code></td>
+<td>Represents the absence of a value; its only instance is <code>None</code>.</td>
+<td><code>x = None</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Composite Data Types</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Definition</th>
+<th>Declaration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list</code></td>
+<td>Ordered, mutable collection of items.</td>
+<td><code>x = [1, 2, 3]</code></td>
+</tr>
+<tr>
+<td><code>tuple</code></td>
+<td>Ordered, immutable collection of items.</td>
+<td><code>x = (1, 2, 3)</code></td>
+</tr>
+<tr>
+<td><code>set</code></td>
+<td>Unordered, mutable collection of unique items.</td>
+<td><code>x = {1, 2, 3}</code></td>
+</tr>
+<tr>
+<td><code>frozenset</code></td>
+<td>Unordered, immutable collection of unique items.</td>
+<td><code>x = frozenset({1, 2, 3})</code></td>
+</tr>
+<tr>
+<td><code>dict</code></td>
+<td>Collection of key-value pairs (insertion-ordered).</td>
+<td><code>x = {"a": 1, "b": 2}</code></td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td>Immutable sequence of raw bytes.</td>
+<td><code>x = b"hello"</code></td>
+</tr>
+<tr>
+<td><code>bytearray</code></td>
+<td>Mutable sequence of raw bytes.</td>
+<td><code>x = bytearray(b"hello")</code></td>
+</tr>
+<tr>
+<td><code>range</code></td>
+<td>Immutable, lazily generated sequence of numbers.</td>
+<td><code>x = range(10)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Chapter plan</strong> — the sections below go deeper into each group above, grouped the same way
+the Python docs group them:</p>
+<ul>
+<li>2.2 Basic Data Types — <code>int</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2-1">2.2.1</a>), <code>float</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2-2">2.2.2</a>), <code>bool</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2-3">2.2.3</a>), <code>str</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2-4">2.2.4</a>), <code>complex</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2-5">2.2.5</a>)</li>
+<li>2.3 Composite Data Types — <code>list</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-1">2.3.1</a>), <code>tuple</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-2">2.3.2</a>), <code>set</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-3">2.3.3</a>), <code>frozenset</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-4">2.3.4</a>), <code>dict</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-5">2.3.5</a>), <code>bytes</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-6">2.3.6</a>), <code>bytearray</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-7">2.3.7</a>), <code>range</code> (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-3-8">2.3.8</a>)</li>
+<li>2.4 Object Reuse and Caching (Interning)</li>
+<li>2.5 The <code>del</code> Statement</li>
+</ul></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [1]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>   <span class="c1"># e.g. 132695655973232 &lt;class &#39;int&#39;&gt; 5 -- identity, type, value</span>
+</code></pre><div class="outs"><pre class="out-text">10454408 &lt;class &#x27;int&#x27;&gt; 5</pre></div></div>
+<div class="md"><h3 id="s2-2">2.2 Basic Data Types</h3>
+<p>These are the 5 basic data types in Python — <code>int</code>, <code>float</code>, <code>bool</code>, <code>str</code> and <code>complex</code>.
+All five are <strong>immutable</strong>: once created, the object itself can never be changed — a name
+bound to one always points to that single object, and anything that looks like a
+modification actually creates a new object and rebinds the name to it.</p>
+<p>Deep dive into each one below — literal forms, conversions and inbuilt behaviour, one
+sub-section per type.</p></div>
+<div class="md"><h4 id="s2-2-1">2.2.1 Integers (<code>int</code>)</h4>
+<p>Python has three numeric types — <code>int</code>, <code>float</code> and <code>complex</code> (defined in <a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-1">2.1</a>). Of the
+three, <code>int</code> is the only one with multiple literal forms, since a whole number can be
+written in decimal, binary, octal or hexadecimal and still be the exact same value/object.</p>
+<p><strong>Integer literals in different bases</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Base</th>
+<th>Prefix</th>
+<th>Example</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decimal (base 10)</td>
+<td>none</td>
+<td><code>x = 42</code></td>
+<td>42</td>
+</tr>
+<tr>
+<td>Binary (base 2)</td>
+<td><code>0b</code> / <code>0B</code></td>
+<td><code>x = 0b101010</code></td>
+<td>42</td>
+</tr>
+<tr>
+<td>Octal (base 8)</td>
+<td><code>0o</code> / <code>0O</code></td>
+<td><code>x = 0o52</code></td>
+<td>42</td>
+</tr>
+<tr>
+<td>Hexadecimal (base 16)</td>
+<td><code>0x</code> / <code>0X</code></td>
+<td><code>x = 0x2A</code></td>
+<td>42</td>
+</tr>
+</tbody>
+</table></div>
+<p>The prefix only affects how the literal is <em>written</em> — run the cell below to confirm all
+four produce the exact same <code>int</code> object.</p>
+<p><strong>Note</strong> — <code>type(x)</code> returns the actual class object <code>x</code> was built from, and
+printing a class shows it in <code>&lt;class '...'&gt;</code> form — so <code>&lt;class 'int'&gt;</code> just means "this
+object's type is the built-in class <code>int</code>". Every type from here on prints the same way:
+<code>&lt;class 'float'&gt;</code>, <code>&lt;class 'str'&gt;</code>, <code>&lt;class 'list'&gt;</code>, and so on.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [2]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x_dec</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">x_bin</span> <span class="o">=</span> <span class="mb">0b101010</span>
+<span class="n">x_oct</span> <span class="o">=</span> <span class="mo">0o52</span>
+<span class="n">x_hex</span> <span class="o">=</span> <span class="mh">0x2A</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_dec</span><span class="p">,</span> <span class="n">x_bin</span><span class="p">,</span> <span class="n">x_oct</span><span class="p">,</span> <span class="n">x_hex</span><span class="p">)</span>                     <span class="c1"># 42 42 42 42 -&gt; all the same value</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x_dec</span><span class="p">),</span> <span class="n">x_dec</span> <span class="o">==</span> <span class="n">x_bin</span> <span class="o">==</span> <span class="n">x_oct</span> <span class="o">==</span> <span class="n">x_hex</span><span class="p">)</span>   <span class="c1"># &lt;class &#39;int&#39;&gt; True</span>
+</code></pre><div class="outs"><pre class="out-text">42 42 42 42
+&lt;class &#x27;int&#x27;&gt; True</pre></div></div>
+<div class="md"><p><strong>Converting between bases</strong> — <code>int</code> → base-prefixed string with <code>bin()</code>, <code>oct()</code>, <code>hex()</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [3]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>   <span class="c1"># &#39;0b101010&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">oct</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>   <span class="c1"># &#39;0o52&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>   <span class="c1"># &#39;0x2a&#39;</span>
+</code></pre><div class="outs"><pre class="out-text">0b101010
+0o52
+0x2a</pre></div></div>
+<div class="md"><p>String in a given base → <code>int</code> with <code>int(string, base)</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [4]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="s1">&#39;101010&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>   <span class="c1"># 42</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>        <span class="c1"># 42</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="s1">&#39;2a&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>       <span class="c1"># 42</span>
+</code></pre><div class="outs"><pre class="out-text">42
+42
+42</pre></div></div>
+<div class="md"><p>Python's <code>int</code> also has <strong>arbitrary precision</strong> — it grows to fit however large the value
+is, with no fixed bit-width and no silent overflow:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [5]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">100</span><span class="p">)</span>   <span class="c1"># 1267650600228229401496703205376 -- a fixed-width 64-bit int would overflow here</span>
+</code></pre><div class="outs"><pre class="out-text">1267650600228229401496703205376</pre></div></div>
+<div class="md"><h4 id="s2-2-2">2.2.2 Floating-Point Numbers (<code>float</code>)</h4>
+<p>A number with a decimal point (or written in exponential notation) is a <code>float</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [6]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mf">10.5</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mf">1.5e3</span>      <span class="c1"># exponential notation</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>      <span class="c1"># 10.5 1500.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># &lt;class &#39;float&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">10.5 1500.0
+&lt;class &#x27;float&#x27;&gt;</pre></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [7]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">)</span>   <span class="c1"># 0.30000000000000004 -- not exactly 0.3</span>
+</code></pre><div class="outs"><pre class="out-text">0.30000000000000004</pre></div></div>
+<div class="md"><p><strong>Why</strong> — <code>float</code> is stored as binary floating-point (IEEE 754), and most decimal
+fractions (including <code>0.1</code> and <code>0.2</code>) have no exact binary representation, the same way
+<code>1/3</code> has no exact finite decimal representation. Each is stored as the closest
+representable binary value, so arithmetic on them accumulates tiny rounding error. Never
+compare floats with <code>==</code>; use <code>math.isclose()</code> instead.</p>
+<p><strong>Going deeper</strong> — for cases that genuinely need exact decimal arithmetic (money, for
+example), <code>decimal.Decimal</code> and <code>fractions.Fraction</code> avoid this error entirely by not
+using binary floating-point at all.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [8]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="nb">print</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">==</span> <span class="mf">0.3</span><span class="p">)</span>               <span class="c1"># False -- fails due to representation error</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">))</span>   <span class="c1"># True -- the correct way to compare floats</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s2">&quot;0.1&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Decimal</span><span class="p">(</span><span class="s2">&quot;0.2&quot;</span><span class="p">))</span>   <span class="c1"># 0.3 -- exact, no representation error</span>
+</code></pre><div class="outs"><pre class="out-text">False
+True
+0.3</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — this is exactly why financial systems never use <code>float</code> for money.</strong>
+Payment processors, banking software, and billing systems universally use
+<code>decimal.Decimal</code> (or integer cents) instead of <code>float</code> for currency amounts — a
+rounding error like the one just shown is unacceptable when it means a transaction
+total is off by a fraction of a cent, which compounds into real discrepancies at scale.</p></div>
+<div class="md"><h4 id="s2-2-3">2.2.3 Booleans (<code>bool</code>)</h4>
+<p>A <code>bool</code> holds one of two truth values, <code>True</code> or <code>False</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [9]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># True &lt;class &#39;bool&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">True &lt;class &#x27;bool&#x27;&gt;</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — treating <code>bool</code> as an unrelated type. In fact <code>bool</code> is a <em>subclass</em>
+of <code>int</code> — <code>True</code>/<code>False</code> behave as <code>1</code>/<code>0</code> in arithmetic, and <code>isinstance(True, int)</code> is
+<code>True</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [10]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>   <span class="c1"># True -- bool IS an int subclass</span>
+<span class="nb">print</span><span class="p">(</span><span class="kc">True</span> <span class="o">+</span> <span class="kc">True</span><span class="p">)</span>              <span class="c1"># 2   -- arithmetic treats them as 1/0</span>
+<span class="nb">print</span><span class="p">(</span><span class="kc">True</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>                <span class="c1"># True</span>
+</code></pre><div class="outs"><pre class="out-text">True
+2
+True</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — a genuinely useful idiom, not just a curiosity.</strong> <code>sum(user.is_active
+for user in users)</code> to count how many users are active, or <code>df["flag"].sum()</code> in a
+pandas-style data pipeline to count <code>True</code> values in a boolean column, both lean
+directly on <code>bool</code> being an <code>int</code> subclass — counting truthy conditions by summing them
+is a common, idiomatic pattern rather than a coincidence to avoid.</p></div>
+<div class="md"><h4 id="s2-2-4">2.2.4 Strings (<code>str</code>)</h4>
+<p>A <code>str</code> is a sequence of characters, written inside single, double or triple quotes.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [11]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># hello &lt;class &#39;str&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">hello &lt;class &#x27;str&#x27;&gt;</pre></div></div>
+<div class="md"><p>If the string holds a valid whole number, it can be typecast to <code>int</code> with <code>int()</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [12]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="s2">&quot;42&quot;</span><span class="p">))</span>   <span class="c1"># 42</span>
+</code></pre><div class="outs"><pre class="out-text">42</pre></div></div>
+<div class="md"><h4 id="s2-2-5">2.2.5 Complex Numbers (<code>complex</code>)</h4>
+<p>A <code>complex</code> number has a real part and an imaginary part, the latter suffixed with <code>j</code>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [13]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="n">j</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>       <span class="c1"># (2+3j) &lt;class &#39;complex&#39;&gt;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>   <span class="c1"># 2.0 3.0 -&gt; the real and imaginary parts, as floats</span>
+</code></pre><div class="outs"><pre class="out-text">(2+3j) &lt;class &#x27;complex&#x27;&gt;
+2.0 3.0</pre></div></div>
+<div class="md"><h3 id="s2-3">2.3 Composite Data Types</h3>
+<p>These are the 8 composite data types in Python — <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code>,
+<code>dict</code>, <code>bytes</code>, <code>bytearray</code> and <code>range</code>. Unlike the basic types (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-2">2.2</a>), mutability varies
+by type: <code>list</code>, <code>set</code>, <code>dict</code> and <code>bytearray</code> are <strong>mutable</strong>; <code>tuple</code>, <code>frozenset</code>,
+<code>bytes</code> and <code>range</code> are <strong>immutable</strong>.</p>
+<p>Deep dive into each one below — literal forms and inbuilt behaviour, one sub-section per
+type.</p></div>
+<div class="md"><h4 id="s2-3-1">2.3.1 Lists (<code>list</code>)</h4>
+<p>An ordered, mutable collection of items. Day-to-day operations — indexing, slicing,
+methods, comprehensions — are covered in depth in <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-1">5.1</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [14]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># [1, 2, 3] &lt;class &#39;list&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">[1, 2, 3] &lt;class &#x27;list&#x27;&gt;</pre></div></div>
+<div class="md"><p><strong>Mutable</strong> means the object can be changed in place after creation — it stays the <em>same</em>
+object (same <code>id()</code>), just with different contents:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [15]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>         <span class="c1"># e.g. 140023456</span>
+<span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>           <span class="c1"># changes the object in place</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>       <span class="c1"># [1, 2, 3, 4]  &lt;- same id, same object</span>
+</code></pre><div class="outs"><pre class="out-text">140554110596672
+[1, 2, 3, 4] 140554110596672</pre></div></div>
+<div class="md"><h4 id="s2-3-2">2.3.2 Tuples (<code>tuple</code>)</h4>
+<p>An ordered, immutable collection of items. Day-to-day operations — unpacking, methods,
+hashability — are covered in depth in <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-5">5.5</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [16]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># (1, 2, 3) &lt;class &#39;tuple&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">(1, 2, 3) &lt;class &#x27;tuple&#x27;&gt;</pre></div></div>
+<div class="md"><p><strong>Ordered</strong> means each item keeps a fixed position, accessible by index:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [17]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># 10 20 30 -&gt; items keep their position/index</span>
+</code></pre><div class="outs"><pre class="out-text">10 20 30</pre></div></div>
+<div class="md"><p><strong>Immutable</strong> means the object can never be changed in place after creation — anything
+that looks like a modification actually builds a <em>new</em> object:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [18]</span><span class="cell-lines">4 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>       <span class="c1"># e.g. 140099876</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span><span class="p">,)</span>         <span class="c1"># no in-place way to add an item -&gt; builds a new tuple</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>     <span class="c1"># (1, 2, 3, 4)  &lt;- different id, a different object</span>
+</code></pre><div class="outs"><pre class="out-text">140554110594816
+(1, 2, 3, 4) 140554110685712</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — tuples as cache/memoization keys.</strong> A function that caches results
+keyed by several arguments at once (e.g. <code>cache[(user_id, page_number)]</code>) has to use a
+<code>tuple</code> for that key, not a <code>list</code> — a dict key must be hashable (5.3.1/5.4.6), and a
+<code>list</code>'s mutability disqualifies it; this is one of the most common real reasons to
+reach for a tuple instead of a list.</p></div>
+<div class="md"><h4 id="s2-3-3">2.3.3 Sets (<code>set</code>)</h4>
+<p>An unordered, mutable collection of unique items. Day-to-day operations — methods,
+mathematical set operations, hashing — are covered in depth in <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-3">5.3</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [19]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># {1, 2, 3} &lt;class &#39;set&#39;&gt;  -&gt; the duplicate 2 is dropped</span>
+</code></pre><div class="outs"><pre class="out-text">{1, 2, 3} &lt;class &#x27;set&#x27;&gt;</pre></div></div>
+<div class="md"><h4 id="s2-3-4">2.3.4 Frozensets (<code>frozenset</code>)</h4>
+<p>An unordered, immutable collection of unique items. Covered alongside <code>set</code> in <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-3">5.3</a>,
+including why immutability makes it hashable.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [20]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># frozenset({1, 2, 3}) &lt;class &#39;frozenset&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">frozenset({1, 2, 3}) &lt;class &#x27;frozenset&#x27;&gt;</pre></div></div>
+<div class="md"><h4 id="s2-3-5">2.3.5 Dictionaries (<code>dict</code>)</h4>
+<p>A collection of key-value pairs, insertion-ordered. Day-to-day operations — methods,
+comprehension, hashing — are covered in depth in <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4">5.4</a>.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [21]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># {&#39;a&#39;: 1, &#39;b&#39;: 2} &lt;class &#39;dict&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">{&#x27;a&#x27;: 1, &#x27;b&#x27;: 2} &lt;class &#x27;dict&#x27;&gt;</pre></div></div>
+<div class="md"><p>It can also be created with the <code>dict()</code> constructor:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [22]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
+</code></pre><div class="outs"><pre class="out-text">{&#x27;a&#x27;: 1, &#x27;b&#x27;: 2}</pre></div></div>
+<div class="md"><p>Being mutable, a new key-value pair can be added in place:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [23]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="n">x</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>   <span class="c1"># {&#39;a&#39;: 1, &#39;b&#39;: 2, &#39;c&#39;: 3}</span>
+</code></pre><div class="outs"><pre class="out-text">{&#x27;a&#x27;: 1, &#x27;b&#x27;: 2, &#x27;c&#x27;: 3}</pre></div></div>
+<div class="md"><h4 id="s2-3-6">2.3.6 Bytes (<code>bytes</code>)</h4>
+<p>An immutable sequence of raw bytes.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [24]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;hello&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># b&#39;hello&#39; &lt;class &#39;bytes&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">b&#x27;hello&#x27; &lt;class &#x27;bytes&#x27;&gt;</pre></div></div>
+<div class="md"><h4 id="s2-3-7">2.3.7 Bytearrays (<code>bytearray</code>)</h4>
+<p>A mutable sequence of raw bytes.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [25]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># bytearray(b&#39;hello&#39;) &lt;class &#39;bytearray&#39;&gt;</span>
+</code></pre><div class="outs"><pre class="out-text">bytearray(b&#x27;hello&#x27;) &lt;class &#x27;bytearray&#x27;&gt;</pre></div></div>
+<div class="md"><p>Each element is a single byte — an integer in the range <code>0</code> to <code>255</code> (a byte is 8 bits,
+i.e. 2⁸ = 256 possible values). Assigning a value outside this range raises <code>ValueError</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [26]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>              <span class="c1"># within range -&gt; ok</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>                 <span class="c1"># bytearray(b&#39;\xffello&#39;)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">256</span>           <span class="c1"># out of range</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">bytearray(b&#x27;\xffello&#x27;)
+ValueError: byte must be in range(0, 256)</pre></div></div>
+<div class="md"><p><strong>Bridging to <code>str</code></strong> — <code>bytes</code>/<code>bytearray</code> hold raw byte values, while <code>str</code> holds text
+characters; converting between them is <code>.encode()</code> (<code>str</code> → <code>bytes</code>) and <code>.decode()</code>
+(<code>bytes</code> → <code>str</code>). This boundary matters the moment data leaves the process — files and
+network connections deal in raw bytes, not text (see <a class="xref" href="/python-for-data-science/16-file-handling/#s16-1">16.1</a>).</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [27]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>   <span class="c1"># b&#39;hello&#39; -- str -&gt; bytes</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;hello&quot;</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>  <span class="c1"># hello    -- bytes -&gt; str</span>
+</code></pre><div class="outs"><pre class="out-text">b&#x27;hello&#x27;
+hello</pre></div></div>
+<div class="md callout practice"><p><strong>In practice — this boundary shows up the moment data leaves the process.</strong> A file
+upload handled by a web backend, an image read from disk, or a payload received over a
+raw network socket all arrive as <code>bytes</code>, not <code>str</code> — a real backend routinely calls
+<code>.decode()</code> on incoming data and <code>.encode()</code> before sending data out, exactly at this
+str/bytes boundary.</p></div>
+<div class="md"><h4 id="s2-3-8">2.3.8 Ranges (<code>range</code>)</h4>
+<p>An immutable, lazily generated sequence of numbers.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [28]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># range(0, 10) &lt;class &#39;range&#39;&gt;  -&gt; stored lazily, not as a list</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>        <span class="c1"># [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  -&gt; values generated on demand</span>
+</code></pre><div class="outs"><pre class="out-text">range(0, 10) &lt;class &#x27;range&#x27;&gt;
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</pre></div></div>
+<div class="md"><h3 id="s2-4">2.4 Object Reuse and Caching (Interning)</h3>
+<p><strong>How reassignment works</strong> — reassigning a name does not change the existing object; it
+creates a new object and rebinds the name to it. If nothing else refers to the old object,
+it becomes eligible for garbage collection.</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [29]</span><span class="cell-lines">5 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># id of the &quot;11&quot; object</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>          <span class="c1"># creates a NEW int object; the &quot;11&quot; object has no more references</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># a different id now</span>
+</code></pre><div class="outs"><pre class="out-text">10454600
+10454568</pre></div></div>
+<div class="md"><p>Now if another name is assigned the <em>same</em> value, CPython checks whether an object for
+that value already exists in a small internal cache and, if so, reuses it — so <code>y</code> ends up
+pointing at the same object as <code>x</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [30]</span><span class="cell-lines">3 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">id</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">y</span><span class="p">)</span>   <span class="c1"># same id both times -&gt; True, same cached object</span>
+</code></pre><div class="outs"><pre class="out-text">10454568 10454568 True</pre></div></div>
+<div class="md"><p>This is a <strong>CPython implementation detail</strong>, not a language guarantee — it exists purely
+as a memory/speed optimization for common, immutable values. Never rely on <code>is</code> for value
+comparison; use <code>==</code>.</p>
+<p><strong>Caching ranges by type</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Cached / interned?</th>
+<th>Range / rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code></td>
+<td>Yes</td>
+<td>Small integers from <code>-5</code> to <code>256</code> (inclusive) are pre-created and reused</td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td>Always</td>
+<td>Only two <code>bool</code> objects ever exist — the singletons <code>True</code> and <code>False</code></td>
+</tr>
+<tr>
+<td><code>str</code></td>
+<td>Sometimes</td>
+<td>Identifier-like literals (letters/digits/underscore only) and compile-time constants are interned; arbitrary or computed strings usually are not</td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td>No</td>
+<td>Every <code>float</code> object is distinct, even for the same value</td>
+</tr>
+<tr>
+<td><code>complex</code></td>
+<td>No</td>
+<td>Every <code>complex</code> object is distinct, even for the same value</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="md callout practice"><p><strong>In practice — a real bug that only shows up once data grows.</strong> Code that
+accidentally uses <code>is</code> instead of <code>==</code> to compare integers can pass every test in
+development (where sample IDs/counts often happen to be small, cached values) and then
+fail unpredictably in production once real data pushes those same values past 256 —
+exactly the kind of bug this caching behavior sets a trap for.</p></div>
+<div class="md"><p><strong>Going deeper (skippable on first read)</strong></p>
+<p><strong>Note on the cells below</strong> — each comparison is deliberately split across two cells
+(assign, then compare in the next cell). Writing both assignments in the <em>same</em> cell would
+let Python's compiler pre-merge identical literal constants at compile time, which hides
+the actual runtime caching behaviour being demonstrated here.</p></div>
+<div class="md"><p><code>int</code> — cached only for <code>-5</code> to <code>256</code>; outside that range, two equal values are separate
+objects:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [31]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="mi">100</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [32]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># True -&gt; within -5..256, same cached object</span>
+</code></pre><div class="outs"><pre class="out-text">True</pre></div></div>
+<div class="md"><p>Now with a value outside the cached range:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [33]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="mi">300</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [34]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># False -&gt; outside the cached range, separate objects</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><p><code>bool</code> — always the same two singletons, no range involved:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [35]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>      <span class="c1"># True -&gt; there is only ever one True object</span>
+</code></pre><div class="outs"><pre class="out-text">True</pre></div></div>
+<div class="md"><p><code>str</code> — interned only for identifier-like literals (letters/digits/underscore only):</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [36]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [37]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># True -&gt; identifier-like, interned</span>
+</code></pre><div class="outs"><pre class="out-text">True</pre></div></div>
+<div class="md"><p>Now with a string that isn't identifier-like:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [38]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;hello world!&quot;</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [39]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello world!&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># False -&gt; contains a space/punctuation, not interned</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><p><code>float</code> and <code>complex</code> — never cached, regardless of value:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [40]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="mf">10.5</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [41]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="mf">10.5</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># False -&gt; separate float objects every time</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><p>Same story for <code>complex</code>:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [42]</span><span class="cell-lines">1 line</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="n">j</span>
+</code></pre></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [43]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">b</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="n">j</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># False -&gt; separate complex objects every time</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><p><strong>Composite (mutable) types never share objects</strong> — <code>list</code>, <code>set</code>, <code>dict</code>, <code>bytearray</code>,
+etc. always create a brand-new object on every assignment, regardless of value. Caching
+only makes sense for values that can never change; sharing a <em>mutable</em> object across
+unrelated names would let a change made through one name silently affect the other:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [44]</span><span class="cell-lines">2 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="ow">is</span> <span class="n">b</span><span class="p">)</span>      <span class="c1"># False -&gt; always a new object</span>
+</code></pre><div class="outs"><pre class="out-text">False</pre></div></div>
+<div class="md"><h3 id="s2-5">2.5 The <code>del</code> Statement</h3>
+<p><code>del</code> removes a <strong>name binding</strong> (or an item from a mutable container) — it does not
+necessarily destroy the underlying object. An object is only garbage-collected once its
+reference count drops to zero (<a class="xref" href="/python-for-data-science/02-objects-and-data-types/#s2-4">2.4</a>), so <code>del</code> just removes <em>one</em> reference; if another
+name still points to the same object, that object lives on.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>del name</code></td>
+<td>removes the variable binding — using <code>name</code> afterwards raises <code>NameError</code></td>
+</tr>
+<tr>
+<td><code>del name1, name2, ...</code></td>
+<td>deletes multiple bindings in one statement</td>
+</tr>
+<tr>
+<td><code>del seq[i]</code></td>
+<td>removes the item at index <code>i</code> from a mutable sequence (<code>list</code>, <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-1-2">5.1.2</a>)</td>
+</tr>
+<tr>
+<td><code>del seq[i:j]</code></td>
+<td>removes a whole slice at once (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-1-1">5.1.1</a>)</td>
+</tr>
+<tr>
+<td><code>del d[key]</code></td>
+<td>removes a key-value pair from a <code>dict</code> (<code>KeyError</code> if absent, <a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4-2">5.4.2</a>)</td>
+</tr>
+</tbody>
+</table></div></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [45]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">del</span> <span class="n">x</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NameError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># &#39;x&#39; is unbound entirely, not just set to None</span>
+</code></pre><div class="outs"><pre class="out-text">NameError: name &#x27;x&#x27; is not defined</pre></div></div>
+<div class="md callout mistake"><p><strong>Common mistake</strong> — <code>del lst[i]</code> looks like <code>lst.pop(i)</code> (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-1-2">5.1.2</a>), but <code>del</code> just
+discards the removed value; <code>pop()</code> returns it. On a <code>list</code>, both mutate the same object
+in place — <code>del</code> also works on a whole slice at once:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [46]</span><span class="cell-lines">7 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
+<span class="k">del</span> <span class="n">lst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>   <span class="c1"># removes the item at index 1 -&gt; nothing returned</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>     <span class="c1"># [10, 30, 40]</span>
+
+<span class="n">lst2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span>
+<span class="k">del</span> <span class="n">lst2</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>   <span class="c1"># removes a whole slice at once</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lst2</span><span class="p">)</span>       <span class="c1"># [10, 40, 50]</span>
+</code></pre><div class="outs"><pre class="out-text">[10, 30, 40]
+[10, 40, 50]</pre></div></div>
+<div class="md"><p>The same syntax removes a key from a <code>dict</code> (<a class="xref" href="/python-for-data-science/05-built-in-data-types-operations-and-methods/#s5-4-2">5.4.2</a>) — accessing a missing key with <code>del</code>
+raises <code>KeyError</code>, the same as a failed <code>d[key]</code> lookup:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [47]</span><span class="cell-lines">8 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>   <span class="c1"># {&#39;b&#39;: 2}</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;KeyError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>   <span class="c1"># &#39;z&#39; -&gt; raised, same as a failed d[key] lookup</span>
+</code></pre><div class="outs"><pre class="out-text">{&#x27;b&#x27;: 2}
+KeyError: &#x27;z&#x27;</pre></div></div>
+<div class="md"><p>A single <code>del</code> statement can also target several names at once, deleting all of them:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [48]</span><span class="cell-lines">6 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+<span class="k">del</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span>   <span class="c1"># deletes all three names in one statement</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NameError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">NameError: name &#x27;a&#x27; is not defined</pre></div></div>
+<div class="md"><p><strong><code>del</code> deletes a reference, not necessarily the object</strong> — if a second name still
+points to the same object, deleting the first name doesn't touch it:</p></div>
+<div class="cell"><div class="cell-bar"><span class="cell-tag">In [49]</span><span class="cell-lines">9 lines</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre class="code"><code><span class="n">original</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">alias</span> <span class="o">=</span> <span class="n">original</span>     <span class="c1"># alias points at the SAME list object</span>
+<span class="k">del</span> <span class="n">original</span>           <span class="c1"># removes only the &quot;original&quot; binding</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>             <span class="c1"># [1, 2, 3] -&gt; the object is still alive, reachable via &quot;alias&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NameError:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre><div class="outs"><pre class="out-text">[1, 2, 3]
+NameError: name &#x27;original&#x27; is not defined</pre></div></div></article>
+</section>
+<!-- page:end -->
+</main>
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

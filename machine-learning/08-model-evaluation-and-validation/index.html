@@ -3,6 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XEG5R5YZ7V', { send_page_view: false });
+(function () {
+  // one page_view per address; js/router.js fires 'pageview' after each in-app navigation
+  var last = null;
+  function track() {
+    setTimeout(function () {
+      var here = location.pathname + location.search;
+      if (here === last) return; last = here;
+      gtag('event', 'page_view', { page_title: document.title, page_location: location.href, page_path: here });
+    }, 300);
+  }
+  window.addEventListener('pageview', track);
+  window.addEventListener('load', track);
+})();
+</script>
+<!-- seo:start  written by tools/build_seo.py -->
 <title>Model Evaluation and Validation – Machine Learning Chapter 8 | Gradient Atlas</title>
 <meta name="description" content="Measuring how well a model will do on data it has never seen — the machinery every later chapter reports its numbers through.">
 <link rel="canonical" href="https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/">
@@ -13,32 +36,58 @@
 <meta property="og:url" content="https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/">
 <meta property="og:image" content="https://gradient-atlas.chandrima-das.com/icon-512.png">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Model Evaluation and Validation", "headline": "Model Evaluation and Validation", "description": "Measuring how well a model will do on data it has never seen — the machinery every later chapter reports its numbers through.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT54M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Gradient Atlas", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Model Evaluation and Validation", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/"}]}]}</script>
+<!-- seo:end -->
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#2563eb">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XEG5R5YZ7V"></script>
-<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XEG5R5YZ7V');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script>try { const t = JSON.parse(localStorage.getItem('s2s2.theme')); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/metro.css">
+<link rel="stylesheet" href="/css/path.css">
+<link rel="stylesheet" href="/css/console.css">
+<link rel="stylesheet" href="/css/recall.css">
 <link rel="stylesheet" href="/css/reader.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/tour.css">
+<link rel="stylesheet" href="/css/home.css">
 <link rel="stylesheet" href="/css/static.css">
 <script src="/js/mathjax-config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "LearningResource", "name": "Model Evaluation and Validation", "headline": "Model Evaluation and Validation", "description": "Measuring how well a model will do on data it has never seen — the machinery every later chapter reports its numbers through.", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/", "learningResourceType": "Course chapter", "inLanguage": "en", "isAccessibleForFree": true, "timeRequired": "PT54M", "publisher": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}, "isPartOf": {"@type": "Course", "name": "Machine Learning for data science", "url": "https://gradient-atlas.chandrima-das.com/machine-learning/", "provider": {"@type": "Organization", "name": "Gradient Atlas", "url": "https://gradient-atlas.chandrima-das.com/"}}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradient-atlas.chandrima-das.com/"}, {"@type": "ListItem", "position": 2, "name": "Data science roadmap", "item": "https://gradient-atlas.chandrima-das.com/data-science-roadmap/"}, {"@type": "ListItem", "position": 3, "name": "Machine Learning", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/"}, {"@type": "ListItem", "position": 4, "name": "Model Evaluation and Validation", "item": "https://gradient-atlas.chandrima-das.com/machine-learning/08-model-evaluation-and-validation/"}]}]}</script>
+<script type="module" src="/js/main.js"></script>
 </head>
-<body class="static">
-<header class="sbar"><a class="sbrand" href="/"><b>Gradient Atlas</b><small>Data science pathway</small></a>
-<nav><a href="/data-science-roadmap/">Roadmap</a><a href="/python/">Python</a><a href="/machine-learning/">Machine learning</a></nav></header>
-<main class="sdoc">
-<p class="crumb"><a href="/">Home</a> › <a href="/data-science-roadmap/">Roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 8</p>
-<h1><small>Machine Learning · Chapter 8</small>Model Evaluation and Validation</h1>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="/" aria-label="Gradient Atlas, ML Materials — home"><span class="glyph"></span><span class="bt"><b>Gradient Atlas</b><small>ML Materials</small></span></a>
+  <form class="repl" id="repl" autocomplete="off">
+    <div class="repl-in"><span class="ps" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="cmd" type="text" spellcheck="false" aria-label="Search" placeholder="Type what you want to search"><button class="run" type="submit">Search</button></div>
+    <div class="suggest" id="suggest" hidden></div>
+  </form>
+  <button class="icon-btn" id="tourBtn" type="button" aria-label="Take the guided tour" title="Take the tour" style="font-family:var(--f-mono);font-weight:600">?</button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+</div></header>
+
+<nav class="rail" aria-label="Views">
+  <a href="/" data-v="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</a>
+  <a href="/data-science-roadmap/" data-v="metro"><svg viewBox="0 0 24 24"><path d="M3 6h7l4 6h7M3 18h5l4-6"/><circle cx="3" cy="6" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="12" cy="12" r="2.2"/><circle cx="3" cy="18" r="1.5"/></svg>Route</a>
+  <a href="/search/" data-v="console"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</a>
+  <a href="/machine-learning/recall/" data-v="recall"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/><path d="m7.5 14 2 2 4-4.5"/></svg>Recall<span class="due" id="dueBadge" hidden></span></a>
+</nav>
+
+<!-- each view's markup lives in views/*.html; js/main.js loads them into this element.
+     What sits inside it now is for search engines and readers without JavaScript. On the other pages
+     tools/build_seo.py swaps it for that page's text, and #seo blocks with data-key stay under the view. -->
+<main class="stage">
+<!-- page:start -->
+<section class="sdoc" id="seo">
+<p class="crumb"><a href="/data-science-roadmap/">Data science roadmap</a> › <a href="/machine-learning/">Machine Learning</a> › Chapter 8</p>
+<h1>Model Evaluation and Validation</h1>
 <p class="lead">Measuring how well a model will do on data it has never seen — the machinery every later chapter reports its numbers through.</p>
-<p class="cta"><a class="sbtn" href="/#ch8">Read in the interactive reader, with quizzes and flashcards →</a></p>
-<nav class="stoc" aria-label="Sections"><ol><li class="l3"><a href="#s8-1">8.1 Why a Training Score Is Not a Score</a></li><li class="l3"><a href="#s8-2">8.2 Train, Validation and Test</a></li><li class="l3"><a href="#s8-3">8.3 Cross-Validation Strategies</a></li><li class="l3"><a href="#s8-4">8.4 Regression Metrics</a></li><li class="l3"><a href="#s8-5">8.5 Classification Metrics</a></li><li class="l3"><a href="#s8-6">8.6 The Decision Threshold</a></li><li class="l3"><a href="#s8-7">8.7 Probability Calibration</a></li><li class="l3"><a href="#s8-8">8.8 Baselines and Honest Comparison</a></li><li class="l3"><a href="#s8-9">8.9 In Practice</a></li></ol></nav>
 <article class="body"><div class="md"><p>Every chapter from 11 onward reports a number. This chapter is where those numbers come from, and what they
 are worth.</p>
 <p>Three separate questions get confused constantly, and keeping them apart is most of the skill:</p>
@@ -1723,12 +1772,9 @@ and the flag rate, not only the score (<a class="xref" href="/machine-learning/2
 <p><strong>A threshold is a decision, and decisions expire.</strong> It was derived from costs that were true when someone
 quoted them. Offer costs change, customer value changes, acceptance rates change. The threshold is the
 cheapest thing in the entire pipeline to re-derive and the most commonly forgotten.</p></div></article>
-<nav class="spn"><a href="/machine-learning/07-feature-selection-and-dimensionality-reduction/">← Feature Selection and Dimensionality Reduction</a><a href="/machine-learning/09-bias-variance-and-regularization/">Bias, Variance and Regularization →</a></nav>
+</section>
+<!-- page:end -->
 </main>
-<footer class="sfoot">
-<span>© 2026 Gradient Atlas. All rights reserved.</span>
-<span>Content by <b>Shayan Saha</b> &amp; <b>Sayan Porey</b> · Website by <b>Chandrima Das</b></span>
-</footer>
-<script>(window.__mjq = window.__mjq || []).push(document.querySelector('.sdoc .body')); if (window.__mjReady) MathJax.typesetPromise(window.__mjq.splice(0)).catch(() => {});</script>
+<div class="toast" id="toast" hidden></div>
 </body>
 </html>

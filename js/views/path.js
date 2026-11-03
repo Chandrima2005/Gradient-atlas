@@ -1,9 +1,10 @@
-// data science pathway (#route): the five stages drawn as one metro map, in the same style as each course's route map.
+// data science pathway (/data-science-roadmap/): the five stages drawn as one metro map, in the same style as each course's route map.
 // One station per stage; the chapters inside each stage live on that stage's own route map.
 import { $, $$, esc } from '../core.js';
 import { TRACKS, TRACK } from '../tracks.js';
+import { toPath } from '../paths.js';
 
-const hrefOf = t => t.status === 'live' ? t.href : `#route-${t.id}`;
+const hrefOf = t => toPath(t.status === 'live' ? t.href : `route-${t.id}`);
 
 const Path = {
   built: false, sel: null,
@@ -61,14 +62,14 @@ const Path = {
     if (!t || t.status === 'live') {
       const live = TRACKS.filter(x => x.status === 'live').length;
       el.innerHTML = `<h2>Five stages</h2><p class="sum">${live} live · ${TRACKS.length - live} coming soon</p>
-        <ol class="stops">${TRACKS.map(x => `<li data-id="${x.id}" style="--pc:var(${x.v})"><span class="dot">${x.n}</span><div><a href="${hrefOf(x)}">${esc(x.title)}</a><small>${esc(x.sub)}</small>${x.status === 'live' ? `<a class="go" href="${x.href}">Open route map →</a>` : `<small class="soon">Coming soon · ${x.mods.length} planned stops</small>`}</div></li>`).join('')}</ol>`;
+        <ol class="stops">${TRACKS.map(x => `<li data-id="${x.id}" style="--pc:var(${x.v})"><span class="dot">${x.n}</span><div><a href="${hrefOf(x)}">${esc(x.title)}</a><small>${esc(x.sub)}</small>${x.status === 'live' ? `<a class="go" href="${toPath(x.href)}">Open route map →</a>` : `<small class="soon">Coming soon · ${x.mods.length} planned stops</small>`}</div></li>`).join('')}</ol>`;
       $$('#pitin li[data-id]').forEach(li => { li.onmouseenter = () => this.focus(li.dataset.id); li.onmouseleave = () => this.focus(this.sel); });
       return;
     }
     const next = TRACKS.find(x => x.status === 'live');
     el.innerHTML = `<h2>${esc(t.title)}</h2><p class="sum">Stage ${t.n} · coming soon · ${t.mods.length} planned stops</p>
       <ol class="stops">${t.mods.map((m, i) => `<li style="--pc:var(${t.v})"><span class="dot">${i + 1}</span><div><span style="font-family:var(--f-display);font-weight:600;font-size:15px">${esc(m)}</span><small>planned</small></div></li>`).join('')}</ol>
-      <div class="acts"><a class="btn small" href="#route">← All stages</a>${next ? `<a class="btn primary small" href="${next.href}">Start ${esc(next.title)} →</a>` : ''}</div>`;
+      <div class="acts"><a class="btn small" href="/data-science-roadmap/">← All stages</a>${next ? `<a class="btn primary small" href="${toPath(next.href)}">Start ${esc(next.title)} →</a>` : ''}</div>`;
   },
   async show(id) {
     this.sel = id || null;

@@ -77,10 +77,10 @@ You can use it in two ways:
 
 ## 🛤️ The data science pathway
 
-`#route` shows the five stages. Each stage is set in `js/tracks.js`:
+`/data-science-roadmap/` shows the five stages. Each stage is set in `js/tracks.js`:
 
-- `status: 'live'` makes the stage open its own route map (Machine learning opens `#route-ml`).
-- `status: 'soon'` shows a "Coming soon" preview of the planned modules at `#route-<id>`, for example `#route-python`.
+- `status: 'live'` makes the stage open its own route map (Machine learning opens `/machine-learning/`).
+- `status: 'soon'` shows a "Coming soon" preview of the planned modules at its own URL, for example `/generative-ai/`. A new stage also needs a URL in `js/paths.js` and `tools/build_seo.py`.
 
 To open a new stage, add its material, then change its `status` to `'live'` and give it an `href`.
 
@@ -142,10 +142,10 @@ clear()             clear the console
 
 ```
 .
-├── index.html        # page shell: header, menu, and links to the files below
+├── index.html        # page shell: header, menu, and links to the files below (also the template for every page)
 ├── views/            # the HTML for each page (home, pathway, route map, reader…)
 ├── css/              # styles, one file per page
-├── js/               # app code: core.js (courses and data), router.js, tracks.js, views/
+├── js/               # app code: core.js (courses and data), router.js, paths.js (URLs), tracks.js, views/
 ├── data/             # Machine learning course
 │   ├── manifest.json # chapters, parts, sections
 │   ├── ch00–ch25.json# chapter content (HTML)
@@ -154,19 +154,22 @@ clear()             clear the console
 │   ├── search.json   # search index
 │   └── py/           # Python course: the same files, ch01–ch20
 ├── img/              # 93 figures taken from the notebooks
-├── CNAME             # custom domain for GitHub Pages
-└── .nojekyll         # stops GitHub Pages from running Jekyll
+├── tools/            # build_seo.py (writes the pages below) and serve.py (local server)
+├── data-science-roadmap/, python-for-data-science/, machine-learning/,
+│   python-libraries/, deep-learning/, generative-ai/   # written by tools/build_seo.py
+├── sitemap.xml, robots.txt                          # written by tools/build_seo.py
+└── vercel.json       # clean URLs: pages without their own file get index.html
 ```
 
 ---
 
 ## 💻 Run locally
 
-The site loads its data with `fetch()`, so it needs a local server. Opening `index.html` by double-clicking will not work.
+The site loads its data with `fetch()`, so it needs a local server. Opening `index.html` by double-clicking will not work. Use `tools/serve.py` rather than `python -m http.server`: like Vercel, it gives pages such as `/search/` the app.
 
 ```bash
 # from the repository folder
-python -m http.server 8000
+python tools/serve.py
 ```
 
 Then open http://localhost:8000.
@@ -175,13 +178,9 @@ Then open http://localhost:8000.
 
 ## 🚀 Deploy
 
-**GitHub Pages** (the current setup)
+**Vercel** (the current setup) deploys every push to `main`. There is no build command, and the output directory is the repository root. `vercel.json` sends any page without its own file (such as `/search/` or `/machine-learning/quiz-13/`) to `index.html`, and redirects the old `/python/` pages.
 
-1. Push the repository to GitHub.
-2. Go to **Settings → Pages → Deploy from a branch → `main` / root**.
-3. Optionally, add a custom domain. This creates the `CNAME` file.
-
-**Netlify** (an alternative): drag and drop the folder at app.netlify.com/drop, or connect the repo. There is no build command, and the publish directory is `/`.
+GitHub Pages has no such rewrites, so those pages would show a 404 there.
 
 **Publish an update**
 
@@ -191,15 +190,17 @@ git commit -m "Update site"
 git push
 ```
 
-GitHub Pages redeploys within a minute or two.
+Vercel redeploys within a minute or two.
 
 ---
 
 ## 🔎 Search engine pages
 
-Google treats every `#` link as the same page, so the app at `/` is indexed as one URL. `tools/build_seo.py` writes plain pages that search engines can read: `/data-science-roadmap/`, `/python/`, `/machine-learning/`, one page per chapter, plus `sitemap.xml` and `robots.txt`. Each page links back into the interactive app.
+Every page has a normal URL, such as `/data-science-roadmap/`, `/python-for-data-science/`, `/generative-ai/` or `/machine-learning/11-linear-regression/`. Old `/#…` links are converted when they load. `js/paths.js` maps URLs to the views.
 
-Run it again after changing anything in `data/` or the stages in `js/tracks.js`, and commit the output:
+`tools/build_seo.py` writes each of those pages from `index.html`, with its own title, description, canonical link, structured data and text, so search engines can read it before any JavaScript runs. On course and stage pages that text stays visible under the route map. The script also writes `js/slugs.js`, `sitemap.xml` and `robots.txt`.
+
+Run it again after changing `index.html`, anything in `data/`, or the stages in `js/tracks.js`, and commit the output:
 
 ```bash
 python tools/build_seo.py
@@ -209,7 +210,7 @@ python tools/build_seo.py
 
 ## 📊 Analytics
 
-The site uses Google Analytics 4 to count page views. Each view (e.g. `/home`, `/route`, `/ch11`) is recorded when you change pages. No personal study data is sent anywhere, because your progress stays in your own browser.
+The site uses Google Analytics 4 to count page views. Each page (e.g. `/`, `/data-science-roadmap/`, `/machine-learning/11-linear-regression/`) is recorded when you change pages. No personal study data is sent anywhere, because your progress stays in your own browser.
 
 ---
 
